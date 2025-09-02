@@ -88,7 +88,7 @@ echo ""
 #Adding keys
 echo ">>> {Waiting for adding keys, it will take few seconds}"
 echo ""
-ret=$(curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | sudo apt-key add -)
+ret=$(curl -sSL 'https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc' | sudo apt-key add -)
 
 #Checking return value is OK
 case $ret in
