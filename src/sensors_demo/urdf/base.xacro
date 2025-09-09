@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+
+<robot name="base_demo" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="PI" value="3.14" />
+
+    <xacro:property name="vert_samples" value="1" />
+    <xacro:property name="hori_samples" value="5" />
+
+    <xacro:property name="vert_min_angle" value="-1" />
+    <xacro:property name="vert_max_angle" value="1" />
+    <xacro:property name="hori_min_angle" value="-30" />
+    <xacro:property name="hori_max_angle" value="30" />
+
+    <xacro:property name="range_min" value="0.1" />
+    <xacro:property name="range_max" value="5.0" />
+
+    <xacro:property name="lz" value="0.1" />
+    <xacro:property name="lx" value="0.1" />
+    <xacro:property name="ly" value="0.1" />
+
+    <xacro:include filename="$(find sensors_demo)/urdf/materials.xacro" />
+
+    <link name="root" />
+
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 ${lz/2}" rpy="0 0 0" />
+            <geometry>
+                <box size="${lx} ${ly} ${lz}" />
+            </geometry>
+            <material name="green">
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 ${lz/2}" rpy="0 0 0" />
+            <geometry>
+                <box size="0.1 0.1 0.1" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1.0" />
+            <origin xyz="0 0 0" />
+            <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+        </inertial>
+    </link>
+
+    <joint name="root_link" type="fixed">
+        <parent link="root" />
+        <child link="base_link" />
+    </joint>
+
+    <link name="sensor_link">
+        <visual>
+            <origin xyz="0 0 ${lz}" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="${lx/4}" length="${lx/2}"/> 
+            </geometry>
+            <material name="material_name">
+                <color rgba="1 1 1 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 ${lz/2}" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="${lx/4}" length="${lx/2}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1.0" />
+            <origin xyz="0 0 0" />
+            <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+        </inertial>
+    </link>
+
+</robot>
