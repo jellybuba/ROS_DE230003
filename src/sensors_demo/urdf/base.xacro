@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+
+<robot name="base_demo" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- Properties that can be used in the rest of the xacro file -->
+    <xacro:property name="PI" value="3.14" />
+
+    <xacro:property name="vert_samples" value="10" />
+    <xacro:property name="hori_samples" value="10" />
+
+    <xacro:property name="vert_min_angle" value="-5" />
+    <xacro:property name="vert_max_angle" value="5" />
+    <xacro:property name="hori_max_angle" value="30" />
+    <xacro:property name="hori_min_angle" value="-30" />
+
+    <xacro:property name="range_min" value="1" />
+    <xacro:property name="range_max" value="5.0" />
+    
+    <xacro:property name="lz" value="0.1" />
+    <xacro:property name="lx" value="0.1" />
+    <xacro:property name="ly" value="0.1" />
+    
+    <!-- We can include other xacro or URDF files -->
+    <xacro:include filename="$(find sensors_demo)/urdf/materials.xacro" />
+    <!-- <xacro:include filename="$(find sensors_demo)/urdf/sonar.gazebo" /> -->
+    <xacro:include filename="$(find sensors_demo)/urdf/lidar.gazebo" />
+
+    <!-- Rviz/Gazebo does not like the first link having mass or inertia, so a dummy link is created -->
+    <link name="root" />
+
+    <gazebo reference="base_link">
+        <material>Gazebo/RedBright</material>
+    </gazebo>
+
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 ${lz/2}" rpy="0 0 0" />
+            <geometry>
+                <box size="${lx} ${ly} ${lz}" />
+            </geometry>
+            <material name="green" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 ${lz/2}" rpy="0 0 0" />
+            <geometry>
+                <box size="${lx} ${ly} ${lz}" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1.0" />
+            <origin xyz="0 0 0" />
+            <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+        </inertial>
+    </link>
+
+    <joint name="root_joint" type="fixed">
+        <parent link="root" />
+        <child link="base_link" />
+    </joint>
+
+    <link name="sensor_link">
+        <visual>
+            <origin xyz="0 0 ${lz}" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="${lx/4}" length="${lz/2}" />
+            </geometry>
+            <material name="pink_i_guess" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 ${lz}" rpy="0 0 0" />
+            <geometry>
+                <cylinder radius="${lx/4}" length="${lz/2}" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1.0" />
+            <origin xyz="0 0 0" />
+            <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+        </inertial>
+    </link>
+
+    <joint name="sensor_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="sensor_link" />
+        <origin xyz="0 0 ${lz}" rpy="0 0 0" />
+        <axis xyz="1 0 0" />
+    </joint>
+
+</robot>

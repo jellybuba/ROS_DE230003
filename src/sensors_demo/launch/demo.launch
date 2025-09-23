@@ -1,0 +1,13 @@
+<launch>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch" />
+    <node name="robot_state_publisher" 
+        pkg="robot_state_publisher" 
+        type="robot_state_publisher" />
+
+    <param name="robot_description"
+        command="$(find xacro)/xacro '$(find sensors_demo)/urdf/base.xacro'"
+    />
+
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+        args="-urdf -model base_demo -param robot_description" />
+</launch>
