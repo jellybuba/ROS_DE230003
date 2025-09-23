@@ -21,6 +21,10 @@
     <color rgba="${255/255} ${108/255} ${10/255} 1.0"/>
   </material>
 
+  <material name="pink">
+    <color rgba="${255/255} ${0/255} ${255/255} 1.0"/>
+  </material>
+
   <material name="brown">
     <color rgba="${222/255} ${207/255} ${195/255} 1.0"/>
   </material>
