@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Load robot description -->
+    <param name="robot_description" command="$(find xacro)/xacro '$(find robotti_1)/urdf/robotti_1.urdf'" />
+
+    <!-- Launch Gazebo -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
+
+    <!-- Spawn robot in Gazebo -->
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" 
+          args="-param robot_description -urdf -model robotti_1" />
+
+    <!-- Load controllers -->
+    <rosparam file="$(find robotti_1)/config/robot1_controller.yaml" command="load"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" 
+        args="joint_state_controller wheel_l_velocity_controller 
+              wheel_r_velocity_controller weapon_velocity_controller"/>
+
+    <!-- Robot state publisher -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <!-- Start position recorder -->
+    <node name="position_recorder" pkg="position_to_csv" type="pos_saver.py" output="screen" />
+
+</launch>
