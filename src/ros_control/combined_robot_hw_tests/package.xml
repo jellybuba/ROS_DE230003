@@ -20,22 +20,23 @@
 
   <author email="toni@shadowrobot.com">Toni Oliver</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>combined_robot_hw</depend>
   <depend>controller_manager</depend>
-  <depend>hardware_interface</depend> <!-- exec_depend required for plugin -->
-  <depend>roscpp</depend>
+  <depend>hardware_interface</depend>
+  <depend>rclcpp</depend> <!-- exec_depend required for plugin -->
 
   <build_depend>pluginlib</build_depend>
 
   <build_export_depend>pluginlib</build_export_depend>
 
+  <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>controller_manager_msgs</test_depend>
   <test_depend>controller_manager_tests</test_depend>
-  <test_depend>rostest</test_depend>
 
   <export>
     <hardware_interface plugin="${prefix}/test_robot_hw_plugin.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

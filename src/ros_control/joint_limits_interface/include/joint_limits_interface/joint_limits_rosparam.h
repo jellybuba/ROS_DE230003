@@ -32,7 +32,7 @@
 
 #include <string>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <joint_limits_interface/joint_limits.h>
 
 namespace joint_limits_interface
@@ -72,10 +72,10 @@ namespace joint_limits_interface
  * existing values. Values in \p limits not specified in the parameter server remain unchanged.
  * \return True if a limits specification is found (ie. the \p joint_limits/joint_name parameter exists in \p nh), false otherwise.
  */
-inline bool getJointLimits(const std::string& joint_name, const ros::NodeHandle& nh, JointLimits& limits)
+inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node& nh, JointLimits& limits)
 {
   // Node handle scoped where the joint limits are defined
-  ros::NodeHandle limits_nh;
+  rclcpp::Node limits_nh;
   try
   {
     const std::string limits_namespace = "joint_limits/" + joint_name;
@@ -85,7 +85,7 @@ inline bool getJointLimits(const std::string& joint_name, const ros::NodeHandle&
                        "' in the parameter server (namespace " << nh.getNamespace() + "/" + limits_namespace << ").");
       return false;
     }
-    limits_nh = ros::NodeHandle(nh, limits_namespace);
+    limits_nh = rclcpp::Node(nh, limits_namespace);
   }
   catch(const ros::InvalidNameException& ex)
   {
@@ -191,10 +191,10 @@ inline bool getJointLimits(const std::string& joint_name, const ros::NodeHandle&
  * \return True if a complete soft limits specification is found (ie. if all \p k_position, \p k_velocity, \p soft_lower_limit and
  * \p soft_upper_limit exist in \p joint_limits/joint_name namespace), false otherwise.
  */
-inline bool getSoftJointLimits(const std::string& joint_name, const ros::NodeHandle& nh, SoftJointLimits& soft_limits)
+inline bool getSoftJointLimits(const std::string& joint_name, const rclcpp::Node& nh, SoftJointLimits& soft_limits)
 {
   // Node handle scoped where the soft joint limits are defined
-  ros::NodeHandle limits_nh;
+  rclcpp::Node limits_nh;
   try
   {
     const std::string limits_namespace = "joint_limits/" + joint_name;
@@ -204,7 +204,7 @@ inline bool getSoftJointLimits(const std::string& joint_name, const ros::NodeHan
                        "' in the parameter server (namespace " << nh.getNamespace() + "/" + limits_namespace << ").");
       return false;
     }
-    limits_nh = ros::NodeHandle(nh, limits_namespace);
+    limits_nh = rclcpp::Node(nh, limits_namespace);
   }
   catch(const ros::InvalidNameException& ex)
   {

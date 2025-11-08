@@ -4,9 +4,9 @@
 
 
 // ROS
-#include <ros/ros.h>
-#include <std_msgs/Float64.h>
-#include <std_srvs/Empty.h>
+#include "rclcpp/rclcpp.hpp"
+#include <std_msgs/msg/float64.hpp>
+#include <std_srvs/srv/empty.hpp>
 
 // ros_control
 #include <controller_manager/controller_manager.h>
@@ -59,8 +59,8 @@ public:
     registerInterface(&jnt_pos_interface_);
   }
 
-  ros::Time getTime() const {return ros::Time::now();}
-  ros::Duration getPeriod() const {return ros::Duration(0.01);}
+  rclcpp::Time getTime() const {return rclcpp::Time::now();}
+  rclcpp::Duration getPeriod() const {return rclcpp::Duration(0.01);}
 
   void read()
   {
@@ -117,13 +117,13 @@ public:
 
   }
 
-  bool start_callback(std_srvs::Empty::Request& /*req*/, std_srvs::Empty::Response& /*res*/)
+  bool start_callback(std_srvs::srv::Empty::Request& /*req*/, std_srvs::srv::Empty::Response& /*res*/)
   {
     running_ = true;
     return true;
   }
 
-  bool stop_callback(std_srvs::Empty::Request& /*req*/, std_srvs::Empty::Response& /*res*/)
+  bool stop_callback(std_srvs::srv::Empty::Request& /*req*/, std_srvs::srv::Empty::Response& /*res*/)
   {
     running_ = false;
     return true;
@@ -155,7 +155,7 @@ private:
   } steering_joints_[4];
   bool running_;
 
-  ros::NodeHandle nh_;
+  rclcpp::Node nh_;
   ros::ServiceServer start_srv_;
   ros::ServiceServer stop_srv_;
 };

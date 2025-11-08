@@ -33,9 +33,9 @@
 
 
 // ROS
-#include <ros/ros.h>
-#include <std_msgs/Float64.h>
-#include <std_srvs/Empty.h>
+#include "rclcpp/rclcpp.hpp"
+#include <std_msgs/msg/float64.hpp>
+#include <std_srvs/srv/empty.hpp>
 
 // ros_control
 #include <controller_manager/controller_manager.h>
@@ -75,8 +75,8 @@ public:
     ROS_INFO_STREAM("wheel_separation_h in test ackermann_steering_bot= " << wheel_separation_h_);
   }
 
-  ros::Time getTime() const {return ros::Time::now();}
-  ros::Duration getPeriod() const {return ros::Duration(0.01);}
+  rclcpp::Time getTime() const {return rclcpp::Time::now();}
+  rclcpp::Duration getPeriod() const {return rclcpp::Duration(0.01);}
 
   void read()
   {
@@ -185,14 +185,14 @@ public:
     }
   }
 
-  bool startCallback(std_srvs::Empty::Request& /*req*/, std_srvs::Empty::Response& /*res*/)
+  bool startCallback(std_srvs::srv::Empty::Request& /*req*/, std_srvs::srv::Empty::Response& /*res*/)
   {
     ROS_INFO_STREAM("running_ = " << running_ << ".");
     running_ = true;
     return true;
   }
 
-  bool stopCallback(std_srvs::Empty::Request& /*req*/, std_srvs::Empty::Response& /*res*/)
+  bool stopCallback(std_srvs::srv::Empty::Request& /*req*/, std_srvs::srv::Empty::Response& /*res*/)
   {
     ROS_INFO_STREAM("running_ = " << running_ << ".");
     running_ = false;
@@ -239,13 +239,13 @@ private:
     virtual_front_steer_jnt_pos_cmd_.clear();
   }
 
-  void getJointNames(ros::NodeHandle &_nh)
+  void getJointNames(rclcpp::Node &_nh)
   {
     this->getWheelJointNames(_nh);
     this->getSteerJointNames(_nh);
   }
 
-  void getWheelJointNames(ros::NodeHandle &_nh)
+  void getWheelJointNames(rclcpp::Node &_nh)
   {
     // wheel joint to get linear command
     _nh.getParam(ns_ + "rear_wheel", rear_wheel_jnt_name_);
@@ -266,7 +266,7 @@ private:
     virtual_front_wheel_jnt_vel_cmd_.resize(dof);
   }
 
-  void getSteerJointNames(ros::NodeHandle &_nh)
+  void getSteerJointNames(rclcpp::Node &_nh)
   {
     // steer joint to get angular command
     _nh.getParam(ns_ + "front_steer", front_steer_jnt_name_);
@@ -436,7 +436,7 @@ private:
   std::string ns_;
   bool running_;
 
-  ros::NodeHandle nh_;
+  rclcpp::Node nh_;
   ros::ServiceServer start_srv_;
   ros::ServiceServer stop_srv_;
 };

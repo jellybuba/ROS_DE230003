@@ -36,16 +36,16 @@
 namespace imu_sensor_controller
 {
 
-  bool ImuSensorController::init(hardware_interface::ImuSensorInterface* hw, ros::NodeHandle &root_nh, ros::NodeHandle& controller_nh)
+  bool ImuSensorController::init(hardware_interface::ImuSensorInterface* hw, rclcpp::Node &root_nh, rclcpp::Node& controller_nh)
   {
     // get all joint states from the hardware interface
     const std::vector<std::string>& sensor_names = hw->getNames();
     for (unsigned i=0; i<sensor_names.size(); i++)
-      ROS_DEBUG("Got sensor %s", sensor_names[i].c_str());
+      RCLCPP_DEBUG(rclcpp::get_logger("ImuSensorController"), "Got sensor %s", sensor_names[i].c_str());
 
     // get publishing period
     if (!controller_nh.getParam("publish_rate", publish_rate_)){
-      ROS_ERROR("Parameter 'publish_rate' not set");
+      RCLCPP_ERROR(rclcpp::get_logger("ImuSensorController"), "Parameter 'publish_rate' not set");
       return false;
     }
 
@@ -54,7 +54,7 @@ namespace imu_sensor_controller
       sensors_.push_back(hw->getHandle(sensor_names[i]));
 
       // realtime publisher
-      RtPublisherPtr rt_pub(new realtime_tools::RealtimePublisher<sensor_msgs::Imu>(root_nh, sensor_names[i], 4));
+      RtPublisherPtr rt_pub(new realtime_tools::RealtimePublisher<sensor_msgs::msg::Imu>(root_nh, sensor_names[i], 4));
       realtime_pubs_.push_back(rt_pub);
     }
 
@@ -63,7 +63,7 @@ namespace imu_sensor_controller
     return true;
   }
 
-  void ImuSensorController::starting(const ros::Time& time)
+  void ImuSensorController::starting(const rclcpp::Time& time)
   {
     // initialize time
     for (unsigned i=0; i<last_publish_times_.size(); i++){
@@ -71,17 +71,17 @@ namespace imu_sensor_controller
     }
   }
 
-  void ImuSensorController::update(const ros::Time& time, const ros::Duration& /*period*/)
+  void ImuSensorController::update(const rclcpp::Time& time, const rclcpp::Duration& /*period*/)
   {
     using namespace hardware_interface;
 
     // limit rate of publishing
     for (unsigned i=0; i<realtime_pubs_.size(); i++){
-      if (publish_rate_ > 0.0 && last_publish_times_[i] + ros::Duration(1.0/publish_rate_) < time){
+      if (publish_rate_ > 0.0 && last_publish_times_[i] + rclcpp::Duration(1.0/publish_rate_) < time){
         // try to publish
         if (realtime_pubs_[i]->trylock()){
           // we're actually publishing, so increment time
-          last_publish_times_[i] = last_publish_times_[i] + ros::Duration(1.0/publish_rate_);
+          last_publish_times_[i] = last_publish_times_[i] + rclcpp::Duration(1.0/publish_rate_);
 
           // populate message
           realtime_pubs_[i]->msg_.header.stamp = time;
@@ -187,7 +187,7 @@ namespace imu_sensor_controller
     }
   }
 
-  void ImuSensorController::stopping(const ros::Time& /*time*/)
+  void ImuSensorController::stopping(const rclcpp::Time& /*time*/)
   {}
 
 }

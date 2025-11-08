@@ -1,4 +1,4 @@
-<package format="2">
+<package format="3">
   <name>samk_robowar_world</name>
   <version>1.0.0</version>
   <description>
@@ -6,10 +6,10 @@
     <p>This package contains arena worlds for samk robowars</p>
   </description>
   <author>Toni Aaltonen</author>
-  <maintainer email="toni.aaltonen@samk.fi" />
+  <maintainer email="toni.aaltonen@samk.fi"/>
   <license>BSD</license>
   <!--
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>roslaunch</depend>
   <depend>robot_state_publisher</depend>
   <depend>rviz</depend>
@@ -27,7 +27,7 @@
   </export>
   -->
   
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>urdf</build_depend>
   <build_export_depend>urdf</build_export_depend>
   <exec_depend>urdf</exec_depend>
@@ -35,8 +35,9 @@
   
   <export>
    
-      <gazebo_ros gazebo_model_path="${prefix}/models" />
-      <gazebo_ros gazebo_media_path="${prefix}/models" />
+      <gazebo_ros gazebo_model_path="${prefix}/models"/>
+      <gazebo_ros gazebo_media_path="${prefix}/models"/>
+    <build_type>ament_cmake</build_type>
   </export>
   
 

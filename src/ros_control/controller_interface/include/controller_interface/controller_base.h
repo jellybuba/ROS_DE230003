@@ -63,35 +63,35 @@ public:
    *
    * \param time The current time
    */
-  virtual void starting(const ros::Time& /*time*/) {}
+  virtual void starting(const rclcpp::Time& /*time*/) {}
 
   /** \brief This is called periodically by the realtime thread when the controller is running
    *
    * \param time The current time
    * \param period The time passed since the last call to \ref update
    */
-  virtual void update(const ros::Time& time, const ros::Duration& period) = 0;
+  virtual void update(const rclcpp::Time& time, const rclcpp::Duration& period) = 0;
 
   /** \brief This is called from within the realtime thread just after the last
    * update call before the controller is stopped
    *
    * \param time The current time
    */
-  virtual void stopping(const ros::Time& /*time*/) {}
+  virtual void stopping(const rclcpp::Time& /*time*/) {}
 
   /** \brief This is called from within the realtime thread while the controller is
    * waiting to start
    *
    * \param time The current time
    */
-  virtual void waiting(const ros::Time& /*time*/) {}
+  virtual void waiting(const rclcpp::Time& /*time*/) {}
 
   /** \brief This is called from within the realtime thread when the controller needs
    * to be aborted
    *
    * \param time The current time
    */
-  virtual void aborting(const ros::Time& /*time*/) {}
+  virtual void aborting(const rclcpp::Time& /*time*/) {}
 
   /** \brief Check if the controller is initialized
    * \returns true if the controller is initialized
@@ -134,7 +134,7 @@ public:
   }
 
   /// Calls \ref update only if this controller is running.
-  void updateRequest(const ros::Time& time, const ros::Duration& period)
+  void updateRequest(const rclcpp::Time& time, const rclcpp::Duration& period)
   {
     if (state_ == ControllerState::RUNNING)
     {
@@ -143,7 +143,7 @@ public:
   }
 
   /// Calls \ref starting unless this controller is just constructed
-  bool startRequest(const ros::Time& time)
+  bool startRequest(const rclcpp::Time& time)
   {
     // start works from any state, except CONSTRUCTED
     if (state_ != ControllerState::CONSTRUCTED)
@@ -160,7 +160,7 @@ public:
   }
 
   /// Calls \ref stopping unless this controller is just constructed
-  bool stopRequest(const ros::Time& time)
+  bool stopRequest(const rclcpp::Time& time)
   {
     // stop works from any state, except CONSTRUCTED
     if (state_ != ControllerState::CONSTRUCTED)
@@ -177,7 +177,7 @@ public:
   }
 
   /// Calls \ref waiting unless this controller is just constructed
-  bool waitRequest(const ros::Time& time)
+  bool waitRequest(const rclcpp::Time& time)
   {
     // wait works from any state, except CONSTRUCTED
     if (state_ != ControllerState::CONSTRUCTED)
@@ -194,7 +194,7 @@ public:
   }
 
   /// Calls \ref abort unless this controller is just constructed
-  bool abortRequest(const ros::Time& time)
+  bool abortRequest(const rclcpp::Time& time)
   {
     // abort works from any state, except CONSTRUCTED
     if (state_ != ControllerState::CONSTRUCTED)
@@ -234,8 +234,8 @@ public:
    * is ready to be started.
    */
   virtual bool initRequest(hardware_interface::RobotHW* robot_hw,
-                           ros::NodeHandle&             root_nh,
-                           ros::NodeHandle&             controller_nh,
+                           rclcpp::Node&             root_nh,
+                           rclcpp::Node&             controller_nh,
                            ClaimedResources&            claimed_resources) = 0;
 
   /*\}*/

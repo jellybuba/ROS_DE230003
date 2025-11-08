@@ -30,12 +30,12 @@
 
 using namespace controller_manager_tests;
 
-bool EffortTestController::init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle& n)
+bool EffortTestController::init(hardware_interface::EffortJointInterface* hw, rclcpp::Node& n)
 {
   // get all joint states from the hardware interface
   // const std::vector<std::string>& joint_names = hw->getJointNames();
   // for (unsigned i=0; i<joint_names.size(); i++)
-  //  ROS_INFO("Got joint %s", joint_names[i].c_str());
+  //  RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "Got joint %s", joint_names[i].c_str());
   std::vector<std::string> joint_names;
 
   if (!n.getParam("joints", joint_names))
@@ -50,17 +50,17 @@ bool EffortTestController::init(hardware_interface::EffortJointInterface* hw, ro
   return true;
 }
 
-void EffortTestController::starting(const ros::Time& /*time*/)
+void EffortTestController::starting(const rclcpp::Time& /*time*/)
 {
-  ROS_INFO("Starting JointState Controller");
+  RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "Starting JointState Controller");
 }
 
-void EffortTestController::update(const ros::Time& /*time*/, const ros::Duration& /*period*/)
+void EffortTestController::update(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
 {}
 
-void EffortTestController::stopping(const ros::Time& /*time*/)
+void EffortTestController::stopping(const rclcpp::Time& /*time*/)
 {
-  ROS_INFO("Stopping JointState Controller");
+  RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "Stopping JointState Controller");
 }
 
 PLUGINLIB_EXPORT_CLASS( controller_manager_tests::EffortTestController, controller_interface::ControllerBase)

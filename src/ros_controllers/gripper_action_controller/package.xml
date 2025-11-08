@@ -11,7 +11,7 @@
 
   <author email="robot.moveit@gmail.com">Sachin Chitta</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>actionlib</depend>
   <depend>angles</depend>
@@ -22,13 +22,14 @@
   <depend>controller_manager</depend>
   <depend>hardware_interface</depend>
   <depend>realtime_tools</depend>
-  <depend>roscpp</depend>
   <depend>trajectory_msgs</depend>
   <depend>urdf</depend>
   <depend>xacro</depend>
   <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
 
   <export>
     <controller_interface plugin="${prefix}/ros_control_plugins.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

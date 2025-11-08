@@ -1,34 +1,38 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(position_controllers)
+find_package(ament_cmake REQUIRED)
+find_package(controller_interface REQUIRED)
+find_package(forward_command_controller REQUIRED)
+find_package(pluginlib REQUIRED)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS controller_interface forward_command_controller pluginlib)
 
 # Declare catkin project
-catkin_package(
-    CATKIN_DEPENDS controller_interface forward_command_controller
-    INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME}
-)
 
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+include_directories(include ${Boost_INCLUDE_DIR})
 add_library(${PROJECT_NAME}
   src/joint_position_controller.cpp
   src/joint_group_position_controller.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
+ament_target_dependencies(${PROJECT_NAME} "forward_command_controller" "pluginlib")
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+ament_export_dependencies(controller_interface forward_command_controller)
+ament_package()
 
 # Install
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  DESTINATION include/${PROJECT_NAME}
+)
 
 # Install library
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-  )
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  
+)
 
 install(FILES position_controllers_plugins.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+  DESTINATION share/${PROJECT_NAME}
+)

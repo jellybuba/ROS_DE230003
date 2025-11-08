@@ -44,7 +44,7 @@
 #include <ros/node_handle.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <controller_interface/controller.h>
-#include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/msg/float64_multi_array.hpp>
 #include <realtime_tools/realtime_buffer.h>
 
 
@@ -66,7 +66,7 @@ namespace forward_command_controller
  * \param joints Names of the joints to control.
  *
  * Subscribes to:
- * - \b command (std_msgs::Float64MultiArray) : The joint commands to apply.
+ * - \b command (std_msgs::msg::Float64MultiArray) : The joint commands to apply.
  */
 template <class T>
 class ForwardJointGroupCommandController: public controller_interface::Controller<T>
@@ -75,7 +75,7 @@ public:
   ForwardJointGroupCommandController() {}
   ~ForwardJointGroupCommandController() {sub_command_.shutdown();}
 
-  bool init(T* hw, ros::NodeHandle &n)
+  bool init(T* hw, rclcpp::Node &n)
   {
     // List of controlled joints
     std::string param_name = "joints";
@@ -105,12 +105,12 @@ public:
 
     commands_buffer_.writeFromNonRT(std::vector<double>(n_joints_, 0.0));
 
-    sub_command_ = n.subscribe<std_msgs::Float64MultiArray>("command", 1, &ForwardJointGroupCommandController::commandCB, this);
+    sub_command_ = n.subscribe<std_msgs::msg::Float64MultiArray>("command", 1, &ForwardJointGroupCommandController::commandCB, this);
     return true;
   }
 
-  void starting(const ros::Time& time);
-  void update(const ros::Time& /*time*/, const ros::Duration& /*period*/)
+  void starting(const rclcpp::Time& time);
+  void update(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
   {
     std::vector<double> & commands = *commands_buffer_.readFromRT();
     for(unsigned int i=0; i<n_joints_; i++)
@@ -124,7 +124,7 @@ public:
 
 private:
   ros::Subscriber sub_command_;
-  void commandCB(const std_msgs::Float64MultiArrayConstPtr& msg)
+  void commandCB(const std_msgs::msg::Float64MultiArray::ConstSharedPtr& msg)
   {
     if(msg->data.size()!=n_joints_)
     {

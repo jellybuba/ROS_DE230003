@@ -29,7 +29,8 @@
 /// \author Masaru Morita
 
 #include "../common/include/test_common.h"
-#include <tf/transform_listener.h>
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 
 // TEST CASES
 TEST_F(AckermannSteeringControllerTest, testForward)
@@ -37,23 +38,23 @@ TEST_F(AckermannSteeringControllerTest, testForward)
   // wait for ROS
   while(!isControllerAlive() || !isLastOdomValid())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
   // zero everything before test
-  geometry_msgs::Twist cmd_vel;
+  geometry_msgs::msg::Twist cmd_vel;
   cmd_vel.linear.x = 0.0;
   cmd_vel.angular.z = 0.0;
   publish(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
   // get initial odom
-  nav_msgs::Odometry old_odom = getLastOdom();
+  nav_msgs::msg::Odometry old_odom = getLastOdom();
   // send a velocity command of 0.1 m/s
   cmd_vel.linear.x = 0.1;
   publish(cmd_vel);
   // wait for 10s
-  ros::Duration(10.0).sleep();
+  rclcpp::Duration(10.0).sleep();
 
-  nav_msgs::Odometry new_odom = getLastOdom();
+  nav_msgs::msg::Odometry new_odom = getLastOdom();
 
   // check if the robot traveled 1 meter in XY plane, changes in z should be ~~0
   const double dx = new_odom.pose.pose.position.x - old_odom.pose.pose.position.x;
@@ -84,16 +85,16 @@ TEST_F(AckermannSteeringControllerTest, testTurn)
   // wait for ROS
   while(!isControllerAlive())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
   // zero everything before test
-  geometry_msgs::Twist cmd_vel;
+  geometry_msgs::msg::Twist cmd_vel;
   cmd_vel.linear.x = 0.0;
   cmd_vel.angular.z = 0.0;
   publish(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
   // get initial odom
-  nav_msgs::Odometry old_odom = getLastOdom();
+  nav_msgs::msg::Odometry old_odom = getLastOdom();
   // send a velocity command
   cmd_vel.angular.z = M_PI/10.0;
   // send linear command too 
@@ -101,9 +102,9 @@ TEST_F(AckermannSteeringControllerTest, testTurn)
   cmd_vel.linear.x = 0.1;
   publish(cmd_vel);
   // wait for 10s
-  ros::Duration(10.0).sleep();
+  rclcpp::Duration(10.0).sleep();
 
-  nav_msgs::Odometry new_odom = getLastOdom();
+  nav_msgs::msg::Odometry new_odom = getLastOdom();
 
   // check if the robot rotated PI around z, changes in x should be ~~0 and in y should be y_answer
   double x_answer = 0.0;
@@ -135,11 +136,11 @@ TEST_F(AckermannSteeringControllerTest, testOdomFrame)
   // wait for ROS
   while(!isControllerAlive())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
   // set up tf listener
-  tf::TransformListener listener;
-  ros::Duration(2.0).sleep();
+  tf2_ros::TransformListener listener;
+  rclcpp::Duration(2.0).sleep();
   // check the odom frame exist
   EXPECT_TRUE(listener.frameExists("odom"));
 }
@@ -147,11 +148,12 @@ TEST_F(AckermannSteeringControllerTest, testOdomFrame)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "ackermann_steering_controller_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("ackermann_steering_controller_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();
-  //ros::Duration(0.5).sleep();
+  //rclcpp::Duration(0.5).sleep();
   int ret = RUN_ALL_TESTS();
   spinner.stop();
   ros::shutdown();

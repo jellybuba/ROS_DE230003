@@ -36,11 +36,11 @@ TEST_F(DiffDriveControllerTest, breakWithMultiplePublishers)
   waitForController();
   waitForOdomMsgs();
 
-  nav_msgs::Odometry old_odom = getLastOdom();
+  nav_msgs::msg::Odometry old_odom = getLastOdom();
   //TODO: we should be programatically publish from 2 different nodes
   // not the current hacky solution with the launch files
-  ros::Duration(1.0).sleep(); 
-  nav_msgs::Odometry new_odom = getLastOdom();
+  rclcpp::Duration(1.0).sleep(); 
+  nav_msgs::msg::Odometry new_odom = getLastOdom();
 
   const double dx = new_odom.pose.pose.position.x - old_odom.pose.pose.position.x;
   const double dy = new_odom.pose.pose.position.y - old_odom.pose.pose.position.y;
@@ -61,7 +61,8 @@ TEST_F(DiffDriveControllerTest, breakWithMultiplePublishers)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "diff_drive_multiple_publishers_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("diff_drive_multiple_publishers_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

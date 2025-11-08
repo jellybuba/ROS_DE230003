@@ -38,14 +38,14 @@
 #pragma once
 
 
-#include <control_msgs/JointControllerState.h>
+#include <control_msgs/msg/joint_controller_state.hpp>
 #include <control_toolbox/pid.h>
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <realtime_tools/realtime_buffer.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <ros/node_handle.h>
-#include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/msg/float64_multi_array.hpp>
 #include <urdf/model.h>
 
 namespace effort_controllers
@@ -62,7 +62,7 @@ namespace effort_controllers
  * \param joints List of names of the joints to control.
  *
  * Subscribes to:
- * - \b command (std_msgs::Float64MultiArray) : The joint efforts to apply
+ * - \b command (std_msgs::msg::Float64MultiArray) : The joint efforts to apply
  */
 class JointGroupPositionController : public controller_interface::Controller<hardware_interface::EffortJointInterface>
 {
@@ -70,8 +70,8 @@ public:
   JointGroupPositionController();
   ~JointGroupPositionController();
 
-  bool init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle &n);
-  void update(const ros::Time& /*time*/, const ros::Duration& /*period*/);
+  bool init(hardware_interface::EffortJointInterface* hw, rclcpp::Node &n);
+  void update(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/);
 
   std::vector< std::string > joint_names_;
   std::vector< hardware_interface::JointHandle > joints_;
@@ -85,7 +85,7 @@ private:
 
   std::vector<urdf::JointConstSharedPtr> joint_urdfs_;
 
-  void commandCB(const std_msgs::Float64MultiArrayConstPtr& msg);
+  void commandCB(const std_msgs::msg::Float64MultiArray::ConstSharedPtr& msg);
   void enforceJointLimits(double &command, unsigned int index);
 }; // class
 

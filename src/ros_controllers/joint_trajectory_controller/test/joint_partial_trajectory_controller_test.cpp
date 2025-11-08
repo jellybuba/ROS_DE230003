@@ -34,13 +34,13 @@
 
 #include <gtest/gtest.h>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <actionlib/client/simple_action_client.h>
 
-#include <std_msgs/Float64.h>
-#include <control_msgs/FollowJointTrajectoryAction.h>
-#include <control_msgs/JointTrajectoryControllerState.h>
-#include <control_msgs/QueryTrajectoryState.h>
+#include <std_msgs/msg/float64.hpp>
+#include <control_msgs/msg/follow_joint_trajectory_action.hpp>
+#include <control_msgs/msg/joint_trajectory_controller_state.hpp>
+#include <control_msgs/srv/query_trajectory_state.hpp>
 
 // Floating-point value comparison threshold
 const double EPS = 0.01;
@@ -62,7 +62,7 @@ public:
     joint_names[0] = "joint1";
     joint_names[1] = "joint2";
 
-    trajectory_msgs::JointTrajectoryPoint point;
+    trajectory_msgs::msg::JointTrajectoryPoint point;
     point.positions.resize(n_joints, 0.0);
     point.velocities.resize(n_joints, 0.0);
     point.accelerations.resize(n_joints, 0.0);
@@ -70,21 +70,21 @@ public:
     // Go home trajectory
     traj_home.joint_names = joint_names;
     traj_home.points.resize(1, point);
-    traj_home.points[0].time_from_start = ros::Duration(1.0);
+    traj_home.points[0].time_from_start = rclcpp::Duration(1.0);
 
     // Three-point trajectory
     points.resize(3, point);
     points[0].positions[0] =  M_PI / 4.0;
     points[0].positions[1] =  0.0;
-    points[0].time_from_start = ros::Duration(1.0);
+    points[0].time_from_start = rclcpp::Duration(1.0);
 
     points[1].positions[0] =  0.0;
     points[1].positions[1] = -M_PI / 4.0;
-    points[1].time_from_start = ros::Duration(2.0);
+    points[1].time_from_start = rclcpp::Duration(2.0);
 
     points[2].positions[0] = -M_PI / 4.0;
     points[2].positions[1] =  M_PI / 4.0;
-    points[2].time_from_start = ros::Duration(4.0);
+    points[2].time_from_start = rclcpp::Duration(4.0);
 
     traj.joint_names = joint_names;
     traj.points = points;
@@ -93,13 +93,13 @@ public:
     traj_partial.joint_names.resize(1, "joint2");
     points.resize(3, point);
     points[0].positions[0] =  M_PI / 4.0;
-    points[0].time_from_start = ros::Duration(1.0);
+    points[0].time_from_start = rclcpp::Duration(1.0);
 
     points[1].positions[0] =  M_PI / 2.0;
-    points[1].time_from_start = ros::Duration(2.0);
+    points[1].time_from_start = rclcpp::Duration(2.0);
 
     points[2].positions[0] =  -M_PI / 2.0;
-    points[2].time_from_start = ros::Duration(4.0);
+    points[2].time_from_start = rclcpp::Duration(4.0);
     traj_partial.points = points;
 
     // Action goals
@@ -108,19 +108,19 @@ public:
     traj_partial_goal.trajectory = traj_partial;
 
     // Smoothing publisher (determines how well the robot follows a trajectory)
-    smoothing_pub = ros::NodeHandle().advertise<std_msgs::Float64>("smoothing", 1);
+    smoothing_pub = rclcpp::Node().advertise<std_msgs::msg::Float64>("smoothing", 1);
 
     // Trajectory publisher
-    traj_pub = nh.advertise<trajectory_msgs::JointTrajectory>("command", 1);
+    traj_pub = nh.advertise<trajectory_msgs::msg::JointTrajectory>("command", 1);
 
     // State subscriber
-    state_sub = nh.subscribe<control_msgs::JointTrajectoryControllerState>("state",
+    state_sub = nh.subscribe<control_msgs::msg::JointTrajectoryControllerState>("state",
                                                                            1,
                                                                            &JointPartialTrajectoryControllerTest::stateCB,
                                                                            this);
 
     // Query state service client
-    query_state_service = nh.serviceClient<control_msgs::QueryTrajectoryState>("query_state");
+    query_state_service = nh.serviceClient<control_msgs::srv::QueryTrajectoryState>("query_state");
 
     // Action client
     const std::string action_server_name = nh.getNamespace() + "/follow_joint_trajectory";
@@ -134,28 +134,28 @@ public:
   }
 
 protected:
-  typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> ActionClient;
+  typedef actionlib::SimpleActionClient<control_msgs::msg::FollowJointTrajectoryAction> ActionClient;
   typedef std::shared_ptr<ActionClient> ActionClientPtr;
-  typedef control_msgs::FollowJointTrajectoryGoal ActionGoal;
-  typedef control_msgs::JointTrajectoryControllerStateConstPtr StateConstPtr;
+  typedef control_msgs::msg::FollowJointTrajectoryGoal ActionGoal;
+  typedef control_msgs::msg::JointTrajectoryControllerState::ConstSharedPtr StateConstPtr;
 
   std::mutex mutex;
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
 
   unsigned int n_joints;
   unsigned int n_partial_joints;
   std::vector<std::string> joint_names;
-  std::vector<trajectory_msgs::JointTrajectoryPoint> points;
+  std::vector<trajectory_msgs::msg::JointTrajectoryPoint> points;
 
-  trajectory_msgs::JointTrajectory traj_home;
-  trajectory_msgs::JointTrajectory traj;
-  trajectory_msgs::JointTrajectory traj_partial;
+  trajectory_msgs::msg::JointTrajectory traj_home;
+  trajectory_msgs::msg::JointTrajectory traj;
+  trajectory_msgs::msg::JointTrajectory traj_partial;
   ActionGoal                       traj_home_goal;
   ActionGoal                       traj_goal;
   ActionGoal                       traj_partial_goal;
 
-  ros::Duration short_timeout;
-  ros::Duration long_timeout;
+  rclcpp::Duration short_timeout;
+  rclcpp::Duration long_timeout;
 
   ros::Publisher     smoothing_pub;
   ros::Publisher     traj_pub;
@@ -179,33 +179,33 @@ protected:
     return controller_state;
   }
 
-  bool initState(const ros::Duration& timeout = ros::Duration(5.0))
+  bool initState(const rclcpp::Duration& timeout = rclcpp::Duration(5.0))
   {
     bool init_ok = false;
-    ros::Time start_time = ros::Time::now();
-    while (!init_ok && (ros::Time::now() - start_time) < timeout)
+    rclcpp::Time start_time = rclcpp::Time::now();
+    while (!init_ok && (rclcpp::Time::now() - start_time) < timeout)
     {
       {
         std::lock_guard<std::mutex> lock(mutex);
         init_ok = controller_state && !controller_state->joint_names.empty();
       }
-      ros::Duration(0.1).sleep();
+      rclcpp::Duration(0.1).sleep();
     }
     return init_ok;
   }
 
   static bool waitForState(const ActionClientPtr& action_client,
                            const actionlib::SimpleClientGoalState& state,
-                           const ros::Duration& timeout)
+                           const rclcpp::Duration& timeout)
   {
-    using ros::Time;
-    using ros::Duration;
+    using rclcpp::Time;
+    using rclcpp::Duration;
 
     Time start_time = Time::now();
-    while (action_client->getState() != state && ros::ok())
+    while (action_client->getState() != state && rclcpp::ok())
     {
       if (timeout >= Duration(0.0) && (Time::now() - start_time) > timeout) {return false;} // Timed-out
-      ros::Duration(0.01).sleep();
+      rclcpp::Duration(0.01).sleep();
     }
     return true;
   }
@@ -223,10 +223,10 @@ TEST_F(JointPartialTrajectoryControllerTest, invalidMessages)
     ActionGoal bad_goal = traj_home_goal;
     bad_goal.trajectory.joint_names[0] = "bad_name";
 
-    bad_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+    bad_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
     action_client->sendGoal(bad_goal);
     ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::REJECTED, long_timeout));
-    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::FollowJointTrajectoryResult::INVALID_JOINTS);
+    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::msg::FollowJointTrajectoryResult::INVALID_JOINTS);
   }
 
   // No position data
@@ -234,10 +234,10 @@ TEST_F(JointPartialTrajectoryControllerTest, invalidMessages)
     ActionGoal bad_goal = traj_home_goal;
     bad_goal.trajectory.points[0].positions.clear();
 
-    bad_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+    bad_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
     action_client->sendGoal(bad_goal);
     ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::REJECTED, long_timeout));
-    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::FollowJointTrajectoryResult::INVALID_GOAL);
+    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::msg::FollowJointTrajectoryResult::INVALID_GOAL);
   }
 
   // Incompatible data sizes
@@ -245,10 +245,10 @@ TEST_F(JointPartialTrajectoryControllerTest, invalidMessages)
     ActionGoal bad_goal = traj_home_goal;
     bad_goal.trajectory.points[0].positions.pop_back();
 
-    bad_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+    bad_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
     action_client->sendGoal(bad_goal);
     ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::REJECTED, long_timeout));
-    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::FollowJointTrajectoryResult::INVALID_GOAL);
+    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::msg::FollowJointTrajectoryResult::INVALID_GOAL);
   }
 
   // Non-strictly increasing waypoint times
@@ -258,7 +258,7 @@ TEST_F(JointPartialTrajectoryControllerTest, invalidMessages)
 
     action_client->sendGoal(bad_goal);
     ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::REJECTED, long_timeout));
-    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::FollowJointTrajectoryResult::INVALID_GOAL);
+    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::msg::FollowJointTrajectoryResult::INVALID_GOAL);
   }
 
   // Empty trajectory through action interface
@@ -268,7 +268,7 @@ TEST_F(JointPartialTrajectoryControllerTest, invalidMessages)
     ActionGoal empty_goal;
     action_client->sendGoal(empty_goal);
     ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::REJECTED, long_timeout));
-    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::FollowJointTrajectoryResult::INVALID_JOINTS);
+    EXPECT_EQ(action_client->getResult()->error_code, control_msgs::msg::FollowJointTrajectoryResult::INVALID_JOINTS);
   }
 }
 
@@ -291,9 +291,9 @@ TEST_F(JointPartialTrajectoryControllerTest, topicSinglePartialTraj)
   ASSERT_TRUE(initState());
 
   // Send partial trajectory
-  traj_partial.header.stamp = ros::Time(0); // Start immediately
+  traj_partial.header.stamp = rclcpp::Time(0); // Start immediately
   traj_pub.publish(traj_partial);
-  ros::Duration wait_duration = traj_partial.points.back().time_from_start + ros::Duration(0.5);
+  rclcpp::Duration wait_duration = traj_partial.points.back().time_from_start + rclcpp::Duration(0.5);
   wait_duration.sleep(); // Wait until done
 
   // Validate state topic values
@@ -310,8 +310,8 @@ TEST_F(JointPartialTrajectoryControllerTest, topicSinglePartialTraj)
   EXPECT_NEAR(0.0, state->error.velocities[1], EPS);
 
   // Validate query state service
-  control_msgs::QueryTrajectoryState srv;
-  srv.request.time = ros::Time::now();
+  control_msgs::srv::QueryTrajectoryState srv;
+  srv.request.time = rclcpp::Time::now();
   ASSERT_TRUE(query_state_service.call(srv));
   for (unsigned int i = 0; i < n_joints; ++i)
   {
@@ -327,13 +327,13 @@ TEST_F(JointPartialTrajectoryControllerTest, actionSinglePartialTraj)
   ASSERT_TRUE(action_client->waitForServer(long_timeout));
 
   // Send partial trajectory
-  traj_partial_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  traj_partial_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client->sendGoal(traj_partial_goal);
 
   // Wait until done
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::SUCCEEDED, long_timeout));
-  EXPECT_EQ(action_client->getResult()->error_code, control_msgs::FollowJointTrajectoryResult::SUCCESSFUL);
-  ros::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
+  EXPECT_EQ(action_client->getResult()->error_code, control_msgs::msg::FollowJointTrajectoryResult::SUCCESSFUL);
+  rclcpp::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
 
   // Validate state topic values
   StateConstPtr state = getState();
@@ -357,15 +357,15 @@ TEST_F(JointPartialTrajectoryControllerTest, topicReplacesTopicTraj)
   ASSERT_TRUE(action_client->waitForServer(long_timeout));
 
   // Send trajectory
-  traj.header.stamp = ros::Time(0); // Start immediately
+  traj.header.stamp = rclcpp::Time(0); // Start immediately
   traj_pub.publish(traj);
-  ros::Duration wait_duration = traj.points.front().time_from_start;
+  rclcpp::Duration wait_duration = traj.points.front().time_from_start;
   wait_duration.sleep(); // Wait until ~first waypoint
 
   // Send partial trajectory that preempts the previous one
-  traj_partial.header.stamp = ros::Time(0); // Start immediately
+  traj_partial.header.stamp = rclcpp::Time(0); // Start immediately
   traj_pub.publish(traj_partial);
-  wait_duration = traj_partial.points.back().time_from_start + ros::Duration(0.5);
+  wait_duration = traj_partial.points.back().time_from_start + rclcpp::Duration(0.5);
   wait_duration.sleep(); // Wait until done
 
   // Check that we're at the original trajectory for joint1 and on the partial trajectory for joint2
@@ -385,15 +385,15 @@ TEST_F(JointPartialTrajectoryControllerTest, actionReplacesActionTraj)
   ASSERT_TRUE(action_client->waitForServer(long_timeout));
 
   // Send trajectory
-  traj_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  traj_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client->sendGoal(traj_goal);
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::ACTIVE, short_timeout));
 
-  ros::Duration wait_duration = traj.points.front().time_from_start;
+  rclcpp::Duration wait_duration = traj.points.front().time_from_start;
   wait_duration.sleep(); // Wait until ~first waypoint
 
   // Send partial trajectory that preempts the previous one
-  traj_partial_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  traj_partial_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client2->sendGoal(traj_partial_goal);
   ASSERT_TRUE(waitForState(action_client2, SimpleClientGoalState::ACTIVE,    short_timeout));
   ASSERT_TRUE(waitForState(action_client,  SimpleClientGoalState::PREEMPTED, short_timeout));
@@ -401,7 +401,7 @@ TEST_F(JointPartialTrajectoryControllerTest, actionReplacesActionTraj)
 
   // Wait until done
   ASSERT_TRUE(waitForState(action_client2, SimpleClientGoalState::SUCCEEDED, long_timeout));
-  ros::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
+  rclcpp::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
 
   // Check that we're at the original trajectory for joint1 and on the partial trajectory for joint2
   StateConstPtr state = getState();
@@ -420,19 +420,19 @@ TEST_F(JointPartialTrajectoryControllerTest, actionReplacesTopicTraj)
   ASSERT_TRUE(action_client->waitForServer(long_timeout));
 
   // Send trajectory
-  traj.header.stamp = ros::Time(0); // Start immediately
+  traj.header.stamp = rclcpp::Time(0); // Start immediately
   traj_pub.publish(traj);
-  ros::Duration wait_duration = traj.points.front().time_from_start;
+  rclcpp::Duration wait_duration = traj.points.front().time_from_start;
   wait_duration.sleep(); // Wait until ~first waypoint
 
   // Send partial trajectory that preempts the previous one
-  traj_partial_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  traj_partial_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client->sendGoal(traj_partial_goal);
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::ACTIVE,    short_timeout));
 
   // Wait until done
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::SUCCEEDED, long_timeout));
-  ros::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
+  rclcpp::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
 
   // Check that we're at the original trajectory for joint1 and on the partial trajectory for joint2
   StateConstPtr state = getState();
@@ -451,20 +451,20 @@ TEST_F(JointPartialTrajectoryControllerTest, topicReplacesActionTraj)
   ASSERT_TRUE(action_client->waitForServer(long_timeout));
 
   // Send trajectory
-  traj_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  traj_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client->sendGoal(traj_goal);
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::ACTIVE, short_timeout));
 
-  ros::Duration wait_duration = traj.points.front().time_from_start;
+  rclcpp::Duration wait_duration = traj.points.front().time_from_start;
   wait_duration.sleep(); // Wait until ~first waypoint
 
   // Send partial trajectory that preempts the previous one
-  traj_partial.header.stamp = ros::Time(0); // Start immediately
+  traj_partial.header.stamp = rclcpp::Time(0); // Start immediately
   traj_pub.publish(traj_partial);
 
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::PREEMPTED, short_timeout));
 
-  wait_duration = traj_partial.points.back().time_from_start + ros::Duration(0.5);
+  wait_duration = traj_partial.points.back().time_from_start + rclcpp::Duration(0.5);
   wait_duration.sleep(); // Wait until done
 
   // Check that we're at the original trajectory for joint1 and on the partial trajectory for joint2
@@ -485,16 +485,16 @@ TEST_F(JointPartialTrajectoryControllerTest, ignoreOldTopicTraj)
   ASSERT_TRUE(initState());
 
   // Send trajectory
-  traj.header.stamp = ros::Time(0); // Start immediately
+  traj.header.stamp = rclcpp::Time(0); // Start immediately
   traj_pub.publish(traj);
-  ros::Duration wait_duration = traj.points.front().time_from_start;
+  rclcpp::Duration wait_duration = traj.points.front().time_from_start;
   wait_duration.sleep(); // Wait until ~first waypoint
 
   // Send partial trajectory with all points occuring in the past. Should not preempts the previous one
-  traj_partial.header.stamp = ros::Time::now() - traj_partial.points.back().time_from_start - ros::Duration(0.5);
+  traj_partial.header.stamp = rclcpp::Time::now() - traj_partial.points.back().time_from_start - rclcpp::Duration(0.5);
   traj_pub.publish(traj_partial);
 
-  wait_duration = traj.points.back().time_from_start - traj.points.front().time_from_start + ros::Duration(0.5);
+  wait_duration = traj.points.back().time_from_start - traj.points.front().time_from_start + rclcpp::Duration(0.5);
   wait_duration.sleep(); // Wait until first trajectory is done
 
   // Check that we're at the original trajectory end (Joint2 has not moved according to traj_partial)
@@ -513,21 +513,21 @@ TEST_F(JointPartialTrajectoryControllerTest, ignoreOldActionTraj)
   ASSERT_TRUE(action_client->waitForServer(long_timeout));
 
   // Send trajectory
-  traj_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  traj_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client->sendGoal(traj_goal);
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::ACTIVE, short_timeout));
 
-  ros::Duration wait_duration = traj.points.front().time_from_start;
+  rclcpp::Duration wait_duration = traj.points.front().time_from_start;
   wait_duration.sleep(); // Wait until ~first waypoint
 
   // Send partial trajectory with all points occuring in the past. Should not preempts the previous one
-  traj_partial_goal.trajectory.header.stamp = ros::Time::now() - traj_partial.points.back().time_from_start - ros::Duration(0.5);
+  traj_partial_goal.trajectory.header.stamp = rclcpp::Time::now() - traj_partial.points.back().time_from_start - rclcpp::Duration(0.5);
   action_client2->sendGoal(traj_partial_goal);
   ASSERT_TRUE(waitForState(action_client2, SimpleClientGoalState::REJECTED,  short_timeout));
 
   // Wait until done
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::SUCCEEDED, long_timeout));
-  ros::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
+  rclcpp::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
 
   // Check that we're at the original trajectory end (Joint2 has not moved according to traj_partial)
   StateConstPtr state = getState();
@@ -546,22 +546,22 @@ TEST_F(JointPartialTrajectoryControllerTest, ignorePartiallyOldActionTraj)
 
   // Send trajectory
   ActionGoal first_goal = traj_goal;
-  first_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  first_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client->sendGoal(first_goal);
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::ACTIVE, short_timeout));
 
-  ros::Duration wait_duration = first_goal.trajectory.points.front().time_from_start;
+  rclcpp::Duration wait_duration = first_goal.trajectory.points.front().time_from_start;
   wait_duration.sleep(); // Wait until ~first waypoint
 
   // Send partial trajectory with only the last point not occuring in the past. Only the last point should be executed
-  traj_partial_goal.trajectory.header.stamp = ros::Time::now() - traj.points.back().time_from_start + ros::Duration(1.0);
+  traj_partial_goal.trajectory.header.stamp = rclcpp::Time::now() - traj.points.back().time_from_start + rclcpp::Duration(1.0);
   action_client2->sendGoal(traj_partial_goal);
   ASSERT_TRUE(waitForState(action_client,  SimpleClientGoalState::PREEMPTED, short_timeout));
   ASSERT_TRUE(waitForState(action_client2, SimpleClientGoalState::ACTIVE,    short_timeout));
 
   // Wait until done
   ASSERT_TRUE(waitForState(action_client2, SimpleClientGoalState::SUCCEEDED, long_timeout));
-  ros::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
+  rclcpp::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
 
   // Check that we're at the original trajectory for joint1 and on the partial trajectory for joint2
   StateConstPtr state = getState();
@@ -581,15 +581,15 @@ TEST_F(JointPartialTrajectoryControllerTest, executeParitalActionTrajInFuture)
 
   // Send trajectory
   ActionGoal first_goal = traj_goal;
-  first_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  first_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client->sendGoal(first_goal);
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::ACTIVE, short_timeout));
 
-  ros::Duration wait_duration = first_goal.trajectory.points.front().time_from_start;
+  rclcpp::Duration wait_duration = first_goal.trajectory.points.front().time_from_start;
   wait_duration.sleep(); // Wait until ~first waypoint
 
   // Send partial trajectory with only the last point not occuring in the past. Only the last point should be executed
-  traj_partial_goal.trajectory.header.stamp = ros::Time::now() + traj.points.back().time_from_start + ros::Duration(2.0);
+  traj_partial_goal.trajectory.header.stamp = rclcpp::Time::now() + traj.points.back().time_from_start + rclcpp::Duration(2.0);
   action_client2->sendGoal(traj_partial_goal);
   ASSERT_TRUE(waitForState(action_client,  SimpleClientGoalState::PREEMPTED, short_timeout));
   ASSERT_TRUE(waitForState(action_client2, SimpleClientGoalState::ACTIVE,    short_timeout));
@@ -608,7 +608,7 @@ TEST_F(JointPartialTrajectoryControllerTest, executeParitalActionTrajInFuture)
 
   // Wait until done
   ASSERT_TRUE(waitForState(action_client2, SimpleClientGoalState::SUCCEEDED, long_timeout));
-  ros::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
+  rclcpp::Duration(0.5).sleep(); // Allows values to settle to within EPS, especially accelerations
 
   // Check that we're at the original trajectory for joint1 and on the partial trajectory for joint2
   state = getState();
@@ -625,7 +625,8 @@ TEST_F(JointPartialTrajectoryControllerTest, executeParitalActionTrajInFuture)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "joint_partial_trajectory_controller_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("joint_partial_trajectory_controller_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

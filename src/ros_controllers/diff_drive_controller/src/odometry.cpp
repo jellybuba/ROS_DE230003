@@ -66,14 +66,14 @@ namespace diff_drive_controller
   {
   }
 
-  void Odometry::init(const ros::Time& time)
+  void Odometry::init(const rclcpp::Time& time)
   {
     // Reset accumulators and timestamp:
     resetAccumulators();
     timestamp_ = time;
   }
 
-  bool Odometry::update(double left_pos, double right_pos, const ros::Time &time)
+  bool Odometry::update(double left_pos, double right_pos, const rclcpp::Time &time)
   {
     /// Get current wheel joint positions:
     const double left_wheel_cur_pos  = left_pos  * left_wheel_radius_;
@@ -111,7 +111,7 @@ namespace diff_drive_controller
     return true;
   }
 
-  void Odometry::updateOpenLoop(double linear, double angular, const ros::Time &time)
+  void Odometry::updateOpenLoop(double linear, double angular, const rclcpp::Time &time)
   {
     /// Save last linear and angular velocity:
     linear_ = linear;

@@ -28,7 +28,7 @@
 /// \author Adolfo Rodriguez Tsouroukdissian
 
 #include <gtest/gtest.h>
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <trajectory_interface/pos_vel_acc_state.h>
 #include <joint_trajectory_controller/tolerances.h>
 
@@ -122,7 +122,7 @@ TEST(TolerancesTest, UpdateStateTolerances)
 {
   StateTols default_state_tols(1.0, 2.0, 3.0);
 
-  control_msgs::JointTolerance default_tol_msg;
+  control_msgs::msg::JointTolerance default_tol_msg;
   default_tol_msg.name         = "foo_joint";
   default_tol_msg.position     = 0.0;
   default_tol_msg.velocity     = 0.0;
@@ -131,7 +131,7 @@ TEST(TolerancesTest, UpdateStateTolerances)
   // Zero tolerances: No-op
   {
     StateTols state_tols = default_state_tols;
-    control_msgs::JointTolerance tol_msg = default_tol_msg;
+    control_msgs::msg::JointTolerance tol_msg = default_tol_msg;
     updateStateTolerances(tol_msg, state_tols);
     EXPECT_EQ(default_state_tols.position, state_tols.position);
     EXPECT_EQ(default_state_tols.velocity, state_tols.velocity);
@@ -142,7 +142,7 @@ TEST(TolerancesTest, UpdateStateTolerances)
   {
     // Position
     StateTols state_tols = default_state_tols;
-    control_msgs::JointTolerance tol_msg = default_tol_msg;
+    control_msgs::msg::JointTolerance tol_msg = default_tol_msg;
     tol_msg.position = -1.0;
     updateStateTolerances(tol_msg, state_tols);
     EXPECT_EQ(0.0,                             state_tols.position);
@@ -152,7 +152,7 @@ TEST(TolerancesTest, UpdateStateTolerances)
   {
     // Velocity
     StateTols state_tols = default_state_tols;
-    control_msgs::JointTolerance tol_msg = default_tol_msg;
+    control_msgs::msg::JointTolerance tol_msg = default_tol_msg;
     tol_msg.velocity = -1.0;
     updateStateTolerances(tol_msg, state_tols);
     EXPECT_EQ(default_state_tols.position,     state_tols.position);
@@ -162,7 +162,7 @@ TEST(TolerancesTest, UpdateStateTolerances)
   {
     // Acceleration
     StateTols state_tols = default_state_tols;
-    control_msgs::JointTolerance tol_msg = default_tol_msg;
+    control_msgs::msg::JointTolerance tol_msg = default_tol_msg;
     tol_msg.acceleration = -1.0;
     updateStateTolerances(tol_msg, state_tols);
     EXPECT_EQ(default_state_tols.position, state_tols.position);
@@ -174,7 +174,7 @@ TEST(TolerancesTest, UpdateStateTolerances)
   {
     // Position
     StateTols state_tols = default_state_tols;
-    control_msgs::JointTolerance tol_msg = default_tol_msg;
+    control_msgs::msg::JointTolerance tol_msg = default_tol_msg;
     tol_msg.position = 0.5;
     updateStateTolerances(tol_msg, state_tols);
     EXPECT_EQ(tol_msg.position,                state_tols.position);
@@ -184,7 +184,7 @@ TEST(TolerancesTest, UpdateStateTolerances)
   {
     // Velocity
     StateTols state_tols = default_state_tols;
-    control_msgs::JointTolerance tol_msg = default_tol_msg;
+    control_msgs::msg::JointTolerance tol_msg = default_tol_msg;
     tol_msg.velocity = 0.5;
     updateStateTolerances(tol_msg, state_tols);
     EXPECT_EQ(default_state_tols.position,     state_tols.position);
@@ -194,7 +194,7 @@ TEST(TolerancesTest, UpdateStateTolerances)
   {
     // Acceleration
     StateTols state_tols = default_state_tols;
-    control_msgs::JointTolerance tol_msg = default_tol_msg;
+    control_msgs::msg::JointTolerance tol_msg = default_tol_msg;
     tol_msg.acceleration = 0.5;
     updateStateTolerances(tol_msg, state_tols);
     EXPECT_EQ(default_state_tols.position, state_tols.position);
@@ -219,25 +219,25 @@ TEST(TolerancesTest, UpdateSegmentTolerances)
   ref_segment_tols.goal_time_tolerance     = 1.0;
 
   // Message data
-  control_msgs::JointTolerance invalid_tol_msg;
+  control_msgs::msg::JointTolerance invalid_tol_msg;
   invalid_tol_msg.name         = "invalid_joint";
   invalid_tol_msg.position     = -1.0;
   invalid_tol_msg.velocity     = -1.0;
   invalid_tol_msg.acceleration = -1.0;
 
-  control_msgs::JointTolerance state_tol_msg;
+  control_msgs::msg::JointTolerance state_tol_msg;
   state_tol_msg.name         = joint_names[0];
   state_tol_msg.position     =  0.5;
   state_tol_msg.velocity     =  0.0;
   state_tol_msg.acceleration = -1.0;
 
-  control_msgs::JointTolerance goal_state_tol_msg;
+  control_msgs::msg::JointTolerance goal_state_tol_msg;
   goal_state_tol_msg.name         = joint_names[1];
   goal_state_tol_msg.position     =  0.25;
   goal_state_tol_msg.velocity     =  0.0;
   goal_state_tol_msg.acceleration = -1.0;
 
-  control_msgs::FollowJointTrajectoryGoal goal;
+  control_msgs::msg::FollowJointTrajectoryGoal goal;
   goal.path_tolerance.push_back(invalid_tol_msg); // Useless data that should be ignored
   goal.path_tolerance.push_back(state_tol_msg);   // Only first joint has state tolerances
   goal.path_tolerance.push_back(invalid_tol_msg); // Useless data that should be ignored
@@ -246,7 +246,7 @@ TEST(TolerancesTest, UpdateSegmentTolerances)
   goal.goal_tolerance.push_back(invalid_tol_msg);    // Useless data that should be ignored
   goal.goal_tolerance.push_back(goal_state_tol_msg); // Only second joint has goal state tolerances
 
-  goal.goal_time_tolerance = ros::Duration(0.0); // No-op
+  goal.goal_time_tolerance = rclcpp::Duration(0.0); // No-op
 
   // Update tolerances from message
   SegmentTolerances<double> segment_tols = ref_segment_tols;
@@ -273,18 +273,18 @@ TEST(TolerancesTest, UpdateSegmentTolerances)
   // Goal time constraint
   EXPECT_EQ(ref_segment_tols.goal_time_tolerance, segment_tols.goal_time_tolerance); // No-op
 
-  goal.goal_time_tolerance = ros::Duration(1.0);
+  goal.goal_time_tolerance = rclcpp::Duration(1.0);
   updateSegmentTolerances(goal, joint_names, segment_tols);
   EXPECT_EQ(goal.goal_time_tolerance.toSec(), segment_tols.goal_time_tolerance);     // Update
 
-  goal.goal_time_tolerance = ros::Duration(-1.0);
+  goal.goal_time_tolerance = rclcpp::Duration(-1.0);
   updateSegmentTolerances(goal, joint_names, segment_tols);
   EXPECT_EQ(0.0, segment_tols.goal_time_tolerance);                                  // Reset
 }
 
 TEST(TolerancesTest, getSegmentTolerances)
 {
-  ros::NodeHandle nh("test/constraints");
+  rclcpp::Node nh("test/constraints");
 
   std::vector<std::string> joint_names(2);
   joint_names[0] = "foo_joint";
@@ -315,6 +315,7 @@ TEST(TolerancesTest, getSegmentTolerances)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "tolerances_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("tolerances_test");
   return RUN_ALL_TESTS();
 }

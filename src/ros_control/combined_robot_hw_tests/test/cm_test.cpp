@@ -29,21 +29,21 @@
 /// \author Vijay Pradeep
 /// \author Toni Oliver
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <gtest/gtest.h>
 
-#include <controller_manager_msgs/ListControllers.h>
-#include <controller_manager_msgs/ListControllerTypes.h>
-#include <controller_manager_msgs/LoadController.h>
-#include <controller_manager_msgs/SwitchController.h>
-#include <controller_manager_msgs/UnloadController.h>
+#include <controller_manager_msgs/srv/list_controllers.hpp>
+#include <controller_manager_msgs/srv/list_controller_types.hpp>
+#include <controller_manager_msgs/srv/load_controller.hpp>
+#include <controller_manager_msgs/srv/switch_controller.hpp>
+#include <controller_manager_msgs/srv/unload_controller.hpp>
 
 
 using namespace controller_manager_msgs;
 
 TEST(CMTests, loadUnloadOk)
 {
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   ros::ServiceClient load_client   = nh.serviceClient<LoadController>("/controller_manager/load_controller");
   ros::ServiceClient unload_client = nh.serviceClient<UnloadController>("/controller_manager/unload_controller");
 
@@ -104,7 +104,7 @@ TEST(CMTests, loadUnloadOk)
 
 TEST(CMTests, loadUnloadKo)
 {
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   ros::ServiceClient load_client   = nh.serviceClient<LoadController>("/controller_manager/load_controller");
   ros::ServiceClient unload_client = nh.serviceClient<UnloadController>("/controller_manager/unload_controller");
 
@@ -157,7 +157,7 @@ TEST(CMTests, loadUnloadKo)
 
 TEST(CMTests, switchController)
 {
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   ros::ServiceClient load_client   = nh.serviceClient<LoadController>("/controller_manager/load_controller");
   ros::ServiceClient unload_client = nh.serviceClient<UnloadController>("/controller_manager/unload_controller");
   ros::ServiceClient switch_client = nh.serviceClient<SwitchController>("/controller_manager/switch_controller");
@@ -352,7 +352,7 @@ TEST(CMTests, switchController)
 
 TEST(CMTests, stopBeforeUnload)
 {
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   ros::ServiceClient load_client   = nh.serviceClient<LoadController>("/controller_manager/load_controller");
   ros::ServiceClient unload_client = nh.serviceClient<UnloadController>("/controller_manager/unload_controller");
   ros::ServiceClient switch_client = nh.serviceClient<SwitchController>("/controller_manager/switch_controller");
@@ -407,7 +407,7 @@ TEST(CMTests, stopBeforeUnload)
 
 TEST(CMTests, listControllerTypes)
 {
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   ros::ServiceClient types_client = nh.serviceClient<ListControllerTypes>("/controller_manager/list_controller_types");
 
   ListControllerTypes srv;
@@ -420,7 +420,7 @@ TEST(CMTests, listControllerTypes)
 
 TEST(CMTests, listControllers)
 {
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   ros::ServiceClient load_client   = nh.serviceClient<LoadController>("/controller_manager/load_controller");
   ros::ServiceClient unload_client = nh.serviceClient<UnloadController>("/controller_manager/unload_controller");
   ros::ServiceClient switch_client = nh.serviceClient<SwitchController>("/controller_manager/switch_controller");
@@ -505,14 +505,15 @@ TEST(CMTests, listControllers)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "ControllerManagerTestNode");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("ControllerManagerTestNode");
 
   ros::AsyncSpinner spinner(1);
 
   // wait for services
-  ROS_INFO("Waiting for service");
+  RCLCPP_INFO(rclcpp::get_logger("CombinedRobotHwTests"), "Waiting for service");
   ros::service::waitForService("/controller_manager/load_controller");
-  ROS_INFO("Start tests");
+  RCLCPP_INFO(rclcpp::get_logger("CombinedRobotHwTests"), "Start tests");
   spinner.start();
   int ret = RUN_ALL_TESTS();
   spinner.stop();

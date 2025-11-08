@@ -38,23 +38,23 @@ namespace joint_state_controller
 {
 
   bool JointStateController::init(hardware_interface::JointStateInterface* hw,
-                                  ros::NodeHandle&                         root_nh,
-                                  ros::NodeHandle&                         controller_nh)
+                                  rclcpp::Node&                         root_nh,
+                                  rclcpp::Node&                         controller_nh)
   {
     // get all joint names from the hardware interface
     const std::vector<std::string>& joint_names = hw->getNames();
     num_hw_joints_ = joint_names.size();
     for (unsigned i=0; i<num_hw_joints_; i++)
-      ROS_DEBUG("Got joint %s", joint_names[i].c_str());
+      RCLCPP_DEBUG(rclcpp::get_logger("JointStateController"), "Got joint %s", joint_names[i].c_str());
 
     // get publishing period
     if (!controller_nh.getParam("publish_rate", publish_rate_)){
-      ROS_ERROR("Parameter 'publish_rate' not set");
+      RCLCPP_ERROR(rclcpp::get_logger("JointStateController"), "Parameter 'publish_rate' not set");
       return false;
     }
 
     // realtime publisher
-    realtime_pub_.reset(new realtime_tools::RealtimePublisher<sensor_msgs::JointState>(root_nh, "joint_states", 4));
+    realtime_pub_.reset(new realtime_tools::RealtimePublisher<sensor_msgs::msg::JointState>(root_nh, "joint_states", 4));
 
     // get joints and allocate message
     for (unsigned i=0; i<num_hw_joints_; i++){
@@ -69,21 +69,21 @@ namespace joint_state_controller
     return true;
   }
 
-  void JointStateController::starting(const ros::Time& time)
+  void JointStateController::starting(const rclcpp::Time& time)
   {
     // initialize time
     last_publish_time_ = time;
   }
 
-  void JointStateController::update(const ros::Time& time, const ros::Duration& /*period*/)
+  void JointStateController::update(const rclcpp::Time& time, const rclcpp::Duration& /*period*/)
   {
     // limit rate of publishing
-    if (publish_rate_ > 0.0 && last_publish_time_ + ros::Duration(1.0/publish_rate_) < time){
+    if (publish_rate_ > 0.0 && last_publish_time_ + rclcpp::Duration(1.0/publish_rate_) < time){
 
       // try to publish
       if (realtime_pub_->trylock()){
         // we're actually publishing, so increment time
-        last_publish_time_ = last_publish_time_ + ros::Duration(1.0/publish_rate_);
+        last_publish_time_ = last_publish_time_ + rclcpp::Duration(1.0/publish_rate_);
 
         // populate joint state message:
         // - fill only joints that are present in the JointStateInterface, i.e. indices [0, num_hw_joints_)
@@ -99,23 +99,23 @@ namespace joint_state_controller
     }
   }
 
-  void JointStateController::stopping(const ros::Time& /*time*/)
+  void JointStateController::stopping(const rclcpp::Time& /*time*/)
   {}
 
-  void JointStateController::addExtraJoints(const ros::NodeHandle& nh, sensor_msgs::JointState& msg)
+  void JointStateController::addExtraJoints(const rclcpp::Node& nh, sensor_msgs::msg::JointState& msg)
   {
 
     // Preconditions
     XmlRpc::XmlRpcValue list;
     if (!nh.getParam("extra_joints", list))
     {
-      ROS_DEBUG("No extra joints specification found.");
+      RCLCPP_DEBUG(rclcpp::get_logger("JointStateController"), "No extra joints specification found.");
       return;
     }
 
     if (list.getType() != XmlRpc::XmlRpcValue::TypeArray)
     {
-      ROS_ERROR("Extra joints specification is not an array. Ignoring.");
+      RCLCPP_ERROR(rclcpp::get_logger("JointStateController"), "Extra joints specification is not an array. Ignoring.");
       return;
     }
 

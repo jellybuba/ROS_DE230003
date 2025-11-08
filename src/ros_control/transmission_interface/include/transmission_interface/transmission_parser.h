@@ -46,7 +46,7 @@
 #include <transmission_interface/transmission_info.h>
 
 // ROS
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 // XML
 #include <tinyxml.h>

@@ -50,7 +50,7 @@ inline bool readFile(const std::string& filename, std::string& contents)
   }
   catch (resource_retriever::Exception& e)
   {
-    ROS_ERROR("Failed to retrieve file: %s", e.what());
+    RCLCPP_ERROR(rclcpp::get_logger("TransmissionInterface"), "Failed to retrieve file: %s", e.what());
     return false;
   }
 

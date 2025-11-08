@@ -19,11 +19,13 @@
 
   <author>Wim Meeussen</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
-
-  <depend>roscpp</depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
 
   <build_depend>hardware_interface</build_depend>
 
   <build_export_depend>hardware_interface</build_export_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

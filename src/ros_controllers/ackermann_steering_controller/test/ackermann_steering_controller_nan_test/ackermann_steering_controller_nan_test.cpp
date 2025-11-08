@@ -39,24 +39,24 @@ TEST_F(AckermannSteeringControllerTest, testNaN)
   // wait for ROS
   while(!isControllerAlive())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
   // zero everything before test
-  geometry_msgs::Twist cmd_vel;
+  geometry_msgs::msg::Twist cmd_vel;
   cmd_vel.linear.x = 0.0;
   cmd_vel.angular.z = 0.0;
   publish(cmd_vel);
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
 
   // send a command
   cmd_vel.linear.x = 0.1;
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
 
   // stop robot (will generate NaN)
   stop();
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
 
-  nav_msgs::Odometry odom = getLastOdom();
+  nav_msgs::msg::Odometry odom = getLastOdom();
 
   EXPECT_NE(std::isnan(odom.twist.twist.linear.x), true);
   EXPECT_NE(std::isnan(odom.twist.twist.angular.z), true);
@@ -67,7 +67,7 @@ TEST_F(AckermannSteeringControllerTest, testNaN)
 
   // start robot
   start();
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
 
   odom = getLastOdom();
 
@@ -82,7 +82,8 @@ TEST_F(AckermannSteeringControllerTest, testNaN)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "ackermann_steering_controller_nan_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("ackermann_steering_controller_nan_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

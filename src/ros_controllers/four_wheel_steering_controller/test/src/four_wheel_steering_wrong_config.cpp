@@ -6,12 +6,12 @@ TEST_F(FourWheelSteeringControllerTest, testWrongConfig)
 {
   // The controller should be never alive
   int secs = 0;
-  while(!isControllerAlive() && ros::ok() && secs < 5)
+  while(!isControllerAlive() && rclcpp::ok() && secs < 5)
   {
-    ros::Duration(1.0).sleep();
+    rclcpp::Duration(1.0).sleep();
     secs++;
   }
-  if (!ros::ok())
+  if (!rclcpp::ok())
     FAIL() << "Something went wrong while executing test.";
   // Give up and assume controller load failure after 5 seconds
   EXPECT_GE(secs,5);
@@ -21,7 +21,8 @@ TEST_F(FourWheelSteeringControllerTest, testWrongConfig)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "four_wheel_steering_wrong_config_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("four_wheel_steering_wrong_config_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

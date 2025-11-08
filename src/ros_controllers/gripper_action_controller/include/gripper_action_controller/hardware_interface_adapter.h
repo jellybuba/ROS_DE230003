@@ -53,16 +53,16 @@ template <class HardwareInterface>
 class HardwareInterfaceAdapter
 {
 public:
-  bool init(hardware_interface::JointHandle& joint_handle, ros::NodeHandle& controller_nh)
+  bool init(hardware_interface::JointHandle& joint_handle, rclcpp::Node& controller_nh)
   {
     return false;
   }
 
-  void starting(const ros::Time& time) {}
-  void stopping(const ros::Time& time) {}
+  void starting(const rclcpp::Time& time) {}
+  void stopping(const rclcpp::Time& time) {}
 
-  double updateCommand(const ros::Time&     time,
-		       const ros::Duration& period,
+  double updateCommand(const rclcpp::Time&     time,
+		       const rclcpp::Duration& period,
 		       double desired_position,
 		       double desired_velocity,
 		       double error_position,
@@ -80,7 +80,7 @@ class HardwareInterfaceAdapter<hardware_interface::PositionJointInterface>
 public:
   HardwareInterfaceAdapter() : joint_handle_ptr_(nullptr) {}
 
-  bool init(hardware_interface::JointHandle& joint_handle, ros::NodeHandle& controller_nh)
+  bool init(hardware_interface::JointHandle& joint_handle, rclcpp::Node& controller_nh)
   {
     // Store pointer to joint handles
     joint_handle_ptr_ = &joint_handle;
@@ -88,11 +88,11 @@ public:
     return true;
   }
 
-  void starting(const ros::Time& time) {}
-  void stopping(const ros::Time& time) {}
+  void starting(const rclcpp::Time& time) {}
+  void stopping(const rclcpp::Time& time) {}
 
-  double updateCommand(const ros::Time&     /*time*/,
-		       const ros::Duration& period,
+  double updateCommand(const rclcpp::Time&     /*time*/,
+		       const rclcpp::Duration& period,
 		       double desired_position,
 		       double desired_velocity,
 		       double error_position,
@@ -130,13 +130,13 @@ class HardwareInterfaceAdapter<hardware_interface::EffortJointInterface>
 public:
   HardwareInterfaceAdapter() : joint_handle_ptr_(nullptr) {}
 
-  bool init(hardware_interface::JointHandle& joint_handle, ros::NodeHandle& controller_nh)
+  bool init(hardware_interface::JointHandle& joint_handle, rclcpp::Node& controller_nh)
   {
     // Store pointer to joint handles
     joint_handle_ptr_ = &joint_handle;
 
     // Initialize PIDs
-    ros::NodeHandle joint_nh(controller_nh, std::string("gains/") + joint_handle.getName());
+    rclcpp::Node joint_nh(controller_nh, std::string("gains/") + joint_handle.getName());
 
     // Init PID gains from ROS parameter server
     pid_.reset(new control_toolbox::Pid());
@@ -149,7 +149,7 @@ public:
     return true;
   }
 
-  void starting(const ros::Time& time)
+  void starting(const rclcpp::Time& time)
   {
     if (!joint_handle_ptr_)
     {
@@ -160,10 +160,10 @@ public:
     (*joint_handle_ptr_).setCommand(0.0);
   }
 
-  void stopping(const ros::Time& time) {}
+  void stopping(const rclcpp::Time& time) {}
 
-  double updateCommand(const ros::Time&     /*time*/,
-		       const ros::Duration& period,
+  double updateCommand(const rclcpp::Time&     /*time*/,
+		       const rclcpp::Duration& period,
 		       double desired_position,
 		       double desired_velocity,
 		       double error_position,

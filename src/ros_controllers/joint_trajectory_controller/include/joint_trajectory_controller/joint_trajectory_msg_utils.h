@@ -37,7 +37,7 @@
 
 #include <ros/console.h>
 #include <ros/time.h>
-#include <trajectory_msgs/JointTrajectory.h>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 #include <trajectory_interface/trajectory_interface.h>
 
@@ -49,16 +49,16 @@ namespace internal
 class IsBeforePoint
 {
 public:
-  IsBeforePoint(const ros::Time& msg_start_time) : msg_start_time_(msg_start_time) {}
+  IsBeforePoint(const rclcpp::Time& msg_start_time) : msg_start_time_(msg_start_time) {}
 
-  bool operator()(const ros::Time& time, const trajectory_msgs::JointTrajectoryPoint& point)
+  bool operator()(const rclcpp::Time& time, const trajectory_msgs::msg::JointTrajectoryPoint& point)
   {
-    const ros::Time point_start_time = msg_start_time_ + point.time_from_start;
+    const rclcpp::Time point_start_time = msg_start_time_ + point.time_from_start;
     return time < point_start_time;
   }
 
 private:
-  ros::Time msg_start_time_;
+  rclcpp::Time msg_start_time_;
 };
 
 /**
@@ -66,8 +66,8 @@ private:
  * \param time Trajectory start time, if unspecified in message.
  * \return Start time specified in message. If unspecified (set to zero) return \p time.
  */
-inline ros::Time startTime(const trajectory_msgs::JointTrajectory& msg,
-                           const ros::Time&                        time)
+inline rclcpp::Time startTime(const trajectory_msgs::msg::JointTrajectory& msg,
+                           const rclcpp::Time&                        time)
 {
   return msg.header.stamp.isZero() ? time : msg.header.stamp;
 }
@@ -80,7 +80,7 @@ inline ros::Time startTime(const trajectory_msgs::JointTrajectory& msg,
  * \return True if sizes of the position, velocity and acceleration fields are consistent. An empty field means that
  * it's unspecified, so in this particular case its dimension must not coincide with \p joint_dim.
  */
-inline bool isValid(const trajectory_msgs::JointTrajectoryPoint& point, const unsigned int joint_dim)
+inline bool isValid(const trajectory_msgs::msg::JointTrajectoryPoint& point, const unsigned int joint_dim)
 {
   if (!point.positions.empty()     && point.positions.size()     != joint_dim) {return false;}
   if (!point.velocities.empty()    && point.velocities.size()    != joint_dim) {return false;}
@@ -92,11 +92,11 @@ inline bool isValid(const trajectory_msgs::JointTrajectoryPoint& point, const un
  * \param msg Trajectory message.
  * \return True if sizes of input message are consistent (joint names, position, velocity, acceleration).
  */
-inline bool isValid(const trajectory_msgs::JointTrajectory& msg)
+inline bool isValid(const trajectory_msgs::msg::JointTrajectory& msg)
 {
   const std::vector<std::string>::size_type joint_dim = msg.joint_names.size();
 
-  typedef std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator PointConstIterator;
+  typedef std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator PointConstIterator;
 
   for (PointConstIterator it = msg.points.begin(); it != msg.points.end(); ++it)
   {
@@ -116,18 +116,18 @@ inline bool isValid(const trajectory_msgs::JointTrajectory& msg)
  * \param msg Trajectory message.
  * \return True if each trajectory waypoint is reached at a later time than its predecessor.
  */
-inline bool isTimeStrictlyIncreasing(const trajectory_msgs::JointTrajectory& msg)
+inline bool isTimeStrictlyIncreasing(const trajectory_msgs::msg::JointTrajectory& msg)
 {
   if (msg.points.size() < 2) {return true;}
 
-  typedef std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator PointConstIterator;
+  typedef std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator PointConstIterator;
 
   PointConstIterator it = msg.points.begin();
   PointConstIterator end_it = --msg.points.end();
   while (it != end_it)
   {
-    const ros::Duration& t1 = it->time_from_start;
-    const ros::Duration& t2 = (++it)->time_from_start;
+    const rclcpp::Duration& t1 = it->time_from_start;
+    const rclcpp::Duration& t2 = (++it)->time_from_start;
     if (t1 >= t2) {return false;}
   }
   return true;
@@ -147,16 +147,16 @@ inline bool isTimeStrictlyIncreasing(const trajectory_msgs::JointTrajectory& msg
  * \note On average, this method has logarithmic time complexity when used on containers with \b random-access iterators.
  * On \b non-random-access iterators, iterator advances incur an additional linear time cost.
  */
-inline std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator
-findPoint(const trajectory_msgs::JointTrajectory& msg,
-          const ros::Time&                        time)
+inline std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator
+findPoint(const trajectory_msgs::msg::JointTrajectory& msg,
+          const rclcpp::Time&                        time)
 {
   // Message trajectory start time
   // If message time is == 0.0, the trajectory should start at the current time
-  const ros::Time msg_start_time = internal::startTime(msg, time);
+  const rclcpp::Time msg_start_time = internal::startTime(msg, time);
   internal::IsBeforePoint isBeforePoint(msg_start_time);
 
-  typedef std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator ConstIterator;
+  typedef std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator ConstIterator;
   const ConstIterator first = msg.points.begin();
   const ConstIterator last  = msg.points.end();
 

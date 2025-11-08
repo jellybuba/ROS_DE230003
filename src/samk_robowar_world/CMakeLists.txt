@@ -1,19 +1,10 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 
 project(samk_robowar_world)
-
-find_package(catkin REQUIRED
-  gazebo_ros
-  roscpp
-  rospy
-  controller_manager
-  joint_state_controller
-  robot_state_publisher
-)
-
-catkin_package()
+find_package(ament_cmake REQUIRED)
 
 find_package(roslaunch)
+ament_package()
 
 foreach(dir config launch meshes urdf models world)
 	install(DIRECTORY ${dir}/

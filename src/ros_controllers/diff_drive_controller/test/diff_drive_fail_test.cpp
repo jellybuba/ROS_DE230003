@@ -34,12 +34,12 @@ TEST_F(DiffDriveControllerTest, testWrongJointName)
 {
   // the controller should never be alive
   int secs = 0;
-  while(!isControllerAlive() && ros::ok() && secs < 5)
+  while(!isControllerAlive() && rclcpp::ok() && secs < 5)
   {
-    ros::Duration(1.0).sleep();
+    rclcpp::Duration(1.0).sleep();
     secs++;
   }
-  if (!ros::ok())
+  if (!rclcpp::ok())
     FAIL() << "Something went wrong while executing test.";
 
   // give up and assume controller load failure after 5 seconds
@@ -49,7 +49,8 @@ TEST_F(DiffDriveControllerTest, testWrongJointName)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "diff_drive_fail_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("diff_drive_fail_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

@@ -8,7 +8,8 @@ from sensor_msgs.msg import Range
 
 class PositionRecorder:
     def __init__(self):
-        rospy.init_node('position_recorder', anonymous=True)
+        rclpy.init()
+        node = rclpy.create_node('position_recorder', anonymous=True)
         
         # Data storage
         self.odom_data = None
@@ -32,13 +33,13 @@ class PositionRecorder:
             ])
         
         # Subscribers
-        rospy.Subscriber('/odom', Odometry, self.odom_callback)
-        rospy.Subscriber('/ultrasonic1', Range, self.us1_callback)
-        rospy.Subscriber('/ultrasonic2', Range, self.us2_callback)
-        rospy.Subscriber('/ultrasonic3', Range, self.us3_callback)
-        rospy.Subscriber('/ultrasonic4', Range, self.us4_callback)
-        rospy.Subscriber('/ultrasonic5', Range, self.us5_callback)
-        rospy.Subscriber('/ultrasonic6', Range, self.us6_callback)
+        node.create_subscription(Odometry, '/odom', self.odom_callback)
+        node.create_subscription(Range, '/ultrasonic1', self.us1_callback)
+        node.create_subscription(Range, '/ultrasonic2', self.us2_callback)
+        node.create_subscription(Range, '/ultrasonic3', self.us3_callback)
+        node.create_subscription(Range, '/ultrasonic4', self.us4_callback)
+        node.create_subscription(Range, '/ultrasonic5', self.us5_callback)
+        node.create_subscription(Range, '/ultrasonic6', self.us6_callback)
         
         # Timer for recording data
         self.recording = False

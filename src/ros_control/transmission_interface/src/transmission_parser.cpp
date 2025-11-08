@@ -45,7 +45,7 @@ bool TransmissionParser::parse(const std::string& urdf, std::vector<Transmission
   TiXmlDocument doc;
   if (!doc.Parse(urdf.c_str()) && doc.Error())
   {
-    ROS_ERROR("Can't parse transmissions. Invalid robot description.");
+    RCLCPP_ERROR(rclcpp::get_logger("TransmissionInterface"), "Can't parse transmissions. Invalid robot description.");
     return false;
   }
 
@@ -185,7 +185,7 @@ bool TransmissionParser::parseJoints(TiXmlElement *trans_it, std::vector<JointIn
 
   if(joints.empty())
   {
-    ROS_DEBUG_NAMED("parser","No valid joint element found.");
+    RCLCPP_DEBUG(rclcpp::get_logger("parser"),"No valid joint element found.");
     return false;
   }
 
@@ -251,7 +251,7 @@ bool TransmissionParser::parseActuators(TiXmlElement *trans_it, std::vector<Actu
 
   if(actuators.empty())
   {
-    ROS_DEBUG_NAMED("parser","No valid actuator element found.");
+    RCLCPP_DEBUG(rclcpp::get_logger("parser"),"No valid actuator element found.");
     return false;
   }
 

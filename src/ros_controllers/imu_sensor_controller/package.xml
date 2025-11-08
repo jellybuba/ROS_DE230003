@@ -14,16 +14,18 @@
 
   <author>Adolfo Rodriguez Tsouroukdissian</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>realtime_tools</depend> 
-  <depend>roscpp</depend> 
+   
   <depend>hardware_interface</depend> 
   <depend>pluginlib</depend> 
   <depend>controller_interface</depend> 
-  <depend>sensor_msgs</depend> 
+  <depend>sensor_msgs</depend>
+  <depend>rclcpp</depend> 
 
   <export>
     <controller_interface plugin="${prefix}/imu_sensor_plugin.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

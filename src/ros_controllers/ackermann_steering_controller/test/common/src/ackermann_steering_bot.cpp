@@ -30,7 +30,7 @@
 // NOTE: The contents of this file have been taken largely from the ros_control wiki tutorials
 
 // ROS
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 // ros_control
 #include <controller_manager/controller_manager.h>
@@ -39,17 +39,17 @@
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "ackermann_steering_bot");
-  ros::NodeHandle nh;
+  rclcpp::init(argc, argv);
+  auto nh = rclcpp::Node::make_shared("ackermann_steering_bot");
 
   AckermannSteeringBot robot;
   ROS_WARN_STREAM("period: " << robot.getPeriod().toSec());
   controller_manager::ControllerManager cm(&robot, nh);
 
-  ros::Rate rate(1.0 / robot.getPeriod().toSec());
+  rclcpp::Rate rate(1.0 / robot.getPeriod().toSec());
   ros::AsyncSpinner spinner(1);
   spinner.start();
-  while(ros::ok())
+  while(rclcpp::ok())
   {
     robot.read();
     cm.update(robot.getTime(), robot.getPeriod());

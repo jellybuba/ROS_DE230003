@@ -32,7 +32,7 @@
 
 
 #include <controller_interface/controller.h>
-#include <geometry_msgs/WrenchStamped.h>
+#include <geometry_msgs/msg/wrench_stamped.hpp>
 #include <hardware_interface/force_torque_sensor_interface.h>
 #include <memory>
 #include <pluginlib/class_list_macros.hpp>
@@ -47,16 +47,16 @@ class ForceTorqueSensorController: public controller_interface::Controller<hardw
 public:
   ForceTorqueSensorController(){}
 
-  virtual bool init(hardware_interface::ForceTorqueSensorInterface* hw, ros::NodeHandle &root_nh, ros::NodeHandle& controller_nh);
-  virtual void starting(const ros::Time& time);
-  virtual void update(const ros::Time& time, const ros::Duration& /*period*/);
-  virtual void stopping(const ros::Time& /*time*/);
+  virtual bool init(hardware_interface::ForceTorqueSensorInterface* hw, rclcpp::Node &root_nh, rclcpp::Node& controller_nh);
+  virtual void starting(const rclcpp::Time& time);
+  virtual void update(const rclcpp::Time& time, const rclcpp::Duration& /*period*/);
+  virtual void stopping(const rclcpp::Time& /*time*/);
 
 private:
   std::vector<hardware_interface::ForceTorqueSensorHandle> sensors_;
-  typedef std::shared_ptr<realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> > RtPublisherPtr;
+  typedef std::shared_ptr<realtime_tools::RealtimePublisher<geometry_msgs::msg::WrenchStamped> > RtPublisherPtr;
   std::vector<RtPublisherPtr> realtime_pubs_;
-  std::vector<ros::Time> last_publish_times_;
+  std::vector<rclcpp::Time> last_publish_times_;
   double publish_rate_;
 };
 

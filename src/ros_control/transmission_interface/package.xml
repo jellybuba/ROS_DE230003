@@ -19,9 +19,8 @@
 
   <author>Adolfo Rodriguez Tsouroukdissian</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
-
-  <depend>roscpp</depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
   <depend>tinyxml</depend>
 
   <build_depend>cmake_modules</build_depend>
@@ -36,5 +35,6 @@
   <export>
     <rosdoc config="rosdoc.yaml"/>
     <transmission_interface plugin="${prefix}/ros_control_plugins.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

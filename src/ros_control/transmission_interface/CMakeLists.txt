@@ -1,47 +1,31 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(transmission_interface)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS
-  cmake_modules
-  hardware_interface
-  pluginlib
-  roscpp
-)
 
 # Include a custom cmake file for TinyXML
 find_package(TinyXML REQUIRED)
+find_package(ament_cmake REQUIRED)
+find_package(cmake_modules REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
 
 # Declare a catkin package
-catkin_package(
-  INCLUDE_DIRS
-    include
-  LIBRARIES
-    ${PROJECT_NAME}_parser
-    ${PROJECT_NAME}_loader
-    ${PROJECT_NAME}_loader_plugins
-  CATKIN_DEPENDS
-    hardware_interface
-    pluginlib
-    roscpp
-  DEPENDS
-    TinyXML
-)
-
 
 ###########
 ## Build ##
 ###########
 
 # Specify header include paths
-include_directories(include ${catkin_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS})
+include_directories(include ${TinyXML_INCLUDE_DIRS})
 
 # Transmission parser library
 add_library(${PROJECT_NAME}_parser
   include/transmission_interface/transmission_parser.h
   src/transmission_parser.cpp
 )
-target_link_libraries(${PROJECT_NAME}_parser ${catkin_LIBRARIES} ${TinyXML_LIBRARIES})
+ament_target_dependencies(${PROJECT_NAME}_parser ${TinyXML_LIBRARIES} "pluginlib" "hardware_interface" "rclcpp")
 
 # Transmission loader library
 add_library(${PROJECT_NAME}_loader
@@ -50,10 +34,12 @@ add_library(${PROJECT_NAME}_loader
   src/transmission_interface_loader.cpp
   src/transmission_loader.cpp
 )
-target_link_libraries(${PROJECT_NAME}_loader
+ament_target_dependencies(${PROJECT_NAME}_loader
   ${PROJECT_NAME}_parser
-  ${catkin_LIBRARIES}
   ${TinyXML_LIBRARIES}
+  "pluginlib"
+  "hardware_interface"
+  "rclcpp"
 )
 
 add_library(${PROJECT_NAME}_loader_plugins
@@ -78,43 +64,11 @@ add_library(${PROJECT_NAME}_loader_plugins
   src/simple_transmission_loader.cpp
   src/velocity_joint_interface_provider.cpp
 )
-target_link_libraries(${PROJECT_NAME}_loader_plugins ${PROJECT_NAME}_loader)
-
-
-#############
-## Testing ##
-#############
-
-if(CATKIN_ENABLE_TESTING)
-  find_package(resource_retriever REQUIRED)
-  include_directories(${resource_retriever_INCLUDE_DIRS})
-
-  catkin_add_gtest(simple_transmission_test                       test/simple_transmission_test.cpp)
-
-  catkin_add_gtest(differential_transmission_test                 test/differential_transmission_test.cpp)
-
-  catkin_add_gtest(four_bar_linkage_transmission_test             test/four_bar_linkage_transmission_test.cpp)
-
-  catkin_add_gtest(transmission_interface_test                    test/transmission_interface_test.cpp)
-  target_link_libraries(transmission_interface_test               ${catkin_LIBRARIES})
-
-  catkin_add_gtest(transmission_parser_test                       test/transmission_parser_test.cpp)
-  target_link_libraries(transmission_parser_test                  ${PROJECT_NAME}_parser ${resource_retriever_LIBRARIES})
-
-  catkin_add_gtest(simple_transmission_loader_test                test/simple_transmission_loader_test.cpp)
-  target_link_libraries(simple_transmission_loader_test           ${PROJECT_NAME}_parser ${resource_retriever_LIBRARIES})
-
-  catkin_add_gtest(differential_transmission_loader_test          test/differential_transmission_loader_test.cpp)
-  target_link_libraries(differential_transmission_loader_test     ${PROJECT_NAME}_parser ${resource_retriever_LIBRARIES})
-
-  catkin_add_gtest(four_bar_linkage_transmission_loader_test      test/four_bar_linkage_transmission_loader_test.cpp)
-  target_link_libraries(four_bar_linkage_transmission_loader_test ${PROJECT_NAME}_parser ${resource_retriever_LIBRARIES})
-
-  catkin_add_gtest(transmission_interface_loader_test             test/transmission_interface_loader_test.cpp)
-  target_link_libraries(transmission_interface_loader_test        transmission_interface_loader
-                                                                  ${resource_retriever_LIBRARIES})
-endif()
-
+ament_target_dependencies(${PROJECT_NAME}_loader_plugins ${PROJECT_NAME}_loader)
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME}_parser ${PROJECT_NAME}_loader ${PROJECT_NAME}_loader_plugins)
+ament_export_dependencies(hardware_interface pluginlib rclcpp)
+ament_package()
 
 #############
 ## Install ##
@@ -122,19 +76,53 @@ endif()
 
 # Install headers
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  DESTINATION include/${PROJECT_NAME}
 )
 
 # Install targets
 install(TARGETS ${PROJECT_NAME}_loader
                 ${PROJECT_NAME}_loader_plugins
                 ${PROJECT_NAME}_parser
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 # Install plugins
 install(FILES ros_control_plugins.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  DESTINATION share/${PROJECT_NAME}
 )
+
+#############
+## Testing ##
+#############
+
+if(BUILD_TESTING)
+  find_package(resource_retriever REQUIRED)
+  include_directories(${resource_retriever_INCLUDE_DIRS})
+  target_link_libraries(transmission_interface_test               ${catkin_LIBRARIES})
+  target_link_libraries(transmission_parser_test                  ${PROJECT_NAME}_parser ${resource_retriever_LIBRARIES})
+  target_link_libraries(simple_transmission_loader_test           ${PROJECT_NAME}_parser ${resource_retriever_LIBRARIES})
+  target_link_libraries(differential_transmission_loader_test     ${PROJECT_NAME}_parser ${resource_retriever_LIBRARIES})
+  target_link_libraries(four_bar_linkage_transmission_loader_test ${PROJECT_NAME}_parser ${resource_retriever_LIBRARIES})
+  target_link_libraries(transmission_interface_loader_test        transmission_interface_loader
+                                                                  ${resource_retriever_LIBRARIES})
+
+  ament_add_gtest(simple_transmission_test                       test/simple_transmission_test.cpp)
+
+  ament_add_gtest(differential_transmission_test                 test/differential_transmission_test.cpp)
+
+  ament_add_gtest(four_bar_linkage_transmission_test             test/four_bar_linkage_transmission_test.cpp)
+
+  ament_add_gtest(transmission_interface_test                    test/transmission_interface_test.cpp)
+
+  ament_add_gtest(transmission_parser_test                       test/transmission_parser_test.cpp)
+
+  ament_add_gtest(simple_transmission_loader_test                test/simple_transmission_loader_test.cpp)
+
+  ament_add_gtest(differential_transmission_loader_test          test/differential_transmission_loader_test.cpp)
+
+  ament_add_gtest(four_bar_linkage_transmission_loader_test      test/four_bar_linkage_transmission_loader_test.cpp)
+
+  ament_add_gtest(transmission_interface_loader_test             test/transmission_interface_loader_test.cpp)
+endif()

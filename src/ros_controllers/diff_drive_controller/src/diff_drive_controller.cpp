@@ -58,7 +58,7 @@ static bool hasCollisionGeometry(const urdf::LinkConstSharedPtr& link)
 {
   if (!link)
   {
-    ROS_ERROR("Link pointer is null.");
+    RCLCPP_ERROR(rclcpp::get_logger("DiffDriveController"), "Link pointer is null.");
     return false;
   }
 
@@ -163,8 +163,8 @@ namespace diff_drive_controller{
   }
 
   bool DiffDriveController::init(hardware_interface::VelocityJointInterface* hw,
-            ros::NodeHandle& root_nh,
-            ros::NodeHandle &controller_nh)
+            rclcpp::Node& root_nh,
+            rclcpp::Node &controller_nh)
   {
     const std::string complete_ns = controller_nh.getNamespace();
     std::size_t id = complete_ns.find_last_of("/");
@@ -198,7 +198,7 @@ namespace diff_drive_controller{
     controller_nh.param("publish_rate", publish_rate, 50.0);
     ROS_INFO_STREAM_NAMED(name_, "Controller state will be published at "
                           << publish_rate << "Hz.");
-    publish_period_ = ros::Duration(1.0 / publish_rate);
+    publish_period_ = rclcpp::Duration(1.0 / publish_rate);
 
     controller_nh.param("open_loop", open_loop_, open_loop_);
 
@@ -305,13 +305,13 @@ namespace diff_drive_controller{
 
     if (publish_cmd_)
     {
-      cmd_vel_pub_.reset(new realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped>(controller_nh, "cmd_vel_out", 100));
+      cmd_vel_pub_.reset(new realtime_tools::RealtimePublisher<geometry_msgs::msg::TwistStamped>(controller_nh, "cmd_vel_out", 100));
     }
 
     // Wheel joint controller state:
     if (publish_wheel_joint_controller_state_)
     {
-      controller_state_pub_.reset(new realtime_tools::RealtimePublisher<control_msgs::JointTrajectoryControllerState>(controller_nh, "wheel_joint_controller_state", 100));
+      controller_state_pub_.reset(new realtime_tools::RealtimePublisher<control_msgs::msg::JointTrajectoryControllerState>(controller_nh, "wheel_joint_controller_state", 100));
 
       const size_t num_wheels = wheel_joints_size_ * 2;
 
@@ -386,7 +386,7 @@ namespace diff_drive_controller{
     return true;
   }
 
-  void DiffDriveController::update(const ros::Time& time, const ros::Duration& period)
+  void DiffDriveController::update(const rclcpp::Time& time, const rclcpp::Duration& period)
   {
     // update parameter from dynamic reconf
     updateDynamicParams();
@@ -429,7 +429,7 @@ namespace diff_drive_controller{
     {
       last_state_publish_time_ += publish_period_;
       // Compute and store orientation info
-      const geometry_msgs::Quaternion orientation(
+      const geometry_msgs::msg::Quaternion orientation(
             tf::createQuaternionMsgFromYaw(odometry_.getHeading()));
 
       // Populate odom message and publish
@@ -447,7 +447,7 @@ namespace diff_drive_controller{
       // Publish tf /odom frame
       if (enable_odom_tf_ && tf_odom_pub_->trylock())
       {
-        geometry_msgs::TransformStamped& odom_frame = tf_odom_pub_->msg_.transforms[0];
+        geometry_msgs::msg::TransformStamped& odom_frame = tf_odom_pub_->msg_.transforms[0];
         odom_frame.header.stamp = time;
         odom_frame.transform.translation.x = odometry_.getX();
         odom_frame.transform.translation.y = odometry_.getY();
@@ -501,7 +501,7 @@ namespace diff_drive_controller{
     time_previous_ = time;
   }
 
-  void DiffDriveController::starting(const ros::Time& time)
+  void DiffDriveController::starting(const rclcpp::Time& time)
   {
     brake();
 
@@ -512,7 +512,7 @@ namespace diff_drive_controller{
     odometry_.init(time);
   }
 
-  void DiffDriveController::stopping(const ros::Time& /*time*/)
+  void DiffDriveController::stopping(const rclcpp::Time& /*time*/)
   {
     brake();
   }
@@ -527,7 +527,7 @@ namespace diff_drive_controller{
     }
   }
 
-  void DiffDriveController::cmdVelCallback(const geometry_msgs::Twist& command)
+  void DiffDriveController::cmdVelCallback(const geometry_msgs::msg::Twist& command)
   {
     if (isRunning())
     {
@@ -548,7 +548,7 @@ namespace diff_drive_controller{
 
       command_struct_.ang   = command.angular.z;
       command_struct_.lin   = command.linear.x;
-      command_struct_.stamp = ros::Time::now();
+      command_struct_.stamp = rclcpp::Time::now();
       command_.writeFromNonRT (command_struct_);
       ROS_DEBUG_STREAM_NAMED(name_,
                              "Added values to command. "
@@ -558,11 +558,11 @@ namespace diff_drive_controller{
     }
     else
     {
-      ROS_ERROR_NAMED(name_, "Can't accept new commands. Controller is not running.");
+      RCLCPP_ERROR(rclcpp::get_logger(name_), "Can't accept new commands. Controller is not running.");
     }
   }
 
-  bool DiffDriveController::getWheelNames(ros::NodeHandle& controller_nh,
+  bool DiffDriveController::getWheelNames(rclcpp::Node& controller_nh,
                               const std::string& wheel_param,
                               std::vector<std::string>& wheel_names)
   {
@@ -615,7 +615,7 @@ namespace diff_drive_controller{
       return true;
   }
 
-  bool DiffDriveController::setOdomParamsFromUrdf(ros::NodeHandle& root_nh,
+  bool DiffDriveController::setOdomParamsFromUrdf(rclcpp::Node& root_nh,
                              const std::string& left_wheel_name,
                              const std::string& right_wheel_name,
                              bool lookup_wheel_separation,
@@ -633,7 +633,7 @@ namespace diff_drive_controller{
     std::string robot_model_str="";
     if (!res || !root_nh.getParam(model_param_name,robot_model_str))
     {
-      ROS_ERROR_NAMED(name_, "Robot description couldn't be retrieved from param server.");
+      RCLCPP_ERROR(rclcpp::get_logger(name_), "Robot description couldn't be retrieved from param server.");
       return false;
     }
 
@@ -684,7 +684,7 @@ namespace diff_drive_controller{
     return true;
   }
 
-  void DiffDriveController::setOdomPubFields(ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh)
+  void DiffDriveController::setOdomPubFields(rclcpp::Node& root_nh, rclcpp::Node& controller_nh)
   {
     // Get and check params for covariances
     XmlRpc::XmlRpcValue pose_cov_list;
@@ -702,7 +702,7 @@ namespace diff_drive_controller{
       ROS_ASSERT(twist_cov_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 
     // Setup odometry realtime publisher + odom message constant fields
-    odom_pub_.reset(new realtime_tools::RealtimePublisher<nav_msgs::Odometry>(controller_nh, "odom", 100));
+    odom_pub_.reset(new realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry>(controller_nh, "odom", 100));
     odom_pub_->msg_.header.frame_id = odom_frame_id_;
     odom_pub_->msg_.child_frame_id = base_frame_id_;
     odom_pub_->msg_.pose.pose.position.z = 0;
@@ -724,7 +724,7 @@ namespace diff_drive_controller{
         0., 0., 0., static_cast<double>(twist_cov_list[3]), 0., 0.,
         0., 0., 0., 0., static_cast<double>(twist_cov_list[4]), 0.,
         0., 0., 0., 0., 0., static_cast<double>(twist_cov_list[5]) };
-    tf_odom_pub_.reset(new realtime_tools::RealtimePublisher<tf::tfMessage>(root_nh, "/tf", 100));
+    tf_odom_pub_.reset(new realtime_tools::RealtimePublisher<tf::msg::tfMessage>(root_nh, "/tf", 100));
     tf_odom_pub_->msg_.transforms.resize(1);
     tf_odom_pub_->msg_.transforms[0].transform.translation.z = 0.0;
     tf_odom_pub_->msg_.transforms[0].child_frame_id = base_frame_id_;
@@ -756,11 +756,11 @@ namespace diff_drive_controller{
     right_wheel_radius_multiplier_ = dynamic_params.right_wheel_radius_multiplier;
     wheel_separation_multiplier_   = dynamic_params.wheel_separation_multiplier;
 
-    publish_period_ = ros::Duration(1.0 / dynamic_params.publish_rate);
+    publish_period_ = rclcpp::Duration(1.0 / dynamic_params.publish_rate);
     enable_odom_tf_ = dynamic_params.enable_odom_tf;
   }
 
-  void DiffDriveController::publishWheelData(const ros::Time& time, const ros::Duration& period, Commands& curr_cmd,
+  void DiffDriveController::publishWheelData(const rclcpp::Time& time, const rclcpp::Duration& period, Commands& curr_cmd,
           double wheel_separation, double left_wheel_radius, double right_wheel_radius)
   {
     if (publish_wheel_joint_controller_state_ && controller_state_pub_->trylock())

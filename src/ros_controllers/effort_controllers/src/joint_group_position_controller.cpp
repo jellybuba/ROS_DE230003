@@ -53,12 +53,12 @@ namespace effort_controllers
  * \param joints List of names of the joints to control.
  *
  * Subscribes to:
- * - \b command (std_msgs::Float64MultiArray) : The joint efforts to apply
+ * - \b command (std_msgs::msg::Float64MultiArray) : The joint efforts to apply
  */
   JointGroupPositionController::JointGroupPositionController() {}
   JointGroupPositionController::~JointGroupPositionController() {sub_command_.shutdown();}
 
-  bool JointGroupPositionController::init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle &n)
+  bool JointGroupPositionController::init(hardware_interface::EffortJointInterface* hw, rclcpp::Node &n)
   {
     // List of controlled joints
     std::string param_name = "joints";
@@ -78,7 +78,7 @@ namespace effort_controllers
     urdf::Model urdf;
     if (!urdf.initParam("robot_description"))
     {
-      ROS_ERROR("Failed to parse urdf file");
+      RCLCPP_ERROR(rclcpp::get_logger("EffortControllers"), "Failed to parse urdf file");
       return false;
     }
 
@@ -101,13 +101,13 @@ namespace effort_controllers
       urdf::JointConstSharedPtr joint_urdf = urdf.getJoint(joint_name);
       if (!joint_urdf)
       {
-        ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
+        RCLCPP_ERROR(rclcpp::get_logger("EffortControllers"), "Could not find joint '%s' in urdf", joint_name.c_str());
         return false;
       }
       joint_urdfs_.push_back(joint_urdf);
 
       // Load PID Controller using gains set on parameter server
-      if (!pid_controllers_[i].init(ros::NodeHandle(n, joint_name + "/pid")))
+      if (!pid_controllers_[i].init(rclcpp::Node(n, joint_name + "/pid")))
       {
         ROS_ERROR_STREAM("Failed to load PID parameters from " << joint_name + "/pid");
         return false;
@@ -116,11 +116,11 @@ namespace effort_controllers
 
     commands_buffer_.writeFromNonRT(std::vector<double>(n_joints_, 0.0));
 
-    sub_command_ = n.subscribe<std_msgs::Float64MultiArray>("command", 1, &JointGroupPositionController::commandCB, this);
+    sub_command_ = n.subscribe<std_msgs::msg::Float64MultiArray>("command", 1, &JointGroupPositionController::commandCB, this);
     return true;
   }
 
-  void JointGroupPositionController::update(const ros::Time& time, const ros::Duration& period)
+  void JointGroupPositionController::update(const rclcpp::Time& time, const rclcpp::Duration& period)
   {
     std::vector<double> & commands = *commands_buffer_.readFromRT();
     for(unsigned int i=0; i<n_joints_; i++)
@@ -162,7 +162,7 @@ namespace effort_controllers
     }
   }
 
-  void JointGroupPositionController::commandCB(const std_msgs::Float64MultiArrayConstPtr& msg)
+  void JointGroupPositionController::commandCB(const std_msgs::msg::Float64MultiArray::ConstSharedPtr& msg)
   {
     if(msg->data.size()!=n_joints_)
     {

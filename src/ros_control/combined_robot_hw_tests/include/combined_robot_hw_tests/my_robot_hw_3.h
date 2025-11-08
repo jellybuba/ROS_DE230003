@@ -38,9 +38,9 @@ namespace combined_robot_hw_tests
 class MyRobotHW3 : public hardware_interface::RobotHW
 {
 public:
-  bool init(ros::NodeHandle& root_nh, ros::NodeHandle &robot_hw_nh) override;
-  void read(const ros::Time& time, const ros::Duration& period) override;
-  void write(const ros::Time& time, const ros::Duration& period) override;
+  bool init(rclcpp::Node& root_nh, rclcpp::Node &robot_hw_nh) override;
+  void read(const rclcpp::Time& time, const rclcpp::Duration& period) override;
+  void write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
 protected:
 

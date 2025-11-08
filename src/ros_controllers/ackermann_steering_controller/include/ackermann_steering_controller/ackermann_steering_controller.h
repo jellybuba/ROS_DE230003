@@ -45,10 +45,10 @@
 #include <diff_drive_controller/speed_limiter.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <memory>
-#include <nav_msgs/Odometry.h>
+#include <nav_msgs/msg/odometry.hpp>
 #include <realtime_tools/realtime_buffer.h>
 #include <realtime_tools/realtime_publisher.h>
-#include <tf/tfMessage.h>
+#include <tf/msg/tf_message.hpp>
 
 namespace ackermann_steering_controller{
 
@@ -77,34 +77,34 @@ namespace ackermann_steering_controller{
      */
     bool init(//hardware_interface::VelocityJointInterface *hw,
               hardware_interface::RobotHW* robot_hw,
-              ros::NodeHandle& root_nh,
-              ros::NodeHandle &controller_nh);
+              rclcpp::Node& root_nh,
+              rclcpp::Node &controller_nh);
 
     /**
      * \brief Updates controller, i.e. computes the odometry and sets the new velocity commands
      * \param time   Current time
      * \param period Time since the last called to update
      */
-    void update(const ros::Time& time, const ros::Duration& period);
+    void update(const rclcpp::Time& time, const rclcpp::Duration& period);
 
     /**
      * \brief Starts controller
      * \param time Current time
      */
-    void starting(const ros::Time& time);
+    void starting(const rclcpp::Time& time);
 
     /**
      * \brief Stops controller
      * \param time Current time
      */
-    void stopping(const ros::Time& /*time*/);
+    void stopping(const rclcpp::Time& /*time*/);
 
   private:
     std::string name_;
 
     /// Odometry related:
-    ros::Duration publish_period_;
-    ros::Time last_state_publish_time_;
+    rclcpp::Duration publish_period_;
+    rclcpp::Time last_state_publish_time_;
     bool open_loop_;
 
     /// Hardware handles:
@@ -116,7 +116,7 @@ namespace ackermann_steering_controller{
     {
       double lin;
       double ang;
-      ros::Time stamp;
+      rclcpp::Time stamp;
 
       Commands() : lin(0.0), ang(0.0), stamp(0.0) {}
     };
@@ -125,8 +125,8 @@ namespace ackermann_steering_controller{
     ros::Subscriber sub_command_;
 
     /// Odometry related:
-    std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::Odometry> > odom_pub_;
-    std::shared_ptr<realtime_tools::RealtimePublisher<tf::tfMessage> > tf_odom_pub_;
+    std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry> > odom_pub_;
+    std::shared_ptr<realtime_tools::RealtimePublisher<tf::msg::tfMessage> > tf_odom_pub_;
     Odometry odometry_;
 
     /// Wheel separation, wrt the midpoint of the wheel width:
@@ -177,7 +177,7 @@ namespace ackermann_steering_controller{
      * \brief Velocity command callback
      * \param command Velocity command message (twist)
      */
-    void cmdVelCallback(const geometry_msgs::Twist& command);
+    void cmdVelCallback(const geometry_msgs::msg::Twist& command);
 
     /**
      * \brief Sets odometry parameters from the URDF, i.e. the wheel radius and separation
@@ -185,7 +185,7 @@ namespace ackermann_steering_controller{
      * \param left_wheel_name Name of the left wheel joint
      * \param right_wheel_name Name of the right wheel joint
      */
-    bool setOdomParamsFromUrdf(ros::NodeHandle& root_nh,
+    bool setOdomParamsFromUrdf(rclcpp::Node& root_nh,
                                const std::string rear_wheel_name,
                                const std::string front_steer_name,
                                bool lookup_wheel_separation_h,
@@ -196,7 +196,7 @@ namespace ackermann_steering_controller{
      * \param root_nh Root node handle
      * \param controller_nh Node handle inside the controller namespace
      */
-    void setOdomPubFields(ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
+    void setOdomPubFields(rclcpp::Node& root_nh, rclcpp::Node& controller_nh);
 
   };
 

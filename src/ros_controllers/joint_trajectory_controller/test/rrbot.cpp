@@ -28,10 +28,10 @@
 // NOTE: The contents of this file have been taken largely from the ros_control wiki tutorials
 
 // ROS
-#include <ros/ros.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/Empty.h>
+#include "rclcpp/rclcpp.hpp"
+#include <std_msgs/msg/float64.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/empty.hpp>
 
 // ros_control
 #include <controller_manager/controller_manager.h>
@@ -81,7 +81,7 @@ public:
 
     registerInterface(&jnt_vel_interface_);
 
-    ros::NodeHandle nh{};
+    rclcpp::Node nh{};
 
     // Smoothing subscriber
     smoothing_sub_ = nh.subscribe("smoothing", 1, &RRbot::smoothingCB, this);
@@ -96,11 +96,11 @@ public:
     upper_bound_.initRT(std::numeric_limits<double>::infinity());
 
     // Notification publisher: notify that a parameter has been updated successfully.
-    notify_ready_pub_ = nh.advertise<std_msgs::Empty>("parameter_updated", 1);
+    notify_ready_pub_ = nh.advertise<std_msgs::msg::Empty>("parameter_updated", 1);
   }
 
-  ros::Time getTime() const {return ros::Time::now();}
-  ros::Duration getPeriod() const {return ros::Duration(0.01);}
+  rclcpp::Time getTime() const {return rclcpp::Time::now();}
+  rclcpp::Duration getPeriod() const {return rclcpp::Duration(0.01);}
 
   void read() {}
 
@@ -194,28 +194,28 @@ private:
   std::string next_active_interface_[2];
 
   realtime_tools::RealtimeBuffer<double> smoothing_;
-  void smoothingCB(const std_msgs::Float64& smoothing)
+  void smoothingCB(const std_msgs::msg::Float64& smoothing)
   {
     smoothing_.writeFromNonRT(smoothing.data);
-    std_msgs::Empty msg;
+    std_msgs::msg::Empty msg;
     notify_ready_pub_.publish(msg);
   }
   ros::Subscriber smoothing_sub_;
 
   realtime_tools::RealtimeBuffer<bool> delay_;
-  void delayCB(const std_msgs::Bool& delay)
+  void delayCB(const std_msgs::msg::Bool& delay)
   {
     delay_.writeFromNonRT(delay.data);
-    std_msgs::Empty msg;
+    std_msgs::msg::Empty msg;
     notify_ready_pub_.publish(msg);
   }
   ros::Subscriber delay_sub_;
 
   realtime_tools::RealtimeBuffer<double> upper_bound_;
-  void upper_boundCB(const std_msgs::Float64& upper_bound)
+  void upper_boundCB(const std_msgs::msg::Float64& upper_bound)
   {
     upper_bound_.writeFromNonRT(upper_bound.data);
-    std_msgs::Empty msg;
+    std_msgs::msg::Empty msg;
     notify_ready_pub_.publish(msg);
   }
   ros::Subscriber upper_bound_sub_;
@@ -225,16 +225,16 @@ private:
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "rrbot");
-  ros::NodeHandle nh;
+  rclcpp::init(argc, argv);
+  auto nh = rclcpp::Node::make_shared("rrbot");
 
   RRbot robot;
   controller_manager::ControllerManager cm(&robot, nh);
 
-  ros::Rate rate(1.0 / robot.getPeriod().toSec());
+  rclcpp::Rate rate(1.0 / robot.getPeriod().toSec());
   ros::AsyncSpinner spinner(1);
   spinner.start();
-  while (ros::ok())
+  while (rclcpp::ok())
   {
     robot.read();
     cm.update(robot.getTime(), robot.getPeriod());

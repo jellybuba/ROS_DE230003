@@ -59,7 +59,7 @@ static bool isCylinder(const urdf::LinkConstSharedPtr& link)
 {
   if (!link)
   {
-    ROS_ERROR("Link pointer is null.");
+    RCLCPP_ERROR(rclcpp::get_logger("AckermannSteeringController"), "Link pointer is null.");
     return false;
   }
 
@@ -123,8 +123,8 @@ namespace ackermann_steering_controller{
   }
 
   bool AckermannSteeringController::init(hardware_interface::RobotHW* robot_hw,
-                                   ros::NodeHandle& root_nh,
-                                   ros::NodeHandle& controller_nh)
+                                   rclcpp::Node& root_nh,
+                                   rclcpp::Node& controller_nh)
   {
     typedef hardware_interface::VelocityJointInterface VelIface;
     typedef hardware_interface::PositionJointInterface PosIface;
@@ -153,7 +153,7 @@ namespace ackermann_steering_controller{
     controller_nh.param("publish_rate", publish_rate, 50.0);
     ROS_INFO_STREAM_NAMED(name_, "Controller state will be published at "
                           << publish_rate << "Hz.");
-    publish_period_ = ros::Duration(1.0 / publish_rate);
+    publish_period_ = rclcpp::Duration(1.0 / publish_rate);
 
     controller_nh.param("open_loop", open_loop_, open_loop_);
 
@@ -256,7 +256,7 @@ namespace ackermann_steering_controller{
     return true;
   }
 
-  void AckermannSteeringController::update(const ros::Time& time, const ros::Duration& period)
+  void AckermannSteeringController::update(const rclcpp::Time& time, const rclcpp::Duration& period)
   {
     // COMPUTE AND PUBLISH ODOMETRY
     if (open_loop_)
@@ -281,7 +281,7 @@ namespace ackermann_steering_controller{
     {
       last_state_publish_time_ += publish_period_;
       // Compute and store orientation info
-      const geometry_msgs::Quaternion orientation(
+      const geometry_msgs::msg::Quaternion orientation(
             tf::createQuaternionMsgFromYaw(odometry_.getHeading()));
 
       // Populate odom message and publish
@@ -299,7 +299,7 @@ namespace ackermann_steering_controller{
       // Publish tf /odom frame
       if (enable_odom_tf_ && tf_odom_pub_->trylock())
       {
-        geometry_msgs::TransformStamped& odom_frame = tf_odom_pub_->msg_.transforms[0];
+        geometry_msgs::msg::TransformStamped& odom_frame = tf_odom_pub_->msg_.transforms[0];
         odom_frame.header.stamp = time;
         odom_frame.transform.translation.x = odometry_.getX();
         odom_frame.transform.translation.y = odometry_.getY();
@@ -336,7 +336,7 @@ namespace ackermann_steering_controller{
 
   }
 
-  void AckermannSteeringController::starting(const ros::Time& time)
+  void AckermannSteeringController::starting(const rclcpp::Time& time)
   {
     brake();
 
@@ -346,7 +346,7 @@ namespace ackermann_steering_controller{
     odometry_.init(time);
   }
 
-  void AckermannSteeringController::stopping(const ros::Time& /*time*/)
+  void AckermannSteeringController::stopping(const rclcpp::Time& /*time*/)
   {
     brake();
   }
@@ -360,7 +360,7 @@ namespace ackermann_steering_controller{
     front_steer_joint_.setCommand(wheel_vel);
   }
 
-  void AckermannSteeringController::cmdVelCallback(const geometry_msgs::Twist& command)
+  void AckermannSteeringController::cmdVelCallback(const geometry_msgs::msg::Twist& command)
   {
     if (isRunning())
     {
@@ -375,7 +375,7 @@ namespace ackermann_steering_controller{
 
       command_struct_.ang   = command.angular.z;
       command_struct_.lin   = command.linear.x;
-      command_struct_.stamp = ros::Time::now();
+      command_struct_.stamp = rclcpp::Time::now();
       command_.writeFromNonRT (command_struct_);
       ROS_DEBUG_STREAM_NAMED(name_,
                              "Added values to command. "
@@ -385,12 +385,12 @@ namespace ackermann_steering_controller{
     }
     else
     {
-      ROS_ERROR_NAMED(name_, "Can't accept new commands. Controller is not running.");
+      RCLCPP_ERROR(rclcpp::get_logger(name_), "Can't accept new commands. Controller is not running.");
     }
   }
 
 
-  bool AckermannSteeringController::setOdomParamsFromUrdf(ros::NodeHandle& root_nh,
+  bool AckermannSteeringController::setOdomParamsFromUrdf(rclcpp::Node& root_nh,
                              const std::string rear_wheel_name,
                              const std::string front_steer_name,
                              bool lookup_wheel_separation_h,
@@ -408,7 +408,7 @@ namespace ackermann_steering_controller{
     std::string robot_model_str="";
     if (!res || !root_nh.getParam(model_param_name,robot_model_str))
     {
-      ROS_ERROR_NAMED(name_, "Robot descripion couldn't be retrieved from param server.");
+      RCLCPP_ERROR(rclcpp::get_logger(name_), "Robot descripion couldn't be retrieved from param server.");
       return false;
     }
 
@@ -465,7 +465,7 @@ namespace ackermann_steering_controller{
     return true;
   }
 
-  void AckermannSteeringController::setOdomPubFields(ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh)
+  void AckermannSteeringController::setOdomPubFields(rclcpp::Node& root_nh, rclcpp::Node& controller_nh)
   {
     // Get and check params for covariances
     XmlRpc::XmlRpcValue pose_cov_list;
@@ -483,7 +483,7 @@ namespace ackermann_steering_controller{
       ROS_ASSERT(twist_cov_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 
     // Setup odometry realtime publisher + odom message constant fields
-    odom_pub_.reset(new realtime_tools::RealtimePublisher<nav_msgs::Odometry>(controller_nh, "odom", 100));
+    odom_pub_.reset(new realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry>(controller_nh, "odom", 100));
     odom_pub_->msg_.header.frame_id = odom_frame_id_;
     odom_pub_->msg_.child_frame_id = base_frame_id_;
     odom_pub_->msg_.pose.pose.position.z = 0;
@@ -505,7 +505,7 @@ namespace ackermann_steering_controller{
         0., 0., 0., static_cast<double>(twist_cov_list[3]), 0., 0.,
         0., 0., 0., 0., static_cast<double>(twist_cov_list[4]), 0.,
         0., 0., 0., 0., 0., static_cast<double>(twist_cov_list[5]) };
-    tf_odom_pub_.reset(new realtime_tools::RealtimePublisher<tf::tfMessage>(root_nh, "/tf", 100));
+    tf_odom_pub_.reset(new realtime_tools::RealtimePublisher<tf::msg::tfMessage>(root_nh, "/tf", 100));
     tf_odom_pub_->msg_.transforms.resize(1);
     tf_odom_pub_->msg_.transforms[0].transform.translation.z = 0.0;
     tf_odom_pub_->msg_.transforms[0].child_frame_id = base_frame_id_;

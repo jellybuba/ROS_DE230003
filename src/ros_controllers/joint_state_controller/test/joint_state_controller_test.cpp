@@ -31,8 +31,8 @@
 
 #include <gtest/gtest.h>
 
-#include <ros/ros.h>
-#include <sensor_msgs/JointState.h>
+#include "rclcpp/rclcpp.hpp"
+#include <sensor_msgs/msg/joint_state.hpp>
 
 #include <hardware_interface/joint_state_interface.h>
 #include <joint_state_controller/joint_state_controller.h>
@@ -43,7 +43,7 @@ class JointStateControllerTest : public ::testing::Test
 {
 public:
   JointStateControllerTest()
-    : root_nh_(ros::NodeHandle()),
+    : root_nh_(rclcpp::Node()),
       controller_nh_("test_ok/joint_state_controller")
   {
     // Intialize raw joint state data
@@ -60,15 +60,15 @@ public:
     js_iface_.registerHandle(state_handle_2);
 
     // Initialize ROS interfaces
-    sub_ = root_nh_.subscribe<sensor_msgs::JointState>("joint_states",
+    sub_ = root_nh_.subscribe<sensor_msgs::msg::JointState>("joint_states",
                                                        1,
                                                        &JointStateControllerTest::jointStateCb,
                                                        this);
   }
 
 protected:
-  ros::NodeHandle root_nh_;
-  ros::NodeHandle controller_nh_;
+  rclcpp::Node root_nh_;
+  rclcpp::Node controller_nh_;
   ros::Subscriber sub_;
   hardware_interface::JointStateInterface js_iface_;
 
@@ -82,9 +82,9 @@ protected:
   int rec_msgs_;
 
   // Last received joint state message
-  sensor_msgs::JointState last_msg_;
+  sensor_msgs::msg::JointState last_msg_;
 
-  void jointStateCb(const sensor_msgs::JointStateConstPtr& msg)
+  void jointStateCb(const sensor_msgs::msg::JointState::ConstSharedPtr& msg)
   {
     last_msg_ = *msg;
     ++rec_msgs_;
@@ -100,7 +100,7 @@ TEST_F(JointStateControllerTest, initOk)
 TEST_F(JointStateControllerTest, initKo)
 {
   JointStateController jsc;
-  ros::NodeHandle bad_controller_nh("no_period_namespace");
+  rclcpp::Node bad_controller_nh("no_period_namespace");
   EXPECT_FALSE(jsc.init(&js_iface_, root_nh_, bad_controller_nh));
 }
 
@@ -115,24 +115,24 @@ TEST_F(JointStateControllerTest, publishOk)
   rec_msgs_ = 0;
   const int test_duration = 1; // seconds
   const int loop_freq = 2 * pub_rate; // faster than controller publish rate
-  ros::Rate loop_rate(static_cast<double>(loop_freq));
-  const ros::Time start_time = ros::Time::now();
+  rclcpp::Rate loop_rate(static_cast<double>(loop_freq));
+  const rclcpp::Time start_time = rclcpp::Time::now();
   jsc.starting(start_time);
 
   while (true)
   {
-    ros::Time now = ros::Time::now();
-    jsc.update(now, ros::Duration()); // NOTE: Second parameter is unused by implementation
-    ros::spinOnce();
+    rclcpp::Time now = rclcpp::Time::now();
+    jsc.update(now, rclcpp::Duration()); // NOTE: Second parameter is unused by implementation
+    rclcpp::spin_some(node);
     if (rec_msgs_ >= test_duration * pub_rate) break; // Objective reached
-    if (now - start_time > ros::Duration(2.0 * test_duration)) break; // Prevents unexpected infinite loops
+    if (now - start_time > rclcpp::Duration(2.0 * test_duration)) break; // Prevents unexpected infinite loops
     loop_rate.sleep();
   }
-  jsc.stopping(ros::Time::now());
+  jsc.stopping(rclcpp::Time::now());
 
   // NOTE: Below we subtract the loop rate because the the published message gets picked up in the
   // next iteration's spinOnce()
-  const ros::Duration real_test_duration = ros::Time::now() - start_time - loop_rate.expectedCycleTime();
+  const rclcpp::Duration real_test_duration = rclcpp::Time::now() - start_time - loop_rate.expectedCycleTime();
   const double real_pub_rate = static_cast<double>(rec_msgs_) / real_test_duration.toSec();
 
   // The publish rate should be close to the nominal value
@@ -142,7 +142,7 @@ TEST_F(JointStateControllerTest, publishOk)
 TEST_F(JointStateControllerTest, publishKo)
 {
   JointStateController jsc;
-  ros::NodeHandle negative_rate_nh("test_ko/joint_state_controller");
+  rclcpp::Node negative_rate_nh("test_ko/joint_state_controller");
   EXPECT_TRUE(jsc.init(&js_iface_, root_nh_, negative_rate_nh));
 
   // Check non-positive publish rate
@@ -151,17 +151,17 @@ TEST_F(JointStateControllerTest, publishKo)
   ASSERT_LE(pub_rate, 0);
 
   rec_msgs_ = 0;
-  const ros::Duration test_duration(1.0);
-  ros::Rate loop_rate(10.0);
-  const ros::Time start_time = ros::Time::now();
-  while(ros::Time::now() - start_time < test_duration)
+  const rclcpp::Duration test_duration(1.0);
+  rclcpp::Rate loop_rate(10.0);
+  const rclcpp::Time start_time = rclcpp::Time::now();
+  while(rclcpp::Time::now() - start_time < test_duration)
   {
-    ros::Time now = ros::Time::now();
-    jsc.update(now, ros::Duration()); // NOTE: Second parameter is unused by implementation
-    ros::spinOnce();
+    rclcpp::Time now = rclcpp::Time::now();
+    jsc.update(now, rclcpp::Duration()); // NOTE: Second parameter is unused by implementation
+    rclcpp::spin_some(node);
     loop_rate.sleep();
   }
-  jsc.stopping(ros::Time::now());
+  jsc.stopping(rclcpp::Time::now());
 
   // No messages should have been published
   EXPECT_EQ(rec_msgs_, 0);
@@ -174,16 +174,16 @@ TEST_F(JointStateControllerTest, valuesOk)
 
   int pub_rate;
   ASSERT_TRUE(controller_nh_.getParam("publish_rate", pub_rate));
-  ros::Duration period(1.0 / pub_rate);
-  jsc.starting(ros::Time::now());
+  rclcpp::Duration period(1.0 / pub_rate);
+  jsc.starting(rclcpp::Time::now());
 
   pos_[0] = 1.0; pos_[1] = -1.0;
   vel_[0] = 2.0; vel_[1] = -2.0;
   eff_[0] = 3.0; eff_[1] = -3.0;
 
   period.sleep();
-  jsc.update(ros::Time::now(), ros::Duration());
-  period.sleep(); ros::spinOnce(); // To trigger callback
+  jsc.update(rclcpp::Time::now(), rclcpp::Duration());
+  period.sleep(); rclcpp::spin_some(node); // To trigger callback
 
   // Check payload sizes
   ASSERT_EQ(names_.size(),         last_msg_.name.size());
@@ -203,13 +203,13 @@ TEST_F(JointStateControllerTest, valuesOk)
     EXPECT_EQ(vel_[raw_id], last_msg_.velocity[msg_id]);
     EXPECT_EQ(eff_[raw_id], last_msg_.effort[msg_id]);
   }
-  jsc.stopping(ros::Time::now());
+  jsc.stopping(rclcpp::Time::now());
 }
 
 TEST_F(JointStateControllerTest, extraJointsOk)
 {
   JointStateController jsc;
-  ros::NodeHandle extra_joints_nh("test_extra_joints_ok/joint_state_controller");
+  rclcpp::Node extra_joints_nh("test_extra_joints_ok/joint_state_controller");
   EXPECT_TRUE(jsc.init(&js_iface_, root_nh_, extra_joints_nh));
 
   XmlRpc::XmlRpcValue extra_joints;
@@ -218,16 +218,16 @@ TEST_F(JointStateControllerTest, extraJointsOk)
 
   int pub_rate;
   ASSERT_TRUE(controller_nh_.getParam("publish_rate", pub_rate));
-  ros::Duration period(1.0 / pub_rate);
-  jsc.starting(ros::Time::now());
+  rclcpp::Duration period(1.0 / pub_rate);
+  jsc.starting(rclcpp::Time::now());
 
   pos_[0] = 1.0; pos_[1] = -1.0;
   vel_[0] = 2.0; vel_[1] = -2.0;
   eff_[0] = 3.0; eff_[1] = -3.0;
 
   period.sleep();
-  jsc.update(ros::Time::now(), ros::Duration());
-  period.sleep(); ros::spinOnce(); // To trigger callback
+  jsc.update(rclcpp::Time::now(), rclcpp::Duration());
+  period.sleep(); rclcpp::spin_some(node); // To trigger callback
 
   // Check payload sizes
   ASSERT_EQ(num_joints, last_msg_.name.size());
@@ -274,27 +274,27 @@ TEST_F(JointStateControllerTest, extraJointsOk)
     EXPECT_EQ(0.0, last_msg_.effort[msg_id]);
   }
 
-  jsc.stopping(ros::Time::now());
+  jsc.stopping(rclcpp::Time::now());
 }
 
 TEST_F(JointStateControllerTest, extraJointsKo)
 {
   JointStateController jsc;
-  ros::NodeHandle extra_joints_nh("test_extra_joints_ko/joint_state_controller");
+  rclcpp::Node extra_joints_nh("test_extra_joints_ko/joint_state_controller");
   EXPECT_TRUE(jsc.init(&js_iface_, root_nh_, extra_joints_nh));
 
   int pub_rate;
   ASSERT_TRUE(controller_nh_.getParam("publish_rate", pub_rate));
-  ros::Duration period(1.0 / pub_rate);
-  jsc.starting(ros::Time::now());
+  rclcpp::Duration period(1.0 / pub_rate);
+  jsc.starting(rclcpp::Time::now());
 
   pos_[0] = 1.0; pos_[1] = -1.0;
   vel_[0] = 2.0; vel_[1] = -2.0;
   eff_[0] = 3.0; eff_[1] = -3.0;
 
   period.sleep();
-  jsc.update(ros::Time::now(), ros::Duration());
-  period.sleep(); ros::spinOnce(); // To trigger callback
+  jsc.update(rclcpp::Time::now(), rclcpp::Duration());
+  period.sleep(); rclcpp::spin_some(node); // To trigger callback
 
   // Check payload sizes
   ASSERT_EQ(names_.size(),         last_msg_.name.size());
@@ -314,13 +314,14 @@ TEST_F(JointStateControllerTest, extraJointsKo)
     EXPECT_EQ(vel_[raw_id], last_msg_.velocity[msg_id]);
     EXPECT_EQ(eff_[raw_id], last_msg_.effort[msg_id]);
   }
-  jsc.stopping(ros::Time::now());
+  jsc.stopping(rclcpp::Time::now());
 }
 
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "joint_state_controller_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("joint_state_controller_test");
 
   int ret = RUN_ALL_TESTS();
   ros::shutdown();

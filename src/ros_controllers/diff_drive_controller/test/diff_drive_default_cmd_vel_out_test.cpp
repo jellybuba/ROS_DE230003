@@ -42,15 +42,15 @@ TEST_F(DiffDriveControllerTest, testDefaultCmdVelOutTopic)
   EXPECT_FALSE(isPublishingCmdVelOut());
 
   // zero everything before test
-  geometry_msgs::Twist cmd_vel;
+  geometry_msgs::msg::Twist cmd_vel;
   cmd_vel.linear.x = 0.0;
   cmd_vel.angular.z = 0.0;
   publish(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
 
   cmd_vel.linear.x = 0.1;
   publish(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
 
   EXPECT_FALSE(isPublishingCmdVelOut());
 }
@@ -58,7 +58,8 @@ TEST_F(DiffDriveControllerTest, testDefaultCmdVelOutTopic)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "diff_drive_default_cmd_vel_out_topic_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("diff_drive_default_cmd_vel_out_topic_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

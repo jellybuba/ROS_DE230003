@@ -53,7 +53,7 @@ namespace position_controllers
  * \param joint Name of the joint to control.
  *
  * Subscribes to:
- * - \b command (std_msgs::Float64) : The joint position to apply
+ * - \b command (std_msgs::msg::Float64) : The joint position to apply
  */
 typedef forward_command_controller::ForwardCommandController<hardware_interface::PositionJointInterface>
         JointPositionController;

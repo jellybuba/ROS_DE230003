@@ -102,7 +102,9 @@ def main():
     else:
         timeout = args.timeout
 
-    rospy.init_node('spawner', anonymous=True)
+    rclpy.init()
+
+    node = rclpy.create_node('spawner', anonymous=True)
 
     if args.shutdown_timeout is not None:
       rospy.logwarn("DEPRECATION warning: --shutdown-timeout has no effect.")
@@ -149,7 +151,7 @@ def main():
         def wait_for_topic_cb(msg):
             wait_for_topic_result[0] = msg
             rospy.logdebug("Heard from wait-for topic: %s" % str(msg.data))
-        rospy.Subscriber(wait_for_topic, Bool, wait_for_topic_cb)
+        node.create_subscription(Bool, wait_for_topic, wait_for_topic_cb)
         started_waiting = time.time()
 
         # We might not have received any time messages yet

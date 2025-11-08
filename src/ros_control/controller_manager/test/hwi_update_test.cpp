@@ -29,11 +29,11 @@
 
 #include <hardware_interface/robot_hw.h>
 #include <controller_interface/controller_base.h>
-#include <controller_manager_msgs/SwitchController.h>
+#include <controller_manager_msgs/srv/switch_controller.hpp>
 #include <controller_manager/controller_loader_interface.h>
 #include <controller_manager/controller_manager.h>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 #include <gmock/gmock.h>
 
@@ -52,7 +52,7 @@ class RobotHWMock : public hardware_interface::RobotHW
 {
 public:
 
-  MOCK_METHOD2(init, bool(ros::NodeHandle &, ros::NodeHandle &));
+  MOCK_METHOD2(init, bool(rclcpp::Node &, rclcpp::Node &));
   MOCK_CONST_METHOD1(checkForConflict,
                      bool(const std::list<hardware_interface::ControllerInfo> &));
   MOCK_METHOD2(prepareSwitch, bool(const std::list<hardware_interface::ControllerInfo> &,
@@ -61,8 +61,8 @@ public:
                               const std::list<hardware_interface::ControllerInfo> &));
   MOCK_CONST_METHOD0(switchResult, SwitchState(void));
   MOCK_CONST_METHOD1(switchResult, SwitchState(const hardware_interface::ControllerInfo &));
-  MOCK_METHOD2(read, void(const ros::Time &time, const ros::Duration &period));
-  MOCK_METHOD2(write, void(const ros::Time &time, const ros::Duration &period));
+  MOCK_METHOD2(read, void(const rclcpp::Time &time, const rclcpp::Duration &period));
+  MOCK_METHOD2(write, void(const rclcpp::Time &time, const rclcpp::Duration &period));
 };
 
 class ControllerLoaderMock : public controller_manager::ControllerLoaderInterface
@@ -85,13 +85,13 @@ public:
     state_ = ControllerState::INITIALIZED;
   }
 
-  MOCK_METHOD1(starting, void(const ros::Time &));
-  MOCK_METHOD2(update, void(const ros::Time &, const ros::Duration &));
-  MOCK_METHOD1(stopping, void(const ros::Time &));
-  MOCK_METHOD1(waiting, void(const ros::Time &));
-  MOCK_METHOD1(aborting, void(const ros::Time &));
-  MOCK_METHOD4(initRequest, bool(hardware_interface::RobotHW *, ros::NodeHandle &,
-                                 ros::NodeHandle &, ClaimedResources &));
+  MOCK_METHOD1(starting, void(const rclcpp::Time &));
+  MOCK_METHOD2(update, void(const rclcpp::Time &, const rclcpp::Duration &));
+  MOCK_METHOD1(stopping, void(const rclcpp::Time &));
+  MOCK_METHOD1(waiting, void(const rclcpp::Time &));
+  MOCK_METHOD1(aborting, void(const rclcpp::Time &));
+  MOCK_METHOD4(initRequest, bool(hardware_interface::RobotHW *, rclcpp::Node &,
+                                 rclcpp::Node &, ClaimedResources &));
 };
 
 class ControllerManagerTest : public ::testing::Test
@@ -165,26 +165,26 @@ public:
   std::shared_ptr<controller_manager::ControllerManager> cm_;
 };
 
-void update(std::shared_ptr<controller_manager::ControllerManager> cm, const ros::TimerEvent &e)
+void update(std::shared_ptr<controller_manager::ControllerManager> cm, const rclcpp::TimerEvent &e)
 {
   cm->update(e.current_real, e.current_real - e.last_real);
 }
 
 TEST_F(ControllerManagerTest, NoSwitchTest)
 {
-  const ros::Duration period(1.0);
+  const rclcpp::Duration period(1.0);
 
   EXPECT_CALL(*hw_mock_, doSwitch(_, _)).Times(0);
 
-  cm_->update(ros::Time::now(), period);
+  cm_->update(rclcpp::Time::now(), period);
 }
 
 TEST_F(ControllerManagerTest, SwitchOnlyTest)
 {
   // only way to trigger switch is through switchController(...) which in turn waits
   // for update(...) to finish the switch, hence the update on a timer
-  ros::NodeHandle node_handle;
-  ros::Timer timer = node_handle.createTimer(ros::Duration(0.01),
+  rclcpp::Node node_handle;
+  rclcpp::Timer timer = node_handle.createTimer(rclcpp::Duration(0.01),
                                              std::bind(update, cm_, std::placeholders::_1));
 
   EXPECT_CALL(*hw_mock_, checkForConflict(_)).Times(1).WillOnce(Return(false));
@@ -194,7 +194,7 @@ TEST_F(ControllerManagerTest, SwitchOnlyTest)
 
   // switch with no controllers at all
   const std::vector<std::string> start_controllers, stop_controllers;
-  const int strictness = controller_manager_msgs::SwitchController::Request::STRICT;
+  const int strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
   ASSERT_TRUE(cm_->switchController(start_controllers, stop_controllers, strictness));
 }
 
@@ -202,8 +202,8 @@ TEST_F(ControllerManagerTest, SwitchControllersTest)
 {
   // only way to trigger switch is through switchController(...) which in turn waits for
   // update(...) to finish the switch, hence the update on a timer
-  ros::NodeHandle node_handle;
-  ros::Timer timer = node_handle.createTimer(ros::Duration(0.01),
+  rclcpp::Node node_handle;
+  rclcpp::Timer timer = node_handle.createTimer(rclcpp::Duration(0.01),
                                              std::bind(update, cm_, std::placeholders::_1));
 
   // one call for each controller
@@ -212,7 +212,7 @@ TEST_F(ControllerManagerTest, SwitchControllersTest)
   EXPECT_CALL(*hw_mock_, doSwitch(_, _)).Times(2);
   EXPECT_CALL(*hw_mock_, switchResult()).Times(2).WillRepeatedly(Return(RobotHWMock::SwitchState::DONE));
 
-  const int strictness = controller_manager_msgs::SwitchController::Request::STRICT;
+  const int strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
   std::vector<std::string> start_controllers, stop_controllers;
 
   // called at least once, otherwise can't perform second switch
@@ -242,8 +242,8 @@ TEST_F(ControllerManagerTest, SwitchControllersAbortTest)
 {
   // only way to trigger switch is through switchController(...) which in turn waits for
   // update(...) to finish the switch, hence the update on a timer
-  ros::NodeHandle node_handle;
-  ros::Timer timer = node_handle.createTimer(ros::Duration(0.01),
+  rclcpp::Node node_handle;
+  rclcpp::Timer timer = node_handle.createTimer(rclcpp::Duration(0.01),
                                              std::bind(update, cm_, std::placeholders::_1));
 
   // one call for each controller
@@ -252,7 +252,7 @@ TEST_F(ControllerManagerTest, SwitchControllersAbortTest)
   EXPECT_CALL(*hw_mock_, doSwitch(_, _)).Times(1);
   EXPECT_CALL(*hw_mock_, switchResult()).Times(2).WillRepeatedly(Return(RobotHWMock::SwitchState::ERROR));
 
-  const int strictness = controller_manager_msgs::SwitchController::Request::STRICT;
+  const int strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
   std::vector<std::string> start_controllers, stop_controllers;
 
   // controllers are aborted before they can update
@@ -273,8 +273,8 @@ TEST_F(ControllerManagerTest, SwitchControllersTimeoutTest)
 {
   // only way to trigger switch is through switchController(...) which in turn waits for
   // update(...) to finish the switch, hence the update on a timer
-  ros::NodeHandle node_handle;
-  ros::Timer timer = node_handle.createTimer(ros::Duration(0.01),
+  rclcpp::Node node_handle;
+  rclcpp::Timer timer = node_handle.createTimer(rclcpp::Duration(0.01),
                                              std::bind(update, cm_, std::placeholders::_1));
 
   // one call for each controller
@@ -283,7 +283,7 @@ TEST_F(ControllerManagerTest, SwitchControllersTimeoutTest)
   EXPECT_CALL(*hw_mock_, doSwitch(_, _)).Times(1);
   EXPECT_CALL(*hw_mock_, switchResult()).WillRepeatedly(Return(RobotHWMock::SwitchState::ONGOING));
 
-  const int strictness = controller_manager_msgs::SwitchController::Request::STRICT;
+  const int strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
   std::vector<std::string> start_controllers, stop_controllers;
 
   // controllers are never started
@@ -308,8 +308,8 @@ TEST_F(ControllerManagerTest, ControllerUpdatesTest)
 {
   // only way to trigger switch is through switchController(...) which in turn waits for
   // update(...) to finish the switch, hence the update on a timer
-  ros::NodeHandle node_handle;
-  ros::Timer timer = node_handle.createTimer(ros::Duration(0.01),
+  rclcpp::Node node_handle;
+  rclcpp::Timer timer = node_handle.createTimer(rclcpp::Duration(0.01),
                                              std::bind(update, cm_, std::placeholders::_1));
 
   EXPECT_CALL(*hw_mock_, checkForConflict(_)).Times(1).WillOnce(Return(false));
@@ -329,7 +329,7 @@ TEST_F(ControllerManagerTest, ControllerUpdatesTest)
       .WillOnce(Return(RobotHWMock::SwitchState::ONGOING))
       .WillOnce(Return(RobotHWMock::SwitchState::DONE));
 
-  const int strictness = controller_manager_msgs::SwitchController::Request::STRICT;
+  const int strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
   std::vector<std::string> start_controllers, stop_controllers;
 
   // controller started
@@ -348,10 +348,10 @@ TEST_F(ControllerManagerTest, ControllerUpdatesTest)
 
   timer.stop();
 
-  const ros::Duration period(1.0);
+  const rclcpp::Duration period(1.0);
   for (unsigned int i = 0; i < 5; ++i)
   {
-    cm_->update(ros::Time::now(), period);
+    cm_->update(rclcpp::Time::now(), period);
   }
 }
 
@@ -359,8 +359,8 @@ TEST_F(ControllerManagerTest, SwitchControllersAsapTest)
 {
   // only way to trigger switch is through switchController(...) which in turn waits for
   // update(...) to finish the switch, hence the update on a timer
-  ros::NodeHandle node_handle;
-  ros::Timer timer = node_handle.createTimer(ros::Duration(0.01),
+  rclcpp::Node node_handle;
+  rclcpp::Timer timer = node_handle.createTimer(rclcpp::Duration(0.01),
                                              std::bind(update, cm_, std::placeholders::_1));
 
   // one call for each controller
@@ -383,7 +383,7 @@ TEST_F(ControllerManagerTest, SwitchControllersAsapTest)
       .WillOnce(Return(RobotHWMock::SwitchState::ONGOING))
       .WillOnce(Return(RobotHWMock::SwitchState::DONE));
 
-  const int strictness = controller_manager_msgs::SwitchController::Request::STRICT;
+  const int strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
   std::vector<std::string> start_controllers, stop_controllers;
 
   // called at least 5 times, once for each ONGOING
@@ -407,8 +407,8 @@ TEST_F(ControllerManagerTest, SwitchControllersAsapAbortTest)
 {
   // only way to trigger switch is through switchController(...) which in turn waits for
   // update(...) to finish the switch, hence the update on a timer
-  ros::NodeHandle node_handle;
-  ros::Timer timer = node_handle.createTimer(ros::Duration(0.01),
+  rclcpp::Node node_handle;
+  rclcpp::Timer timer = node_handle.createTimer(rclcpp::Duration(0.01),
                                              std::bind(update, cm_, std::placeholders::_1));
 
   // one call for each controller
@@ -432,7 +432,7 @@ TEST_F(ControllerManagerTest, SwitchControllersAsapAbortTest)
       .WillOnce(Return(RobotHWMock::SwitchState::ERROR))
       .WillOnce(Return(RobotHWMock::SwitchState::ERROR));
 
-  const int strictness = controller_manager_msgs::SwitchController::Request::STRICT;
+  const int strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
   std::vector<std::string> start_controllers, stop_controllers;
 
   // called at least 5 times, once for each ONGOING
@@ -456,8 +456,8 @@ TEST_F(ControllerManagerTest, SwitchControllersAsapTimeoutTest)
 {
   // only way to trigger switch is through switchController(...) which in turn waits for
   // update(...) to finish the switch, hence the update on a timer
-  ros::NodeHandle node_handle;
-  ros::Timer timer = node_handle.createTimer(ros::Duration(0.01),
+  rclcpp::Node node_handle;
+  rclcpp::Timer timer = node_handle.createTimer(rclcpp::Duration(0.01),
                                              std::bind(update, cm_, std::placeholders::_1));
 
   // one call for each controller
@@ -469,7 +469,7 @@ TEST_F(ControllerManagerTest, SwitchControllersAsapTimeoutTest)
       .WillOnce(Return(RobotHWMock::SwitchState::DONE))
       .WillRepeatedly(Return(RobotHWMock::SwitchState::ONGOING));
 
-  const int strictness = controller_manager_msgs::SwitchController::Request::STRICT;
+  const int strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
   std::vector<std::string> start_controllers, stop_controllers;
 
   EXPECT_CALL(*ctrl_1_mock_, update(_, _)).Times(AtLeast(1));
@@ -491,7 +491,8 @@ TEST_F(ControllerManagerTest, SwitchControllersAsapTimeoutTest)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "controller_manager_update_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("controller_manager_update_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

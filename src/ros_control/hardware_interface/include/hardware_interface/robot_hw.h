@@ -70,7 +70,7 @@ public:
    *
    * \returns True if initialization was successful
    */
-  virtual bool init(ros::NodeHandle& /*root_nh*/, ros::NodeHandle &/*robot_hw_nh*/) {return true;}
+  virtual bool init(rclcpp::Node& /*root_nh*/, rclcpp::Node &/*robot_hw_nh*/) {return true;}
 
   /** \name Resource Management
    *\{*/
@@ -108,7 +108,7 @@ public:
         std::string controller_list;
         for (const auto& controller : resource_name_and_claiming_controllers.second)
           controller_list += controller.name + ", ";
-        ROS_WARN("Resource conflict on [%s].  Controllers = [%s]", resource_name_and_claiming_controllers.first.c_str(), controller_list.c_str());
+        RCLCPP_WARN(rclcpp::get_logger("HardwareInterface"), "Resource conflict on [%s].  Controllers = [%s]", resource_name_and_claiming_controllers.first.c_str(), controller_list.c_str());
         in_conflict = true;
       }
     }
@@ -174,7 +174,7 @@ public:
    * \param time The current time
    * \param period The time passed since the last call to \ref read
    */
-  virtual void read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {}
+  virtual void read(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/) {}
 
   /** \brief Write commands to the robot hardware.
    * 
@@ -192,7 +192,7 @@ public:
    * \param time The current time
    * \param period The time passed since the last call to \ref write
    */
-  virtual void write(const ros::Time& /*time*/, const ros::Duration& /*period*/) {}
+  virtual void write(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/) {}
 
   /**\}*/
 };

@@ -31,7 +31,7 @@
 namespace combined_robot_hw_tests
 {
 
-bool MyRobotHW4::init(ros::NodeHandle& /*root_nh*/, ros::NodeHandle &/*robot_hw_nh*/)
+bool MyRobotHW4::init(rclcpp::Node& /*root_nh*/, rclcpp::Node &/*robot_hw_nh*/)
 {
   using namespace hardware_interface;
 
@@ -53,12 +53,12 @@ bool MyRobotHW4::init(ros::NodeHandle& /*root_nh*/, ros::NodeHandle &/*robot_hw_
 }
 
 
-void MyRobotHW4::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
+void MyRobotHW4::read(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
 {
   force_[2] = 1.2;
 }
 
-void MyRobotHW4::write(const ros::Time& /*time*/, const ros::Duration& /*period*/)
+void MyRobotHW4::write(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
 {
 }
 

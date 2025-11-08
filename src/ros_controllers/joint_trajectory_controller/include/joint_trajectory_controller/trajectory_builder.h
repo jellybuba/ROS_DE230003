@@ -31,11 +31,11 @@
 #include <vector>
 
 // Boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/optional.hpp>
 
 // ROS messages
-#include <control_msgs/FollowJointTrajectoryAction.h>
+#include <control_msgs/msg/follow_joint_trajectory_action.hpp>
 
 // realtime_tools
 #include <realtime_tools/realtime_server_goal_handle.h>
@@ -68,8 +68,8 @@ private:
   using TrajectoryPerJoint    = std::vector<Segment>;
   using Trajectory            = std::vector<TrajectoryPerJoint>;
 
-  using RealtimeGoalHandle    = realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction>;
-  using RealtimeGoalHandlePtr = boost::shared_ptr<RealtimeGoalHandle>;
+  using RealtimeGoalHandle    = realtime_tools::RealtimeServerGoalHandle<control_msgs::msg::FollowJointTrajectoryAction>;
+  using RealtimeGoalHandlePtr = std::shared_ptr<RealtimeGoalHandle>;
 
 public:
   /**

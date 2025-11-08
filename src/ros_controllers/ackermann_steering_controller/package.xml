@@ -12,16 +12,16 @@
   <url type="repository">https://github.com/ros-controls/ros_controllers/ackermann_steering_controller</url>
   <author email="p595201m@mail.kyutech.jp">Masaru Morita</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>boost</depend>
   <depend>controller_interface</depend>
   <depend>diff_drive_controller</depend>
   <depend>hardware_interface</depend>
   <depend>nav_msgs</depend>
+  <depend>rclcpp</depend>
   <depend>realtime_tools</depend>
-  <depend>roscpp</depend>
-  <depend>tf</depend>
+  <depend>tf2_ros</depend>
 
   <build_depend>pluginlib</build_depend>
   <build_depend>urdf</build_depend>
@@ -30,15 +30,16 @@
   <exec_depend>urdf</exec_depend>
 
   <!--Tests-->
+  <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>controller_manager</test_depend>
   <test_depend>geometry_msgs</test_depend>
   <test_depend>rosunit</test_depend>
-  <test_depend>rostest</test_depend>
   <test_depend>std_msgs</test_depend>
   <test_depend>std_srvs</test_depend>
   <test_depend>xacro</test_depend>
 
   <export>
     <controller_interface plugin="${prefix}/ackermann_steering_controller_plugins.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

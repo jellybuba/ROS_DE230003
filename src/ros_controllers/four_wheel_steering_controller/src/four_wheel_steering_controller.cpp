@@ -55,8 +55,8 @@ namespace four_wheel_steering_controller{
   }
 
   bool FourWheelSteeringController::init(hardware_interface::RobotHW *robot_hw,
-                                         ros::NodeHandle& root_nh,
-                                         ros::NodeHandle &controller_nh)
+                                         rclcpp::Node& root_nh,
+                                         rclcpp::Node &controller_nh)
   {
     const std::string complete_ns = controller_nh.getNamespace();
     std::size_t id = complete_ns.find_last_of("/");
@@ -121,7 +121,7 @@ namespace four_wheel_steering_controller{
     controller_nh.param("publish_rate", publish_rate, 50.0);
     ROS_INFO_STREAM_NAMED(name_, "Controller state will be published at "
                           << publish_rate << "Hz.");
-    publish_period_ = ros::Duration(1.0 / publish_rate);
+    publish_period_ = rclcpp::Duration(1.0 / publish_rate);
 
     controller_nh.param("open_loop", open_loop_, open_loop_);
 
@@ -228,13 +228,13 @@ namespace four_wheel_steering_controller{
     return true;
   }
 
-  void FourWheelSteeringController::update(const ros::Time& time, const ros::Duration& period)
+  void FourWheelSteeringController::update(const rclcpp::Time& time, const rclcpp::Duration& period)
   {
     updateOdometry(time);
     updateCommand(time, period);
   }
 
-  void FourWheelSteeringController::starting(const ros::Time& time)
+  void FourWheelSteeringController::starting(const rclcpp::Time& time)
   {
     brake();
 
@@ -244,12 +244,12 @@ namespace four_wheel_steering_controller{
     odometry_.init(time);
   }
 
-  void FourWheelSteeringController::stopping(const ros::Time& /*time*/)
+  void FourWheelSteeringController::stopping(const rclcpp::Time& /*time*/)
   {
     brake();
   }
 
-  void FourWheelSteeringController::updateOdometry(const ros::Time& time)
+  void FourWheelSteeringController::updateOdometry(const rclcpp::Time& time)
   {
     // COMPUTE AND PUBLISH ODOMETRY
     const double fl_speed = front_wheel_joints_[0].getVelocity();
@@ -290,7 +290,7 @@ namespace four_wheel_steering_controller{
     {
       last_state_publish_time_ += publish_period_;
       // Compute and store orientation info
-      const geometry_msgs::Quaternion orientation(
+      const geometry_msgs::msg::Quaternion orientation(
             tf::createQuaternionMsgFromYaw(odometry_.getHeading()));
 
       // Populate odom message and publish
@@ -321,7 +321,7 @@ namespace four_wheel_steering_controller{
       // Publish tf /odom frame
       if (enable_odom_tf_ && tf_odom_pub_->trylock())
       {
-        geometry_msgs::TransformStamped& odom_frame = tf_odom_pub_->msg_.transforms[0];
+        geometry_msgs::msg::TransformStamped& odom_frame = tf_odom_pub_->msg_.transforms[0];
         odom_frame.header.stamp = time;
         odom_frame.transform.translation.x = odometry_.getX();
         odom_frame.transform.translation.y = odometry_.getY();
@@ -331,7 +331,7 @@ namespace four_wheel_steering_controller{
     }
   }
 
-  void FourWheelSteeringController::updateCommand(const ros::Time& time, const ros::Duration& period)
+  void FourWheelSteeringController::updateCommand(const rclcpp::Time& time, const rclcpp::Duration& period)
   {
     // Retreive current velocity command and time step:
     Command* cmd;
@@ -512,19 +512,19 @@ namespace four_wheel_steering_controller{
     }
   }
 
-  void FourWheelSteeringController::cmdVelCallback(const geometry_msgs::Twist& command)
+  void FourWheelSteeringController::cmdVelCallback(const geometry_msgs::msg::Twist& command)
   {
     if (isRunning())
     {
       if(std::isnan(command.angular.z) || std::isnan(command.linear.x))
       {
-        ROS_WARN("Received NaN in geometry_msgs::Twist. Ignoring command.");
+        RCLCPP_WARN(rclcpp::get_logger("FourWheelSteeringController"), "Received NaN in geometry_msgs::msg::Twist. Ignoring command.");
         return;
       }
       command_struct_twist_.ang   = command.angular.z;
       command_struct_twist_.lin_x   = command.linear.x;
       command_struct_twist_.lin_y   = command.linear.y;
-      command_struct_twist_.stamp = ros::Time::now();
+      command_struct_twist_.stamp = rclcpp::Time::now();
       command_twist_.writeFromNonRT (command_struct_twist_);
       ROS_DEBUG_STREAM_NAMED(name_,
                              "Added values to command. "
@@ -535,24 +535,24 @@ namespace four_wheel_steering_controller{
     }
     else
     {
-      ROS_ERROR_NAMED(name_, "Can't accept new commands. Controller is not running.");
+      RCLCPP_ERROR(rclcpp::get_logger(name_), "Can't accept new commands. Controller is not running.");
     }
   }
 
-  void FourWheelSteeringController::cmdFourWheelSteeringCallback(const four_wheel_steering_msgs::FourWheelSteering& command)
+  void FourWheelSteeringController::cmdFourWheelSteeringCallback(const four_wheel_steering_msgs::msg::FourWheelSteering& command)
   {
     if (isRunning())
     {
       if(std::isnan(command.front_steering_angle) || std::isnan(command.rear_steering_angle)
          || std::isnan(command.speed))
       {
-        ROS_WARN("Received NaN in four_wheel_steering_msgs::FourWheelSteering. Ignoring command.");
+        RCLCPP_WARN(rclcpp::get_logger("FourWheelSteeringController"), "Received NaN in four_wheel_steering_msgs::msg::FourWheelSteering. Ignoring command.");
         return;
       }
       command_struct_four_wheel_steering_.front_steering   = command.front_steering_angle;
       command_struct_four_wheel_steering_.rear_steering   = command.rear_steering_angle;
       command_struct_four_wheel_steering_.lin   = command.speed;
-      command_struct_four_wheel_steering_.stamp = ros::Time::now();
+      command_struct_four_wheel_steering_.stamp = rclcpp::Time::now();
       command_four_wheel_steering_.writeFromNonRT (command_struct_four_wheel_steering_);
       ROS_DEBUG_STREAM_NAMED(name_,
                              "Added values to command. "
@@ -563,11 +563,11 @@ namespace four_wheel_steering_controller{
     }
     else
     {
-      ROS_ERROR_NAMED(name_, "Can't accept new commands. Controller is not running.");
+      RCLCPP_ERROR(rclcpp::get_logger(name_), "Can't accept new commands. Controller is not running.");
     }
   }
 
-  bool FourWheelSteeringController::getWheelNames(ros::NodeHandle& controller_nh,
+  bool FourWheelSteeringController::getWheelNames(rclcpp::Node& controller_nh,
                               const std::string& wheel_param,
                               std::vector<std::string>& wheel_names)
   {
@@ -620,7 +620,7 @@ namespace four_wheel_steering_controller{
       return true;
   }
 
-  void FourWheelSteeringController::setOdomPubFields(ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh)
+  void FourWheelSteeringController::setOdomPubFields(rclcpp::Node& root_nh, rclcpp::Node& controller_nh)
   {
     // Get and check params for covariances
     XmlRpc::XmlRpcValue pose_cov_list;
@@ -638,7 +638,7 @@ namespace four_wheel_steering_controller{
       ROS_ASSERT(twist_cov_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 
     // Setup odometry realtime publisher + odom message constant fields
-    odom_pub_.reset(new realtime_tools::RealtimePublisher<nav_msgs::Odometry>(controller_nh, "odom", 100));
+    odom_pub_.reset(new realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry>(controller_nh, "odom", 100));
     odom_pub_->msg_.header.frame_id = "odom";
     odom_pub_->msg_.child_frame_id = base_frame_id_;
     odom_pub_->msg_.pose.pose.position.z = 0;
@@ -660,10 +660,10 @@ namespace four_wheel_steering_controller{
         0., 0., 0., static_cast<double>(twist_cov_list[3]), 0., 0.,
         0., 0., 0., 0., static_cast<double>(twist_cov_list[4]), 0.,
         0., 0., 0., 0., 0., static_cast<double>(twist_cov_list[5]) };
-    odom_4ws_pub_.reset(new realtime_tools::RealtimePublisher<four_wheel_steering_msgs::FourWheelSteeringStamped>(controller_nh, "odom_steer", 100));
+    odom_4ws_pub_.reset(new realtime_tools::RealtimePublisher<four_wheel_steering_msgs::msg::FourWheelSteeringStamped>(controller_nh, "odom_steer", 100));
     odom_4ws_pub_->msg_.header.frame_id = "odom";
 
-    tf_odom_pub_.reset(new realtime_tools::RealtimePublisher<tf::tfMessage>(root_nh, "/tf", 100));
+    tf_odom_pub_.reset(new realtime_tools::RealtimePublisher<tf::msg::tfMessage>(root_nh, "/tf", 100));
     tf_odom_pub_->msg_.transforms.resize(1);
     tf_odom_pub_->msg_.transforms[0].transform.translation.z = 0.0;
     tf_odom_pub_->msg_.transforms[0].child_frame_id = base_frame_id_;

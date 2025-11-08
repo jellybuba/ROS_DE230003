@@ -143,7 +143,7 @@ public:
 
         if(!RobotHW::prepareSwitch(start_list, stop_list))
         {
-            ROS_ERROR("Something is wrong with RobotHW");
+            RCLCPP_ERROR(rclcpp::get_logger("ControllerManager"), "Something is wrong with RobotHW");
             return false;
         }
 
@@ -236,16 +236,16 @@ class DummyControllerLoader: public controller_manager::ControllerLoaderInterfac
         const std::string type_name;
     public:
         DummyController(const std::string &name) : type_name(name) {}
-        void update(const ros::Time& /*time*/, const ros::Duration& /*period*/) override {}
+        void update(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/) override {}
         bool initRequest(hardware_interface::RobotHW* /*hw*/,
-                         ros::NodeHandle&             /*root_nh*/,
-                         ros::NodeHandle&             controller_nh,
+                         rclcpp::Node&             /*root_nh*/,
+                         rclcpp::Node&             controller_nh,
                          ClaimedResources&            claimed_resources) override
         {
             std::vector<std::string> joints;
             if(!controller_nh.getParam("joints", joints))
             {
-                ROS_ERROR("Could not parse joint names");
+                RCLCPP_ERROR(rclcpp::get_logger("ControllerManager"), "Could not parse joint names");
                 return false;
             }
             std::set<std::string> resources(joints.begin(), joints.end());
@@ -288,7 +288,7 @@ public:
     void reload() override {}
 };
 
-void update(controller_manager::ControllerManager &cm, const ros::TimerEvent& e)
+void update(controller_manager::ControllerManager &cm, const rclcpp::TimerEvent& e)
 {
     cm.update(e.current_real, e.current_real - e.last_real);
 }
@@ -308,13 +308,13 @@ TEST(SwitchInterfacesTest, SwitchInterfaces)
     GuardROS guard;
 
     SwitchBot bot;
-    ros::NodeHandle nh;
+    rclcpp::Node nh;
 
     controller_manager::ControllerManager cm(&bot);
 
     cm.registerControllerLoader(std::make_shared<DummyControllerLoader>());
 
-    ros::Timer timer = nh.createTimer(ros::Duration(0.01), std::bind(&update, std::ref(cm), std::placeholders::_1));
+    rclcpp::Timer timer = nh.createTimer(rclcpp::Duration(0.01), std::bind(&update, std::ref(cm), std::placeholders::_1));
 
     ASSERT_TRUE(cm.loadController("group_pos"));
     ASSERT_TRUE(cm.loadController("another_group_pos"));
@@ -328,131 +328,131 @@ TEST(SwitchInterfacesTest, SwitchInterfaces)
     {   // test hardware interface conflict
         std::vector<std::string> start, stop;
         start.push_back("invalid_group_pos");
-        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
     }
     {   // test resource conflict
         std::vector<std::string> start, stop;
         start.push_back("group_pos");
         start.push_back("group_vel");
-        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
     }
     {   // test pos group
         std::vector<std::string> start, stop;
         start.push_back("group_pos");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
     {   // test same hardware interface switch
         std::vector<std::string> start, stop, next_start;
         start.push_back("group_pos");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
 
         next_start.push_back("group_pos");
-        ASSERT_TRUE(cm.switchController(next_start, start, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(next_start, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
 
-        ASSERT_TRUE(cm.switchController(stop, next_start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(stop, next_start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
     {   // test same hardware interface switch
         std::vector<std::string> start, stop, next_start;
         start.push_back("group_pos");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
 
         next_start.push_back("another_group_pos");
-        ASSERT_TRUE(cm.switchController(next_start, start, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(next_start, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
 
-        ASSERT_TRUE(cm.switchController(stop, next_start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(stop, next_start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
     {   // test vel group
         std::vector<std::string> start, stop;
         start.push_back("group_vel");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
     {   // test eff group
         std::vector<std::string> start, stop;
         start.push_back("group_eff");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
 
     {   // test direct hardware interface upgrades (okay) and downgrades (conflict)
         std::vector<std::string> start, stop, next_start;
         start.push_back("group_eff");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
 
         next_start.push_back("group_vel");
-        ASSERT_TRUE(cm.switchController(next_start, start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // upgrade
+        ASSERT_TRUE(cm.switchController(next_start, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // upgrade
 
-        ASSERT_FALSE(cm.switchController(start, next_start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // downgrade
+        ASSERT_FALSE(cm.switchController(start, next_start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // downgrade
 
-        ASSERT_TRUE(cm.switchController(stop, next_start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(stop, next_start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
 
     {   // test single pos
         std::vector<std::string> start, stop;
         start.push_back("single_pos");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
     {   // test single eff
         std::vector<std::string> start, stop;
         start.push_back("single_pos");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
     {   // test single pos + group_eff (resource conflict)
         std::vector<std::string> start, stop;
         start.push_back("single_pos");
         start.push_back("group_eff");
-        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
     }
     {   // test single pos + group_eff (hardware interface conflict)
         std::vector<std::string> start, stop;
         start.push_back("single_eff");
         start.push_back("group_vel");
-        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
     }
     {   // test single pos + group_vel
         std::vector<std::string> start, stop;
         start.push_back("single_pos");
         start.push_back("group_vel");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
     {   // test single pos + group_vel + totally_random_name
         std::vector<std::string> start, stop;
         start.push_back("single_pos");
         start.push_back("group_vel");
         start.push_back("totally_random_name");
-        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_FALSE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_FALSE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
 
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::BEST_EFFORT));
-        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::BEST_EFFORT)); // clean-up
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::BEST_EFFORT));
+        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::BEST_EFFORT)); // clean-up
     }
     {   // test restart
         std::vector<std::string> start, stop;
         start.push_back("single_pos");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
 
-        ASSERT_TRUE(cm.switchController(start, start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // restart
+        ASSERT_TRUE(cm.switchController(start, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // restart
         ASSERT_TRUE(bot.checkUnqiue());
 
-        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::STRICT));  // clean-up
+        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));  // clean-up
     }
     {   // test stop for controller that is not running
         std::vector<std::string> start, stop;
         stop.push_back("single_pos");
-        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::BEST_EFFORT));
+        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::BEST_EFFORT));
     }
     {   // test stop for controller that is not running
         std::vector<std::string> start, stop;
         start.push_back("single_pos");
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::STRICT));
-        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::SwitchControllerRequest::BEST_EFFORT));
-        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::SwitchControllerRequest::STRICT)); // clean-up
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_FALSE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::STRICT));
+        ASSERT_TRUE(cm.switchController(start, stop, controller_manager_msgs::srv::SwitchControllerRequest::BEST_EFFORT));
+        ASSERT_TRUE(cm.switchController(stop, start, controller_manager_msgs::srv::SwitchControllerRequest::STRICT)); // clean-up
     }
     ASSERT_TRUE(bot.checkNotRunning());
 }
@@ -460,7 +460,8 @@ TEST(SwitchInterfacesTest, SwitchInterfaces)
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    ros::init(argc, argv, "controller_manager_switch_test");
+    rclcpp::init(argc, argv);
+    auto node = rclcpp::Node::make_shared("controller_manager_switch_test");
 
     ros::AsyncSpinner spinner(1);
     spinner.start();

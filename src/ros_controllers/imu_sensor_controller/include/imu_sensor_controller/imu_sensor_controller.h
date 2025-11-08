@@ -34,7 +34,7 @@
 #include <controller_interface/controller.h>
 #include <hardware_interface/imu_sensor_interface.h>
 #include <pluginlib/class_list_macros.hpp>
-#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/msg/imu.hpp>
 #include <realtime_tools/realtime_publisher.h>
 
 namespace imu_sensor_controller
@@ -46,16 +46,16 @@ class ImuSensorController: public controller_interface::Controller<hardware_inte
 public:
   ImuSensorController(){}
 
-  virtual bool init(hardware_interface::ImuSensorInterface* hw, ros::NodeHandle &root_nh, ros::NodeHandle& controller_nh);
-  virtual void starting(const ros::Time& time);
-  virtual void update(const ros::Time& time, const ros::Duration& /*period*/);
-  virtual void stopping(const ros::Time& /*time*/);
+  virtual bool init(hardware_interface::ImuSensorInterface* hw, rclcpp::Node &root_nh, rclcpp::Node& controller_nh);
+  virtual void starting(const rclcpp::Time& time);
+  virtual void update(const rclcpp::Time& time, const rclcpp::Duration& /*period*/);
+  virtual void stopping(const rclcpp::Time& /*time*/);
 
 private:
   std::vector<hardware_interface::ImuSensorHandle> sensors_;
-  typedef std::shared_ptr<realtime_tools::RealtimePublisher<sensor_msgs::Imu> > RtPublisherPtr;
+  typedef std::shared_ptr<realtime_tools::RealtimePublisher<sensor_msgs::msg::Imu> > RtPublisherPtr;
   std::vector<RtPublisherPtr> realtime_pubs_;
-  std::vector<ros::Time> last_publish_times_;
+  std::vector<rclcpp::Time> last_publish_times_;
   double publish_rate_;
 };
 

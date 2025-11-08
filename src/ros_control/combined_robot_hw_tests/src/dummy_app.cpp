@@ -25,30 +25,31 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //////////////////////////////////////////////////////////////////////////////
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <controller_manager/controller_manager.h>
 #include <combined_robot_hw/combined_robot_hw.h>
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "DummyApp");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("DummyApp");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();
 
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   combined_robot_hw::CombinedRobotHW hw;
   bool init_success = hw.init(nh, nh);
 
   controller_manager::ControllerManager cm(&hw, nh);
 
-  ros::Duration period(1.0);
-  while (ros::ok())
+  rclcpp::Duration period(1.0);
+  while (rclcpp::ok())
   {
-    ROS_INFO("loop");
-    hw.read(ros::Time::now(), period);
-    cm.update(ros::Time::now(), period);
-    hw.write(ros::Time::now(), period);
+    RCLCPP_INFO(rclcpp::get_logger("CombinedRobotHwTests"), "loop");
+    hw.read(rclcpp::Time::now(), period);
+    cm.update(rclcpp::Time::now(), period);
+    hw.write(rclcpp::Time::now(), period);
     period.sleep();
   }
 }

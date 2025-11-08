@@ -42,8 +42,8 @@ using Segment = joint_trajectory_controller::JointTrajectorySegment<QuinticSplin
 using TrajectoryPerJoint = std::vector<Segment>;
 using Trajectory = std::vector<TrajectoryPerJoint>;
 
-using GoalHandle = actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction>::GoalHandle;
-using RealTimeServerGoalHandle = realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction>;
+using GoalHandle = actionlib::ActionServer<control_msgs::msg::FollowJointTrajectoryAction>::GoalHandle;
+using RealTimeServerGoalHandle = realtime_tools::RealtimeServerGoalHandle<control_msgs::msg::FollowJointTrajectoryAction>;
 
 TEST(StopTrajectoryBuilderTest, testBuildNoStartTime)
 {
@@ -158,7 +158,7 @@ TEST(StopTrajectoryBuilderTest, testSetGoalHandle)
   const double start_time{0.11};
   Segment::State hold_state{number_of_joints};
   GoalHandle gh;
-  boost::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
+  std::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
 
   Builder builder(stop_duration, hold_state);
 	builder.setStartTime(start_time);
@@ -188,7 +188,7 @@ TEST(StopTrajectoryBuilderTest, testResetGoalHandle)
   const double start_time{0.11};
   Segment::State hold_state{number_of_joints};
   GoalHandle gh;
-  boost::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
+  std::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
 
   Builder builder(stop_duration, hold_state);
   builder.setGoalHandle(rt_goal_handle);

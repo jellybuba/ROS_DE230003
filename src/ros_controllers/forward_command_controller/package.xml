@@ -15,7 +15,7 @@
   <author>Vijay Pradeep</author>
   <author>Adolfo Rodriguez Tsouroukdissian</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>controller_interface</depend> 
   <depend>hardware_interface</depend> 
   <depend>std_msgs</depend> 
@@ -23,5 +23,6 @@
 
   <export>
     <cpp cflags="-I${prefix}/include"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

@@ -30,7 +30,7 @@
 #include <functional>
 #include <string>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 #include <gtest/gtest.h>
 
@@ -40,20 +40,20 @@ namespace joint_trajectory_controller_tests
 {
 AssertionResult waitForEvent(const std::function<bool()>& check_event,
                              const std::string& event_description,
-                             const ros::Duration& timeout,
+                             const rclcpp::Duration& timeout,
                              unsigned int repeat)
 {
   unsigned int count = 0;
-  ros::Time start_time = ros::Time::now();
-  while (ros::ok())
+  rclcpp::Time start_time = rclcpp::Time::now();
+  while (rclcpp::ok())
   {
     count = check_event() ? (count+1) : 0;
-    if ((ros::Time::now() - start_time) > timeout)
+    if ((rclcpp::Time::now() - start_time) > timeout)
     {
       return AssertionFailure() << "Timed out after " << timeout.toSec() << "s waiting for "
                                 << event_description << ".";
     }
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
     if (count == repeat)
     {
       return AssertionSuccess();

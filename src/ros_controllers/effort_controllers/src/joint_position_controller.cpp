@@ -54,26 +54,26 @@ JointPositionController::~JointPositionController()
   sub_command_.shutdown();
 }
 
-bool JointPositionController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
+bool JointPositionController::init(hardware_interface::EffortJointInterface *robot, rclcpp::Node &n)
 {
   // Get joint name from parameter server
   std::string joint_name;
   if (!n.getParam("joint", joint_name))
   {
-    ROS_ERROR("No joint given (namespace: %s)", n.getNamespace().c_str());
+    RCLCPP_ERROR(rclcpp::get_logger("EffortControllers"), "No joint given (namespace: %s)", n.getNamespace().c_str());
     return false;
   }
 
   // Load PID Controller using gains set on parameter server
-  if (!pid_controller_.init(ros::NodeHandle(n, "pid")))
+  if (!pid_controller_.init(rclcpp::Node(n, "pid")))
     return false;
 
   // Start realtime state publisher
   controller_state_publisher_.reset(
-    new realtime_tools::RealtimePublisher<control_msgs::JointControllerState>(n, "state", 1));
+    new realtime_tools::RealtimePublisher<control_msgs::msg::JointControllerState>(n, "state", 1));
 
   // Start command subscriber
-  sub_command_ = n.subscribe<std_msgs::Float64>("command", 1, &JointPositionController::setCommandCB, this);
+  sub_command_ = n.subscribe<std_msgs::msg::Float64>("command", 1, &JointPositionController::setCommandCB, this);
 
   // Get joint handle from hardware interface
   joint_ = robot->getHandle(joint_name);
@@ -82,13 +82,13 @@ bool JointPositionController::init(hardware_interface::EffortJointInterface *rob
   urdf::Model urdf;
   if (!urdf.initParamWithNodeHandle("robot_description", n))
   {
-    ROS_ERROR("Failed to parse urdf file");
+    RCLCPP_ERROR(rclcpp::get_logger("EffortControllers"), "Failed to parse urdf file");
     return false;
   }
   joint_urdf_ = urdf.getJoint(joint_name);
   if (!joint_urdf_)
   {
-    ROS_ERROR("Could not find joint '%s' in urdf", joint_name.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger("EffortControllers"), "Could not find joint '%s' in urdf", joint_name.c_str());
     return false;
   }
 
@@ -148,7 +148,7 @@ void JointPositionController::setCommand(double pos_command, double vel_command)
   command_.writeFromNonRT(command_struct_);
 }
 
-void JointPositionController::starting(const ros::Time& time)
+void JointPositionController::starting(const rclcpp::Time& time)
 {
   double pos_command = joint_.getPosition();
 
@@ -163,7 +163,7 @@ void JointPositionController::starting(const ros::Time& time)
   pid_controller_.reset();
 }
 
-void JointPositionController::update(const ros::Time& time, const ros::Duration& period)
+void JointPositionController::update(const rclcpp::Time& time, const rclcpp::Duration& period)
 {
   command_struct_ = *(command_.readFromRT());
   double command_position = command_struct_.position_;
@@ -244,7 +244,7 @@ void JointPositionController::update(const ros::Time& time, const ros::Duration&
   loop_count_++;
 }
 
-void JointPositionController::setCommandCB(const std_msgs::Float64ConstPtr& msg)
+void JointPositionController::setCommandCB(const std_msgs::msg::Float64::ConstSharedPtr& msg)
 {
   setCommand(msg->data);
 }

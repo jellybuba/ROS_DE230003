@@ -34,14 +34,14 @@ namespace gripper_action_controller
 {
 namespace internal
 {
-std::string getLeafNamespace(const ros::NodeHandle& nh)
+std::string getLeafNamespace(const rclcpp::Node& nh)
 {
   const std::string complete_ns = nh.getNamespace();
   std::size_t id   = complete_ns.find_last_of("/");
   return complete_ns.substr(id + 1);
 }
 
-urdf::ModelSharedPtr getUrdf(const ros::NodeHandle& nh, const std::string& param_name)
+urdf::ModelSharedPtr getUrdf(const rclcpp::Node& nh, const std::string& param_name)
 {
   urdf::ModelSharedPtr urdf(new urdf::Model);
 
@@ -88,20 +88,20 @@ std::vector<urdf::JointConstSharedPtr> getUrdfJoints(const urdf::Model& urdf, co
 
 template <class HardwareInterface>
 inline void GripperActionController<HardwareInterface>::
-starting(const ros::Time& time)
+starting(const rclcpp::Time& time)
 {
   command_struct_rt_.position_ = joint_.getPosition();
   command_struct_rt_.max_effort_ = default_max_effort_;
   command_.initRT(command_struct_rt_);
 
   // Hardware interface adapter
-  hw_iface_adapter_.starting(ros::Time(0.0));
+  hw_iface_adapter_.starting(rclcpp::Time(0.0));
   last_movement_time_ = time;
 }
 
 template <class HardwareInterface>
 inline void GripperActionController<HardwareInterface>::
-stopping(const ros::Time& time)
+stopping(const rclcpp::Time& time)
 {
   preemptActiveGoal();
 }
@@ -117,7 +117,7 @@ preemptActiveGoal()
   {
     // Marks the current goal as canceled
     rt_active_goal_.reset();
-    if(current_active_goal->gh_.getGoalStatus().status == actionlib_msgs::GoalStatus::ACTIVE)
+    if(current_active_goal->gh_.getGoalStatus().status == actionlib_msgs::msg::GoalStatus::ACTIVE)
       current_active_goal->gh_.setCanceled();
   }
 }
@@ -130,8 +130,8 @@ GripperActionController()
 
 template <class HardwareInterface>
 bool GripperActionController<HardwareInterface>::init(HardwareInterface* hw,
-						      ros::NodeHandle&   root_nh,
-						      ros::NodeHandle&   controller_nh)
+						      rclcpp::Node&   root_nh,
+						      rclcpp::Node&   controller_nh)
 {
   using namespace internal;
 
@@ -144,7 +144,7 @@ bool GripperActionController<HardwareInterface>::init(HardwareInterface* hw,
   // Action status checking update rate
   double action_monitor_rate = 20.0;
   controller_nh_.getParam("action_monitor_rate", action_monitor_rate);
-  action_monitor_period_ = ros::Duration(1.0 / action_monitor_rate);
+  action_monitor_period_ = rclcpp::Duration(1.0 / action_monitor_rate);
   ROS_DEBUG_STREAM_NAMED(name_, "Action status changes will be monitored at " << action_monitor_rate << "Hz.");
 
   // Controlled joint
@@ -205,7 +205,7 @@ bool GripperActionController<HardwareInterface>::init(HardwareInterface* hw,
   command_struct_.max_effort_ = default_max_effort_;
 
   // Result
-  pre_alloc_result_.reset(new control_msgs::GripperCommandResult());
+  pre_alloc_result_.reset(new control_msgs::msg::GripperCommandResult());
   pre_alloc_result_->position = command_struct_.position_;
   pre_alloc_result_->reached_goal = false;
   pre_alloc_result_->stalled = false;
@@ -221,7 +221,7 @@ bool GripperActionController<HardwareInterface>::init(HardwareInterface* hw,
 
 template <class HardwareInterface>
 void GripperActionController<HardwareInterface>::
-update(const ros::Time& time, const ros::Duration& period)
+update(const rclcpp::Time& time, const rclcpp::Duration& period)
 {
   command_struct_rt_ = *(command_.readFromRT());
 
@@ -248,8 +248,8 @@ goalCB(GoalHandle gh)
   // Precondition: Running controller
   if (!this->isRunning())
   {
-    ROS_ERROR_NAMED(name_, "Can't accept new action goals. Controller is not running.");
-    control_msgs::GripperCommandResult result;
+    RCLCPP_ERROR(rclcpp::get_logger(name_), "Can't accept new action goals. Controller is not running.");
+    control_msgs::msg::GripperCommandResult result;
     gh.setRejected(result);
     return;
   }
@@ -270,7 +270,7 @@ goalCB(GoalHandle gh)
   pre_alloc_result_->reached_goal = false;
   pre_alloc_result_->stalled = false;
 
-  last_movement_time_ = ros::Time::now();
+  last_movement_time_ = rclcpp::Time::now();
 
   // Setup goal status checking timer
   goal_handle_timer_ = controller_nh_.createTimer(action_monitor_period_,
@@ -293,8 +293,8 @@ cancelCB(GoalHandle gh)
     rt_active_goal_.reset();
 
     // Enter hold current position mode
-    setHoldPosition(ros::Time(0.0));
-    ROS_DEBUG_NAMED(name_, "Canceling active action goal because cancel callback recieved from actionlib.");
+    setHoldPosition(rclcpp::Time(0.0));
+    RCLCPP_DEBUG(rclcpp::get_logger(name_), "Canceling active action goal because cancel callback recieved from actionlib.");
 
     // Mark the current goal as canceled
     current_active_goal->gh_.setCanceled();
@@ -303,7 +303,7 @@ cancelCB(GoalHandle gh)
 
 template <class HardwareInterface>
 void GripperActionController<HardwareInterface>::
-setHoldPosition(const ros::Time& time)
+setHoldPosition(const rclcpp::Time& time)
 {
   command_struct_.position_ = joint_.getPosition();
   command_struct_.max_effort_ = default_max_effort_;
@@ -312,14 +312,14 @@ setHoldPosition(const ros::Time& time)
 
 template <class HardwareInterface>
 void GripperActionController<HardwareInterface>::
-checkForSuccess(const ros::Time& time, double error_position, double current_position, double current_velocity)
+checkForSuccess(const rclcpp::Time& time, double error_position, double current_position, double current_velocity)
 {
   RealtimeGoalHandlePtr current_active_goal(rt_active_goal_);
 
   if(!current_active_goal)
     return;
 
-  if(current_active_goal->gh_.getGoalStatus().status != actionlib_msgs::GoalStatus::ACTIVE)
+  if(current_active_goal->gh_.getGoalStatus().status != actionlib_msgs::msg::GoalStatus::ACTIVE)
     return;
 
   if(fabs(error_position) < goal_tolerance_)

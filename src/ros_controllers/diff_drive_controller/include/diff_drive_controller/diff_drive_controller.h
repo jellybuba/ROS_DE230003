@@ -39,20 +39,20 @@
 #pragma once
 
 
-#include <control_msgs/JointTrajectoryControllerState.h>
+#include <control_msgs/msg/joint_trajectory_controller_state.hpp>
 #include <controller_interface/controller.h>
 #include <diff_drive_controller/DiffDriveControllerConfig.h>
 #include <diff_drive_controller/odometry.h>
 #include <diff_drive_controller/speed_limiter.h>
 #include <dynamic_reconfigure/server.h>
-#include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <hardware_interface/joint_command_interface.h>
 #include <memory>
-#include <nav_msgs/Odometry.h>
+#include <nav_msgs/msg/odometry.hpp>
 #include <pluginlib/class_list_macros.hpp>
 #include <realtime_tools/realtime_buffer.h>
 #include <realtime_tools/realtime_publisher.h>
-#include <tf/tfMessage.h>
+#include <tf/msg/tf_message.hpp>
 
 namespace diff_drive_controller{
 
@@ -78,34 +78,34 @@ namespace diff_drive_controller{
      * \param controller_nh Node handle inside the controller namespace
      */
     bool init(hardware_interface::VelocityJointInterface* hw,
-              ros::NodeHandle& root_nh,
-              ros::NodeHandle &controller_nh);
+              rclcpp::Node& root_nh,
+              rclcpp::Node &controller_nh);
 
     /**
      * \brief Updates controller, i.e. computes the odometry and sets the new velocity commands
      * \param time   Current time
      * \param period Time since the last called to update
      */
-    void update(const ros::Time& time, const ros::Duration& period);
+    void update(const rclcpp::Time& time, const rclcpp::Duration& period);
 
     /**
      * \brief Starts controller
      * \param time Current time
      */
-    void starting(const ros::Time& time);
+    void starting(const rclcpp::Time& time);
 
     /**
      * \brief Stops controller
      * \param time Current time
      */
-    void stopping(const ros::Time& /*time*/);
+    void stopping(const rclcpp::Time& /*time*/);
 
   private:
     std::string name_;
 
     /// Odometry related:
-    ros::Duration publish_period_;
-    ros::Time last_state_publish_time_;
+    rclcpp::Duration publish_period_;
+    rclcpp::Time last_state_publish_time_;
     bool open_loop_;
 
     /// Hardware handles:
@@ -113,7 +113,7 @@ namespace diff_drive_controller{
     std::vector<hardware_interface::JointHandle> right_wheel_joints_;
 
     // Previous time
-    ros::Time time_previous_;
+    rclcpp::Time time_previous_;
 
     /// Previous velocities from the encoders:
     std::vector<double> vel_left_previous_;
@@ -128,7 +128,7 @@ namespace diff_drive_controller{
     {
       double lin;
       double ang;
-      ros::Time stamp;
+      rclcpp::Time stamp;
 
       Commands() : lin(0.0), ang(0.0), stamp(0.0) {}
     };
@@ -137,15 +137,15 @@ namespace diff_drive_controller{
     ros::Subscriber sub_command_;
 
     /// Publish executed commands
-    std::shared_ptr<realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped> > cmd_vel_pub_;
+    std::shared_ptr<realtime_tools::RealtimePublisher<geometry_msgs::msg::TwistStamped> > cmd_vel_pub_;
 
     /// Odometry related:
-    std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::Odometry> > odom_pub_;
-    std::shared_ptr<realtime_tools::RealtimePublisher<tf::tfMessage> > tf_odom_pub_;
+    std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry> > odom_pub_;
+    std::shared_ptr<realtime_tools::RealtimePublisher<tf::msg::tfMessage> > tf_odom_pub_;
     Odometry odometry_;
 
     /// Controller state publisher
-    std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::JointTrajectoryControllerState> > controller_state_pub_;
+    std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::msg::JointTrajectoryControllerState> > controller_state_pub_;
 
     /// Wheel separation, wrt the midpoint of the wheel width:
     double wheel_separation_;
@@ -247,7 +247,7 @@ namespace diff_drive_controller{
      * \brief Velocity command callback
      * \param command Velocity command message (twist)
      */
-    void cmdVelCallback(const geometry_msgs::Twist& command);
+    void cmdVelCallback(const geometry_msgs::msg::Twist& command);
 
     /**
      * \brief Get the wheel names from a wheel param
@@ -257,7 +257,7 @@ namespace diff_drive_controller{
      * \return true if the wheel_param is available and the wheel_names are
      *        retrieved successfully from the param server; false otherwise
      */
-    bool getWheelNames(ros::NodeHandle& controller_nh,
+    bool getWheelNames(rclcpp::Node& controller_nh,
                        const std::string& wheel_param,
                        std::vector<std::string>& wheel_names);
 
@@ -267,7 +267,7 @@ namespace diff_drive_controller{
      * \param left_wheel_name Name of the left wheel joint
      * \param right_wheel_name Name of the right wheel joint
      */
-    bool setOdomParamsFromUrdf(ros::NodeHandle& root_nh,
+    bool setOdomParamsFromUrdf(rclcpp::Node& root_nh,
                                const std::string& left_wheel_name,
                                const std::string& right_wheel_name,
                                bool lookup_wheel_separation,
@@ -278,7 +278,7 @@ namespace diff_drive_controller{
      * \param root_nh Root node handle
      * \param controller_nh Node handle inside the controller namespace
      */
-    void setOdomPubFields(ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
+    void setOdomPubFields(rclcpp::Node& root_nh, rclcpp::Node& controller_nh);
 
     /**
      * \brief Callback for dynamic_reconfigure server
@@ -302,8 +302,8 @@ namespace diff_drive_controller{
      * \param left_wheel_radius left wheel radius with multiplier
      * \param right_wheel_radius right wheel radius with multiplier
      */
-    void publishWheelData(const ros::Time& time,
-                          const ros::Duration& period,
+    void publishWheelData(const rclcpp::Time& time,
+                          const rclcpp::Duration& period,
                           Commands& curr_cmd,
                           double wheel_separation,
                           double left_wheel_radius,

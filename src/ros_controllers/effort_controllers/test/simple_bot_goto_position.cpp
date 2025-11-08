@@ -34,34 +34,34 @@
 
 
 #include <gtest/gtest.h>
-#include <ros/ros.h>
-#include <sensor_msgs/JointState.h>
-#include <std_msgs/Float64.h>
+#include "rclcpp/rclcpp.hpp"
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <std_msgs/msg/float64.hpp>
 
 
 class SimpleBotFixture : public ::testing::Test {
 protected:
   ros::Publisher pub;
   ros::Subscriber sub;
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   double position;
 
-  void positionCB(const sensor_msgs::JointState& msg) {
+  void positionCB(const sensor_msgs::msg::JointState& msg) {
     position = msg.position[0];
   }
 
   bool waitToReachTarget(double target, std::string& err, double precision=5e-2, double timeout=20.0) {
     position = 1e3*precision + target; // make position != target
-    ros::Rate rate(20.0);
-    std_msgs::Float64 cmd;
+    rclcpp::Rate rate(20.0);
+    std_msgs::msg::Float64 cmd;
     cmd.data = target;
-    ros::Time start = ros::Time::now();
+    rclcpp::Time start = rclcpp::Time::now();
 
-    while(ros::ok()) {
+    while(rclcpp::ok()) {
       pub.publish(cmd);
       if(std::fabs(target-position) < precision)
         return true;
-      if( (ros::Time::now()-start).toSec() > timeout ) {
+      if( (rclcpp::Time::now()-start).toSec() > timeout ) {
         err = "Timed out, target = " + std::to_string(target) + ", current = " + std::to_string(position);
         return false;
       }
@@ -76,14 +76,14 @@ protected:
   void SetUp() override {
     // setup
     position = 0.0;
-    pub = nh.advertise<std_msgs::Float64>("position_controller/command", 1);
+    pub = nh.advertise<std_msgs::msg::Float64>("position_controller/command", 1);
     sub = nh.subscribe("joint_states", 1, &SimpleBotFixture::positionCB, this);
   }
 };
 
 
 TEST_F(SimpleBotFixture, TestPosition) {
-  ros::Duration(1.0).sleep();
+  rclcpp::Duration(1.0).sleep();
   std::string err;
   EXPECT_TRUE(waitToReachTarget(1.0, err)) << err;
   EXPECT_TRUE(waitToReachTarget(-1.0, err)) << err;
@@ -93,7 +93,8 @@ TEST_F(SimpleBotFixture, TestPosition) {
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "dummy");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("dummy");
   ros::AsyncSpinner spinner(1);
   spinner.start();
   int ret = RUN_ALL_TESTS();

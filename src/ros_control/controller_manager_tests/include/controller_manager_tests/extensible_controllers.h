@@ -43,9 +43,9 @@ class ExtensibleController : public virtual BaseControllerInterface
 {
 public:
   bool init(hardware_interface::RobotHW* robot_hw,
-            ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh) override;
+            rclcpp::Node& root_nh, rclcpp::Node& controller_nh) override;
   virtual int helper();
-  void update(const ros::Time&, const ros::Duration&) override;
+  void update(const rclcpp::Time&, const rclcpp::Duration&) override;
 };
 
 /**
@@ -57,10 +57,10 @@ typedef controller_interface::MultiInterfaceController<
 class DerivedController : public ExtensibleController, public DerivedControllerInterface
 {
 public:
-  bool initRequest(hardware_interface::RobotHW* hw, ros::NodeHandle& nh, ros::NodeHandle& pnh,
+  bool initRequest(hardware_interface::RobotHW* hw, rclcpp::Node& nh, rclcpp::Node& pnh,
       controller_interface::ControllerBase::ClaimedResources& cr) override;
   bool init(hardware_interface::RobotHW* robot_hw,
-            ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh) override;
+            rclcpp::Node& root_nh, rclcpp::Node& controller_nh) override;
   int helper() override;
 };
 

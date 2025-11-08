@@ -29,7 +29,7 @@
 
 using namespace controller_manager_tests;
 
-bool VelEffController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle &n)
+bool VelEffController::init(hardware_interface::RobotHW* robot_hw, rclcpp::Node &n)
 {
   std::vector<std::string> vel_joints;
   if (!n.getParam("velocity_joints", vel_joints)) {return false;}
@@ -58,17 +58,17 @@ bool VelEffController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHand
   return true;
 }
 
-void VelEffController::starting(const ros::Time& /*time*/)
+void VelEffController::starting(const rclcpp::Time& /*time*/)
 {
-  ROS_INFO("Starting VelEffController");
+  RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "Starting VelEffController");
 }
 
-void VelEffController::update(const ros::Time& /*time*/, const ros::Duration& /*period*/)
+void VelEffController::update(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
 {}
 
-void VelEffController::stopping(const ros::Time& /*time*/)
+void VelEffController::stopping(const rclcpp::Time& /*time*/)
 {
-  ROS_INFO("Stopping VelEffController");
+  RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "Stopping VelEffController");
 }
 
 PLUGINLIB_EXPORT_CLASS( controller_manager_tests::VelEffController, controller_interface::ControllerBase)

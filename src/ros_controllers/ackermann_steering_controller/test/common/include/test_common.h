@@ -38,14 +38,14 @@
 
 #include <gtest/gtest.h>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
-#include <geometry_msgs/Twist.h>
-#include <nav_msgs/Odometry.h>
+#include <geometry_msgs/msg/twist.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 #include <tf/tf.h>
 
-#include <std_srvs/Empty.h>
-#include <controller_manager_msgs/ListControllers.h>
+#include <std_srvs/srv/empty.hpp>
+#include <controller_manager_msgs/srv/list_controllers.hpp>
 
 // Floating-point value comparison threshold
 const double EPS = 0.01;
@@ -61,11 +61,11 @@ class AckermannSteeringControllerTest : public ::testing::Test
 public:
 
   AckermannSteeringControllerTest()
-  : cmd_pub(nh.advertise<geometry_msgs::Twist>("cmd_vel", 100))
+  : cmd_pub(nh.advertise<geometry_msgs::msg::Twist>("cmd_vel", 100))
   , odom_sub(nh.subscribe("odom", 100, &AckermannSteeringControllerTest::odomCallback, this))
-  , start_srv(nh.serviceClient<std_srvs::Empty>("start"))
-  , stop_srv(nh.serviceClient<std_srvs::Empty>("stop"))
-  , list_ctrls_srv(nh.serviceClient<controller_manager_msgs::ListControllers>("/controller_manager/list_controllers"))
+  , start_srv(nh.serviceClient<std_srvs::srv::Empty>("start"))
+  , stop_srv(nh.serviceClient<std_srvs::srv::Empty>("stop"))
+  , list_ctrls_srv(nh.serviceClient<controller_manager_msgs::srv::ListControllers>("/controller_manager/list_controllers"))
   , ctrl_name("ackermann_steering_bot_controller")
   {
   }
@@ -75,7 +75,7 @@ public:
     odom_sub.shutdown();
   }
 
-  nav_msgs::Odometry getLastOdom()
+  nav_msgs::msg::Odometry getLastOdom()
   {
     std::lock_guard<std::mutex> lock(odom_mutex);
     return last_odom;
@@ -95,15 +95,15 @@ public:
     return true;
   }
 
-  void publish(geometry_msgs::Twist cmd_vel){ cmd_pub.publish(cmd_vel); }
+  void publish(geometry_msgs::msg::Twist cmd_vel){ cmd_pub.publish(cmd_vel); }
 
   bool isControllerAlive()
   {
-    controller_manager_msgs::ListControllers srv;
+    controller_manager_msgs::srv::ListControllers srv;
     list_ctrls_srv.call(srv);
 
     auto ctrl_list = srv.response.controller;
-    auto is_running = [this](const controller_manager_msgs::ControllerState& ctrl)
+    auto is_running = [this](const controller_manager_msgs::msg::ControllerState& ctrl)
     {
       return ctrl.name == ctrl_name && ctrl.state == "running";
     };
@@ -112,14 +112,14 @@ public:
     return running && subscribing;
   }
 
-  void start(){ std_srvs::Empty srv; start_srv.call(srv); }
-  void stop(){ std_srvs::Empty srv; stop_srv.call(srv); }
+  void start(){ std_srvs::srv::Empty srv; start_srv.call(srv); }
+  void stop(){ std_srvs::srv::Empty srv; stop_srv.call(srv); }
 
 private:
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   ros::Publisher cmd_pub;
   ros::Subscriber odom_sub;
-  nav_msgs::Odometry last_odom;
+  nav_msgs::msg::Odometry last_odom;
 
   ros::ServiceClient start_srv;
   ros::ServiceClient stop_srv;
@@ -129,7 +129,7 @@ private:
 
   std::mutex odom_mutex;
 
-  void odomCallback(const nav_msgs::Odometry& odom)
+  void odomCallback(const nav_msgs::msg::Odometry& odom)
   {
     ROS_INFO_STREAM("Callback reveived: pos.x: " << odom.pose.pose.position.x
                      << ", orient.z: " << odom.pose.pose.orientation.z
@@ -140,7 +140,7 @@ private:
   }
 };
 
-inline tf::Quaternion tfQuatFromGeomQuat(const geometry_msgs::Quaternion& quat)
+inline tf::Quaternion tfQuatFromGeomQuat(const geometry_msgs::msg::Quaternion& quat)
 {
   return tf::Quaternion(quat.x, quat.y, quat.z, quat.w);
 }

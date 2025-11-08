@@ -43,10 +43,10 @@ class MyDummyController : public controller_interface::Controller<MyDummyInterfa
 {
 public:
   using controller_interface::Controller<MyDummyInterface>::init;
-  bool init(MyDummyInterface* /*hw*/, ros::NodeHandle& /*n*/) override { return true; }
-  void starting(const ros::Time& /*time*/) override { }
-  void update(const ros::Time& /*time*/, const ros::Duration& /*period*/) override { }
-  void stopping(const ros::Time& /*time*/) override { }
+  bool init(MyDummyInterface* /*hw*/, rclcpp::Node& /*n*/) override { return true; }
+  void starting(const rclcpp::Time& /*time*/) override { }
+  void update(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/) override { }
+  void stopping(const rclcpp::Time& /*time*/) override { }
 };
 
 }

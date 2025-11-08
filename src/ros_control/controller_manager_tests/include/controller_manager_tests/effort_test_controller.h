@@ -41,10 +41,10 @@ class EffortTestController: public controller_interface::Controller<hardware_int
 {
 public:
   using controller_interface::Controller<hardware_interface::EffortJointInterface>::init;
-  bool init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle& /*n*/) override;
-  void starting(const ros::Time& /*time*/) override;
-  void update(const ros::Time& /*time*/, const ros::Duration& /*period*/) override;
-  void stopping(const ros::Time& /*time*/) override;
+  bool init(hardware_interface::EffortJointInterface* hw, rclcpp::Node& /*n*/) override;
+  void starting(const rclcpp::Time& /*time*/) override;
+  void update(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/) override;
+  void stopping(const rclcpp::Time& /*time*/) override;
 
 private:
   std::vector<hardware_interface::JointHandle> joint_effort_commands_;

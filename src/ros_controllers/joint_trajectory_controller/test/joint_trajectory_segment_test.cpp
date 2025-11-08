@@ -184,11 +184,11 @@ public:
   {
     p_start.positions.resize(1, 2.0);
     p_start.velocities.resize(1, -1.0);
-    p_start.time_from_start = ros::Duration(1.0);
+    p_start.time_from_start = rclcpp::Duration(1.0);
 
     p_end.positions.resize(1, 4.0);
     p_end.velocities.resize(1, -2.0);
-    p_end.time_from_start = ros::Duration(2.0);
+    p_end.time_from_start = rclcpp::Duration(2.0);
 
     start_time = (traj_start_time + p_start.time_from_start).toSec();
     start_state.position.push_back(p_start.positions.front());
@@ -200,7 +200,7 @@ public:
   }
 
 protected:
-  ros::Time            traj_start_time;
+  rclcpp::Time            traj_start_time;
   JointTrajectoryPoint p_start;
   JointTrajectoryPoint p_end;
 

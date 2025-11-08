@@ -29,7 +29,7 @@
 
 using namespace controller_manager_tests;
 
-bool PosEffController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle &n)
+bool PosEffController::init(hardware_interface::RobotHW* robot_hw, rclcpp::Node &n)
 {
   std::vector<std::string> pos_joints;
   if (!n.getParam("position_joints", pos_joints)) {return false;}
@@ -58,17 +58,17 @@ bool PosEffController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHand
   return true;
 }
 
-void PosEffController::starting(const ros::Time& /*time*/)
+void PosEffController::starting(const rclcpp::Time& /*time*/)
 {
-  ROS_INFO("Starting PosEffController");
+  RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "Starting PosEffController");
 }
 
-void PosEffController::update(const ros::Time& /*time*/, const ros::Duration& /*period*/)
+void PosEffController::update(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
 {}
 
-void PosEffController::stopping(const ros::Time& /*time*/)
+void PosEffController::stopping(const rclcpp::Time& /*time*/)
 {
-  ROS_INFO("Stopping PosEffController");
+  RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "Stopping PosEffController");
 }
 
 PLUGINLIB_EXPORT_CLASS(controller_manager_tests::PosEffController, controller_interface::ControllerBase)

@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(four_wheel_steering_controller)
-
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
+find_package(ament_cmake REQUIRED)
+find_package(${${PROJECT_NAME}_CATKIN_DEPS} REQUIRED)
 
 set(${PROJECT_NAME}_CATKIN_DEPS
     controller_interface
@@ -15,32 +12,35 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     urdf_geometry_parser
     pluginlib)
 
-find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS})
-
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
-)
-
 include_directories(
-  include ${catkin_INCLUDE_DIRS}
+  include
 )
 
 add_library(${PROJECT_NAME} src/four_wheel_steering_controller.cpp src/odometry.cpp src/speed_limiter.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+ament_target_dependencies(${PROJECT_NAME} "four_wheel_steering_msgs" "urdf_geometry_parser" "rclcpp" "geometry_msgs" "nav_msgs" "controller_manager" "std_msgs" "std_srvs" "pluginlib" "tf2_ros" "controller_interface" "realtime_tools" "hardware_interface")
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+ament_export_dependencies(${${PROJECT_NAME}_CATKIN_DEPS})
+ament_package()
 
 # Install library
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-  )
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  
+)
 
 install(FILES four_wheel_steering_controller_plugins.xml
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+    DESTINATION share/${PROJECT_NAME}
+)
 
-if(CATKIN_ENABLE_TESTING)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
+if(BUILD_TESTING)
   find_package(catkin REQUIRED COMPONENTS rosgraph_msgs rostest std_srvs controller_manager tf)
   include_directories(${catkin_INCLUDE_DIRS})
 
@@ -48,20 +48,20 @@ if(CATKIN_ENABLE_TESTING)
   target_link_libraries(four_wheel_steering ${catkin_LIBRARIES})
 
   add_dependencies(tests four_wheel_steering)
+  target_link_libraries(four_wheel_steering_controller_twist_cmd_test ${catkin_LIBRARIES})
+  target_link_libraries(four_wheel_steering_controller_4ws_cmd_test ${catkin_LIBRARIES})
+  target_link_libraries(four_wheel_steering_wrong_config_test ${catkin_LIBRARIES})
 
   add_rostest_gtest(four_wheel_steering_controller_twist_cmd_test
                     test/four_wheel_steering_controller_twist_cmd.test
                     test/src/four_wheel_steering_twist_cmd_test.cpp)
-  target_link_libraries(four_wheel_steering_controller_twist_cmd_test ${catkin_LIBRARIES})
 
   add_rostest_gtest(four_wheel_steering_controller_4ws_cmd_test
                     test/four_wheel_steering_controller_4ws_cmd.test
                     test/src/four_wheel_steering_4ws_cmd_test.cpp)
-  target_link_libraries(four_wheel_steering_controller_4ws_cmd_test ${catkin_LIBRARIES})
 
   add_rostest_gtest(four_wheel_steering_wrong_config_test
                     test/four_wheel_steering_wrong_config.test
                     test/src/four_wheel_steering_wrong_config.cpp)
-  target_link_libraries(four_wheel_steering_wrong_config_test ${catkin_LIBRARIES})
 
 endif()

@@ -1,51 +1,44 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(imu_sensor_controller)
+find_package(ament_cmake REQUIRED)
+find_package(controller_interface REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(realtime_tools REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
+include_directories(include ${Boost_INCLUDE_DIR})
+
+add_library(${PROJECT_NAME}
+  src/imu_sensor_controller.cpp
+  include/imu_sensor_controller/imu_sensor_controller.h)
+ament_target_dependencies(${PROJECT_NAME} "pluginlib" "controller_interface" "sensor_msgs" "realtime_tools" "hardware_interface")
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+ament_export_dependencies(controller_interface hardware_interface pluginlib realtime_tools rclcpp sensor_msgs)
+ament_package()
+
+# Install
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION include/${PROJECT_NAME}
+)
+
+# Install library
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  
+)
+
+install(FILES imu_sensor_plugin.xml
+              imu_sensor_controller.yaml
+              imu_sensor_controller.launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
-
-find_package(catkin REQUIRED COMPONENTS
-  controller_interface
-  hardware_interface
-  pluginlib
-  realtime_tools
-  roscpp
-  sensor_msgs
-)
-
-catkin_package(
-  CATKIN_DEPENDS
-    controller_interface
-    hardware_interface
-    pluginlib
-    realtime_tools
-    roscpp
-    sensor_msgs
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  )
-
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
-
-add_library(${PROJECT_NAME}
-  src/imu_sensor_controller.cpp
-  include/imu_sensor_controller/imu_sensor_controller.h)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
-# Install
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-
-# Install library
-install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-  )
-
-install(FILES imu_sensor_plugin.xml
-              imu_sensor_controller.yaml
-              imu_sensor_controller.launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

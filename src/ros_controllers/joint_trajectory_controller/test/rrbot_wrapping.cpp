@@ -28,8 +28,8 @@
 // NOTE: The contents of this file have been taken largely from the ros_control wiki tutorials
 
 // ROS
-#include <ros/ros.h>
-#include <std_msgs/Float64.h>
+#include "rclcpp/rclcpp.hpp"
+#include <std_msgs/msg/float64.hpp>
 
 // angles
 #include <angles/angles.h>
@@ -71,12 +71,12 @@ public:
     registerInterface(&jnt_vel_interface_);
 
     // Smoothing subscriber
-    smoothing_sub_ = ros::NodeHandle().subscribe("smoothing", 1, &RRbotWrapping::smoothingCB, this);
+    smoothing_sub_ = rclcpp::Node().subscribe("smoothing", 1, &RRbotWrapping::smoothingCB, this);
     smoothing_.initRT(0.0);
   }
 
-  ros::Time getTime() const {return ros::Time::now();}
-  ros::Duration getPeriod() const {return ros::Duration(0.01);}
+  rclcpp::Time getTime() const {return rclcpp::Time::now();}
+  rclcpp::Duration getPeriod() const {return rclcpp::Duration(0.01);}
 
   void read() {}
 
@@ -104,23 +104,23 @@ private:
   double eff_[2];
 
   realtime_tools::RealtimeBuffer<double> smoothing_;
-  void smoothingCB(const std_msgs::Float64& smoothing) {smoothing_.writeFromNonRT(smoothing.data);}
+  void smoothingCB(const std_msgs::msg::Float64& smoothing) {smoothing_.writeFromNonRT(smoothing.data);}
 
   ros::Subscriber smoothing_sub_;
 };
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "rrbot_wrapping");
-  ros::NodeHandle nh;
+  rclcpp::init(argc, argv);
+  auto nh = rclcpp::Node::make_shared("rrbot_wrapping");
 
   RRbotWrapping robot;
   controller_manager::ControllerManager cm(&robot, nh);
 
-  ros::Rate rate(1.0 / robot.getPeriod().toSec());
+  rclcpp::Rate rate(1.0 / robot.getPeriod().toSec());
   ros::AsyncSpinner spinner(1);
   spinner.start();
-  while (ros::ok())
+  while (rclcpp::ok())
   {
     robot.read();
     cm.update(robot.getTime(), robot.getPeriod());

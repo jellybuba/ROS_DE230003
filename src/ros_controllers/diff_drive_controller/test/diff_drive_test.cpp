@@ -28,7 +28,8 @@
 /// \author Bence Magyar
 
 #include "test_common.h"
-#include <tf/transform_listener.h>
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 
 // TEST CASES
 TEST_F(DiffDriveControllerTest, testForward)
@@ -37,22 +38,22 @@ TEST_F(DiffDriveControllerTest, testForward)
   waitForController();
 
   // zero everything before test
-  geometry_msgs::Twist cmd_vel;
+  geometry_msgs::msg::Twist cmd_vel;
   cmd_vel.linear.x = 0.0;
   cmd_vel.angular.z = 0.0;
   publish(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
   // get initial odom
-  nav_msgs::Odometry old_odom = getLastOdom();
+  nav_msgs::msg::Odometry old_odom = getLastOdom();
   // send a velocity command of 0.1 m/s
   cmd_vel.linear.x = 0.1;
   publish(cmd_vel);
   // wait for 10s
-  ros::Duration(10.0).sleep();
+  rclcpp::Duration(10.0).sleep();
 
-  nav_msgs::Odometry new_odom = getLastOdom();
+  nav_msgs::msg::Odometry new_odom = getLastOdom();
 
-  const ros::Duration actual_elapsed_time = new_odom.header.stamp - old_odom.header.stamp;
+  const rclcpp::Duration actual_elapsed_time = new_odom.header.stamp - old_odom.header.stamp;
 
   const double expected_distance = cmd_vel.linear.x * actual_elapsed_time.toSec();
 
@@ -86,27 +87,27 @@ TEST_F(DiffDriveControllerTest, testTurn)
   waitForController();
 
   // zero everything before test
-  geometry_msgs::Twist cmd_vel;
+  geometry_msgs::msg::Twist cmd_vel;
   cmd_vel.linear.x = 0.0;
   cmd_vel.angular.z = 0.0;
   publish(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
   // get initial odom
-  nav_msgs::Odometry old_odom = getLastOdom();
+  nav_msgs::msg::Odometry old_odom = getLastOdom();
   // send a velocity command
   cmd_vel.angular.z = M_PI/10.0;
   publish(cmd_vel);
   // wait for 10s
-  ros::Duration(10.0).sleep();
+  rclcpp::Duration(10.0).sleep();
 
-  nav_msgs::Odometry new_odom = getLastOdom();
+  nav_msgs::msg::Odometry new_odom = getLastOdom();
 
   // check if the robot rotated PI around z, changes in the other fields should be ~~0
   EXPECT_LT(fabs(new_odom.pose.pose.position.x - old_odom.pose.pose.position.x), EPS);
   EXPECT_LT(fabs(new_odom.pose.pose.position.y - old_odom.pose.pose.position.y), EPS);
   EXPECT_LT(fabs(new_odom.pose.pose.position.z - old_odom.pose.pose.position.z), EPS);
 
-  const ros::Duration actual_elapsed_time = new_odom.header.stamp - old_odom.header.stamp;
+  const rclcpp::Duration actual_elapsed_time = new_odom.header.stamp - old_odom.header.stamp;
   const double expected_rotation = cmd_vel.angular.z * actual_elapsed_time.toSec();
 
   // convert to rpy and test that way
@@ -133,8 +134,8 @@ TEST_F(DiffDriveControllerTest, testOdomFrame)
   waitForController();
 
   // set up tf listener
-  tf::TransformListener listener;
-  ros::Duration(2.0).sleep();
+  tf2_ros::TransformListener listener;
+  rclcpp::Duration(2.0).sleep();
   // check the odom frame exist
   EXPECT_TRUE(listener.frameExists("odom"));
 }
@@ -142,11 +143,12 @@ TEST_F(DiffDriveControllerTest, testOdomFrame)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "diff_drive_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("diff_drive_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();
-  //ros::Duration(0.5).sleep();
+  //rclcpp::Duration(0.5).sleep();
   int ret = RUN_ALL_TESTS();
   spinner.stop();
   ros::shutdown();

@@ -15,12 +15,13 @@
 
   <author>Vijay Pradeep</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>controller_interface</depend> 
   <depend>forward_command_controller</depend> 
   <depend>pluginlib</depend>
 
   <export>
     <controller_interface plugin="${prefix}/position_controllers_plugins.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

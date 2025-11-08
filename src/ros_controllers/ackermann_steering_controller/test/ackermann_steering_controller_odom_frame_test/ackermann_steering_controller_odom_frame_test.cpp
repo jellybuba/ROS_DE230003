@@ -29,7 +29,8 @@
 /// \author Masaru Morita
 
 #include "../common/include/test_common.h"
-#include <tf/transform_listener.h>
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 
 // TEST CASES
 TEST_F(AckermannSteeringControllerTest, testNoOdomFrame)
@@ -37,11 +38,11 @@ TEST_F(AckermannSteeringControllerTest, testNoOdomFrame)
   // wait for ROS
   while(!isControllerAlive())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
   // set up tf listener
-  tf::TransformListener listener;
-  ros::Duration(2.0).sleep();
+  tf2_ros::TransformListener listener;
+  rclcpp::Duration(2.0).sleep();
   // check the original odom frame doesn't exist
   EXPECT_FALSE(listener.frameExists("odom"));
 }
@@ -51,11 +52,11 @@ TEST_F(AckermannSteeringControllerTest, testNewOdomFrame)
   // wait for ROS
   while(!isControllerAlive())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
   // set up tf listener
-  tf::TransformListener listener;
-  ros::Duration(2.0).sleep();
+  tf2_ros::TransformListener listener;
+  rclcpp::Duration(2.0).sleep();
   // check the new_odom frame does exist
   EXPECT_TRUE(listener.frameExists("new_odom"));
 }
@@ -65,12 +66,12 @@ TEST_F(AckermannSteeringControllerTest, testOdomTopic)
   // wait for ROS
   while(!isControllerAlive())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
 
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
   // get an odom message
-  nav_msgs::Odometry odom_msg = getLastOdom();
+  nav_msgs::msg::Odometry odom_msg = getLastOdom();
   // check its frame_id
   ASSERT_STREQ(odom_msg.header.frame_id.c_str(), "new_odom");
 }
@@ -78,7 +79,8 @@ TEST_F(AckermannSteeringControllerTest, testOdomTopic)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "ackermann_steering_controller_odom_frame_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("ackermann_steering_controller_odom_frame_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

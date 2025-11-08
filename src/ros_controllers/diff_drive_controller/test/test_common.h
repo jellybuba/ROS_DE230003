@@ -34,14 +34,14 @@
 
 #include <gtest/gtest.h>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
-#include <geometry_msgs/TwistStamped.h>
-#include <nav_msgs/Odometry.h>
-#include <control_msgs/JointTrajectoryControllerState.h>
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <control_msgs/msg/joint_trajectory_controller_state.hpp>
 #include <tf/tf.h>
 
-#include <std_srvs/Empty.h>
+#include <std_srvs/srv/empty.hpp>
 
 // Floating-point value comparison threshold
 const double EPS = 0.01;
@@ -57,12 +57,12 @@ public:
 
   DiffDriveControllerTest()
   : received_first_odom(false)
-  , cmd_pub(nh.advertise<geometry_msgs::Twist>("cmd_vel", 100))
+  , cmd_pub(nh.advertise<geometry_msgs::msg::Twist>("cmd_vel", 100))
   , odom_sub(nh.subscribe("odom", 100, &DiffDriveControllerTest::odomCallback, this))
   , vel_out_sub(nh.subscribe("cmd_vel_out", 100, &DiffDriveControllerTest::cmdVelOutCallback, this))
   , joint_traj_controller_state_sub(nh.subscribe("wheel_joint_controller_state", 100, &DiffDriveControllerTest::jointTrajectoryControllerStateCallback, this))
-  , start_srv(nh.serviceClient<std_srvs::Empty>("start"))
-  , stop_srv(nh.serviceClient<std_srvs::Empty>("stop"))
+  , start_srv(nh.serviceClient<std_srvs::srv::Empty>("start"))
+  , stop_srv(nh.serviceClient<std_srvs::srv::Empty>("stop"))
   {
   }
 
@@ -72,17 +72,17 @@ public:
     joint_traj_controller_state_sub.shutdown();
   }
 
-  nav_msgs::Odometry getLastOdom(){ return last_odom; }
-  geometry_msgs::TwistStamped getLastCmdVelOut(){ return last_cmd_vel_out; }
-  control_msgs::JointTrajectoryControllerState getLastJointTrajectoryControllerState(){ return last_joint_traj_controller_state; }
-  void publish(geometry_msgs::Twist cmd_vel){ cmd_pub.publish(cmd_vel); }
+  nav_msgs::msg::Odometry getLastOdom(){ return last_odom; }
+  geometry_msgs::msg::TwistStamped getLastCmdVelOut(){ return last_cmd_vel_out; }
+  control_msgs::msg::JointTrajectoryControllerState getLastJointTrajectoryControllerState(){ return last_joint_traj_controller_state; }
+  void publish(geometry_msgs::msg::Twist cmd_vel){ cmd_pub.publish(cmd_vel); }
   bool isControllerAlive()const{ return (odom_sub.getNumPublishers() > 0) && (cmd_pub.getNumSubscribers() > 0); }
-  bool isPublishingCmdVelOut(const ros::Duration &timeout=ros::Duration(1)) const
+  bool isPublishingCmdVelOut(const rclcpp::Duration &timeout=rclcpp::Duration(1)) const
   {
-    ros::Time start = ros::Time::now();
+    rclcpp::Time start = rclcpp::Time::now();
     int get_num_publishers = vel_out_sub.getNumPublishers();
-    while ( (get_num_publishers == 0) && (ros::Time::now() < start + timeout) ) {
-      ros::Duration(0.1).sleep();
+    while ( (get_num_publishers == 0) && (rclcpp::Time::now() < start + timeout) ) {
+      rclcpp::Duration(0.1).sleep();
       get_num_publishers = vel_out_sub.getNumPublishers();
     }
     return (get_num_publishers > 0);
@@ -90,46 +90,46 @@ public:
   bool isPublishingJointTrajectoryControllerState(){ return (joint_traj_controller_state_sub.getNumPublishers() > 0); }
   bool hasReceivedFirstOdom()const{ return received_first_odom; }
 
-  void start(){ std_srvs::Empty srv; start_srv.call(srv); }
-  void stop(){ std_srvs::Empty srv; stop_srv.call(srv); }
+  void start(){ std_srvs::srv::Empty srv; start_srv.call(srv); }
+  void stop(){ std_srvs::srv::Empty srv; stop_srv.call(srv); }
 
   void waitForController() const
   {
-    while(!isControllerAlive() && ros::ok())
+    while(!isControllerAlive() && rclcpp::ok())
     {
       ROS_DEBUG_STREAM_THROTTLE(0.5, "Waiting for controller.");
-      ros::Duration(0.1).sleep();
+      rclcpp::Duration(0.1).sleep();
     }
-    if (!ros::ok())
+    if (!rclcpp::ok())
       FAIL() << "Something went wrong while executing test.";
   }
 
   void waitForOdomMsgs() const
   {
-    while(!hasReceivedFirstOdom() && ros::ok())
+    while(!hasReceivedFirstOdom() && rclcpp::ok())
     {
       ROS_DEBUG_STREAM_THROTTLE(0.5, "Waiting for odom messages to be published.");
-      ros::Duration(0.01).sleep();
+      rclcpp::Duration(0.01).sleep();
     }
-    if (!ros::ok())
+    if (!rclcpp::ok())
       FAIL() << "Something went wrong while executing test.";
   }
 
 private:
   bool received_first_odom;
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   ros::Publisher cmd_pub;
   ros::Subscriber odom_sub;
   ros::Subscriber vel_out_sub;
-  nav_msgs::Odometry last_odom;
-  geometry_msgs::TwistStamped last_cmd_vel_out;
+  nav_msgs::msg::Odometry last_odom;
+  geometry_msgs::msg::TwistStamped last_cmd_vel_out;
   ros::Subscriber joint_traj_controller_state_sub;
-  control_msgs::JointTrajectoryControllerState last_joint_traj_controller_state;
+  control_msgs::msg::JointTrajectoryControllerState last_joint_traj_controller_state;
 
   ros::ServiceClient start_srv;
   ros::ServiceClient stop_srv;
 
-  void odomCallback(const nav_msgs::Odometry& odom)
+  void odomCallback(const nav_msgs::msg::Odometry& odom)
   {
     ROS_INFO_STREAM("Callback received: pos.x: " << odom.pose.pose.position.x
                      << ", orient.z: " << odom.pose.pose.orientation.z
@@ -139,7 +139,7 @@ private:
     received_first_odom = true;
   }
 
-  void jointTrajectoryControllerStateCallback(const control_msgs::JointTrajectoryControllerState& joint_traj_controller_state)
+  void jointTrajectoryControllerStateCallback(const control_msgs::msg::JointTrajectoryControllerState& joint_traj_controller_state)
   {
     ROS_INFO_STREAM("Joint trajectory controller state callback.");
     ROS_DEBUG_STREAM("Joint trajectory controller state callback received:\n" <<
@@ -148,7 +148,7 @@ private:
     last_joint_traj_controller_state = joint_traj_controller_state;
   }
 
-  void cmdVelOutCallback(const geometry_msgs::TwistStamped& cmd_vel_out)
+  void cmdVelOutCallback(const geometry_msgs::msg::TwistStamped& cmd_vel_out)
   {
     ROS_INFO_STREAM("Callback received: lin: " << cmd_vel_out.twist.linear.x
                      << ", ang: " << cmd_vel_out.twist.angular.z);
@@ -156,7 +156,7 @@ private:
   }
 };
 
-inline tf::Quaternion tfQuatFromGeomQuat(const geometry_msgs::Quaternion& quat)
+inline tf::Quaternion tfQuatFromGeomQuat(const geometry_msgs::msg::Quaternion& quat)
 {
   return tf::Quaternion(quat.x, quat.y, quat.z, quat.w);
 }

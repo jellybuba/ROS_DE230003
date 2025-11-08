@@ -43,7 +43,7 @@
 #include <urdf/model.h>
 
 // ROS messages
-#include <control_msgs/GripperCommandAction.h>
+#include <control_msgs/msg/gripper_command_action.hpp>
 
 // actionlib
 #include <actionlib/server/action_server.h>
@@ -85,18 +85,18 @@ public:
 
   /** \name Non Real-Time Safe Functions
    *\{*/
-  bool init(HardwareInterface* hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
+  bool init(HardwareInterface* hw, rclcpp::Node& root_nh, rclcpp::Node& controller_nh);
   /*\}*/
 
   /** \name Real-Time Safe Functions
    *\{*/
   /** \brief Holds the current position. */
-  void starting(const ros::Time& time);
+  void starting(const rclcpp::Time& time);
 
   /** \brief Cancels the active action goal, if any. */
-  void stopping(const ros::Time& time);
+  void stopping(const rclcpp::Time& time);
 
-  void update(const ros::Time& time, const ros::Duration& period);
+  void update(const rclcpp::Time& time, const rclcpp::Duration& period);
   /*\}*/
 
   realtime_tools::RealtimeBuffer<Commands> command_;
@@ -104,11 +104,11 @@ public:
 
 private:
 
-  typedef actionlib::ActionServer<control_msgs::GripperCommandAction>                         ActionServer;
+  typedef actionlib::ActionServer<control_msgs::msg::GripperCommandAction>                         ActionServer;
   typedef std::shared_ptr<ActionServer>                                                       ActionServerPtr;
   typedef ActionServer::GoalHandle                                                            GoalHandle;
-  typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::GripperCommandAction>        RealtimeGoalHandle;
-  typedef boost::shared_ptr<RealtimeGoalHandle>                                               RealtimeGoalHandlePtr;
+  typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::msg::GripperCommandAction>        RealtimeGoalHandle;
+  typedef std::shared_ptr<RealtimeGoalHandle>                                               RealtimeGoalHandlePtr;
 
   typedef HardwareInterfaceAdapter<HardwareInterface> HwIfaceAdapter;
 
@@ -122,22 +122,22 @@ private:
   HwIfaceAdapter                               hw_iface_adapter_;   ///< Adapts desired goal state to HW interface.
 
   RealtimeGoalHandlePtr                        rt_active_goal_;     ///< Currently active action goal, if any.
-  control_msgs::GripperCommandResultPtr        pre_alloc_result_;
+  control_msgs::msg::GripperCommandResultPtr        pre_alloc_result_;
 
-  ros::Duration action_monitor_period_;
+  rclcpp::Duration action_monitor_period_;
 
   // ROS API
-  ros::NodeHandle    controller_nh_;
+  rclcpp::Node    controller_nh_;
   ActionServerPtr    action_server_;
 
-  ros::Timer         goal_handle_timer_;
+  rclcpp::Timer         goal_handle_timer_;
 
   void goalCB(GoalHandle gh);
   void cancelCB(GoalHandle gh);
   void preemptActiveGoal();
-  void setHoldPosition(const ros::Time& time);
+  void setHoldPosition(const rclcpp::Time& time);
 
-  ros::Time last_movement_time_;                                    ///< Store stall time
+  rclcpp::Time last_movement_time_;                                    ///< Store stall time
   double computed_command_;                                         ///< Computed command
 
   double stall_timeout_, stall_velocity_threshold_;                 ///< Stall related parameters
@@ -146,7 +146,7 @@ private:
   /**
    * \brief Check for success and publish appropriate result and feedback.
    **/
-  void checkForSuccess(const ros::Time& time, double error_position, double current_position, double current_velocity);
+  void checkForSuccess(const rclcpp::Time& time, double error_position, double current_position, double current_velocity);
 
 };
 

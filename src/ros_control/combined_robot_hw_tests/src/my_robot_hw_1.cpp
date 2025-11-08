@@ -32,7 +32,7 @@
 namespace combined_robot_hw_tests
 {
 
-bool MyRobotHW1::init(ros::NodeHandle& /*root_nh*/, ros::NodeHandle &/*robot_hw_nh*/)
+bool MyRobotHW1::init(rclcpp::Node& /*root_nh*/, rclcpp::Node &/*robot_hw_nh*/)
 {
   using namespace hardware_interface;
 
@@ -86,12 +86,12 @@ bool MyRobotHW1::init(ros::NodeHandle& /*root_nh*/, ros::NodeHandle &/*robot_hw_
 }
 
 
-void MyRobotHW1::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
+void MyRobotHW1::read(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
 {
   joint_position_[0] = 2.7;
 }
 
-void MyRobotHW1::write(const ros::Time& /*time*/, const ros::Duration& /*period*/)
+void MyRobotHW1::write(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
 {
   // Just to test that write() is called
   joint_effort_command_[1] = joint_effort_command_[0];

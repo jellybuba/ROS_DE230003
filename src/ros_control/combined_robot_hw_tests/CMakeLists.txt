@@ -1,26 +1,25 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(combined_robot_hw_tests)
+find_package(ament_cmake REQUIRED)
+find_package(combined_robot_hw REQUIRED)
+find_package(controller_manager REQUIRED)
+find_package(controller_manager_msgs REQUIRED)
+find_package(controller_manager_tests REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS
-  combined_robot_hw
-  controller_manager
-  controller_manager_msgs
-  controller_manager_tests
-  hardware_interface
-  pluginlib
-  roscpp
-)
 
 # Declare a catkin package
-catkin_package()
 
+ament_package()
 
 #############
 ## Testing ##
 #############
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
   find_package(rostest REQUIRED)
 
   # Specify header include paths
@@ -36,21 +35,20 @@ if(CATKIN_ENABLE_TESTING)
 
   add_executable(combined_robot_hw_dummy_app EXCLUDE_FROM_ALL src/dummy_app.cpp)
   target_link_libraries(combined_robot_hw_dummy_app ${PROJECT_NAME} ${catkin_LIBRARIES})
+  target_link_libraries(combined_robot_hw_test ${PROJECT_NAME} ${catkin_LIBRARIES})
+  add_dependencies(combined_robot_hw_cm_test combined_robot_hw_dummy_app ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(combined_robot_hw_cm_test ${PROJECT_NAME} ${catkin_LIBRARIES})
 
   add_rostest_gtest(combined_robot_hw_test
     test/combined_robot_hw_test.test
     test/combined_robot_hw_test.cpp
   )
-  target_link_libraries(combined_robot_hw_test ${PROJECT_NAME} ${catkin_LIBRARIES})
 
   add_rostest_gtest(combined_robot_hw_cm_test
     test/cm_test.test
     test/cm_test.cpp
   )
-  add_dependencies(combined_robot_hw_cm_test combined_robot_hw_dummy_app ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(combined_robot_hw_cm_test ${PROJECT_NAME} ${catkin_LIBRARIES})
 endif()
-
 
 #############
 ## Install ##
@@ -59,7 +57,7 @@ endif()
 # NOTE: Libraries and plugins required for tests are installed since CI
 # runs tests out of the install space rather than the devel space
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
 
   # Install targets
   install(TARGETS ${PROJECT_NAME}

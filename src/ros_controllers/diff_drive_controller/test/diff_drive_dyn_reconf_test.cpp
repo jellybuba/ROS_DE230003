@@ -28,7 +28,8 @@
 /// \author Jeremie Deray
 
 #include "test_common.h"
-#include <tf/transform_listener.h>
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 
 #include <dynamic_reconfigure/server.h>
 
@@ -36,18 +37,18 @@
 TEST_F(DiffDriveControllerTest, testDynReconfServerAlive)
 {
   // wait for ROS
-  while(!isControllerAlive() && ros::ok())
+  while(!isControllerAlive() && rclcpp::ok())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
-  if (!ros::ok())
+  if (!rclcpp::ok())
     FAIL() << "Something went wrong while executing test";
 
   // Expect server is alive
   EXPECT_TRUE(ros::service::exists("diffbot_controller/set_parameters", true));
 
-  dynamic_reconfigure::ReconfigureRequest  srv_req;
-  dynamic_reconfigure::ReconfigureResponse srv_resp;
+  dynamic_reconfigure::srv::ReconfigureRequest  srv_req;
+  dynamic_reconfigure::srv::ReconfigureResponse srv_resp;
 
   // Expect server is callable (get-fashion)
   EXPECT_TRUE(ros::service::call("diffbot_controller/set_parameters", srv_req, srv_resp));
@@ -78,7 +79,7 @@ TEST_F(DiffDriveControllerTest, testDynReconfServerAlive)
     EXPECT_EQ(50, srv_resp.config.doubles[3].value);
   }
 
-  dynamic_reconfigure::DoubleParameter double_param;
+  dynamic_reconfigure::msg::DoubleParameter double_param;
   double_param.name = "left_wheel_radius_multiplier";
   double_param.value = 0.95;
 
@@ -99,7 +100,7 @@ TEST_F(DiffDriveControllerTest, testDynReconfServerAlive)
 
   srv_req.config.doubles.push_back(double_param);
 
-  dynamic_reconfigure::BoolParameter bool_param;
+  dynamic_reconfigure::msg::BoolParameter bool_param;
   bool_param.name = "enable_odom_tf";
   bool_param.value = false;
 
@@ -138,23 +139,23 @@ TEST_F(DiffDriveControllerTest, testDynReconfServerAlive)
 TEST_F(DiffDriveControllerTest, testDynReconfEnableTf)
 {
   // wait for ROS
-  while(!isControllerAlive() && ros::ok())
+  while(!isControllerAlive() && rclcpp::ok())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
-  if (!ros::ok())
+  if (!rclcpp::ok())
     FAIL() << "Something went wrong while executing test";
 
   // set up tf listener
-  tf::TransformListener listener;
-  ros::Duration(2.0).sleep();
+  tf2_ros::TransformListener listener;
+  rclcpp::Duration(2.0).sleep();
   // check the odom frame doesn't exist
   EXPECT_FALSE(listener.frameExists("odom"));
 
-  dynamic_reconfigure::ReconfigureRequest  srv_req;
-  dynamic_reconfigure::ReconfigureResponse srv_resp;
+  dynamic_reconfigure::srv::ReconfigureRequest  srv_req;
+  dynamic_reconfigure::srv::ReconfigureResponse srv_resp;
 
-  dynamic_reconfigure::BoolParameter bool_param;
+  dynamic_reconfigure::msg::BoolParameter bool_param;
   bool_param.name = "enable_odom_tf";
   bool_param.value = true;
 
@@ -162,7 +163,7 @@ TEST_F(DiffDriveControllerTest, testDynReconfEnableTf)
 
   EXPECT_TRUE(ros::service::call("diffbot_controller/set_parameters", srv_req, srv_resp));
 
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
   // check the odom frame doesn't exist
   EXPECT_TRUE(listener.frameExists("odom"));
 }
@@ -170,7 +171,8 @@ TEST_F(DiffDriveControllerTest, testDynReconfEnableTf)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "diff_drive_dyn_reconf_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("diff_drive_dyn_reconf_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

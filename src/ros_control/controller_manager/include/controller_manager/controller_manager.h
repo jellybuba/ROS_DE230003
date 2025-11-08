@@ -38,16 +38,16 @@
 #include <mutex>
 #include <string>
 #include <vector>
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <hardware_interface/robot_hw.h>
 #include <ros/node_handle.h>
 #include <pluginlib/class_loader.hpp>
-#include <controller_manager_msgs/ListControllerTypes.h>
-#include <controller_manager_msgs/ListControllers.h>
-#include <controller_manager_msgs/ReloadControllerLibraries.h>
-#include <controller_manager_msgs/LoadController.h>
-#include <controller_manager_msgs/UnloadController.h>
-#include <controller_manager_msgs/SwitchController.h>
+#include <controller_manager_msgs/srv/list_controller_types.hpp>
+#include <controller_manager_msgs/srv/list_controllers.hpp>
+#include <controller_manager_msgs/srv/reload_controller_libraries.hpp>
+#include <controller_manager_msgs/srv/load_controller.hpp>
+#include <controller_manager_msgs/srv/unload_controller.hpp>
+#include <controller_manager_msgs/srv/switch_controller.hpp>
 #include <controller_manager/controller_loader_interface.h>
 
 
@@ -70,11 +70,11 @@ public:
   /** \brief Constructor
    *
    * \param robot_hw A pointer to a robot hardware interface
-   * \param nh The ros::NodeHandle in whose namespace all ROS interfaces should
+   * \param nh The rclcpp::Node in whose namespace all ROS interfaces should
    * operate.
    */
   ControllerManager(hardware_interface::RobotHW *robot_hw,
-                   const ros::NodeHandle& nh=ros::NodeHandle());
+                   const rclcpp::Node& nh=rclcpp::Node());
   virtual ~ControllerManager() = default;
 
   /** \name Real-Time Safe Functions
@@ -89,7 +89,7 @@ public:
    * \param reset_controllers If \c true, stop and start all running
    * controllers before updating
    */
-  void update(const ros::Time& time, const ros::Duration& period, bool reset_controllers=false);
+  void update(const rclcpp::Time& time, const rclcpp::Duration& period, bool reset_controllers=false);
   /*\}*/
 
   /** \name Non Real-Time Safe Functions
@@ -104,7 +104,7 @@ public:
    * It determines the controller type by accessing the ROS parameter "type" in
    * the namespace given by \c name relative to the namespace of \ref
    * root_nh_. It then initializes the controller with the
-   * hardware_interface::RobotHW pointer \ref robot_hw_, the ros::NodeHandle
+   * hardware_interface::RobotHW pointer \ref robot_hw_, the rclcpp::Node
    * describing this namespace, and a reference to a std::set to retrieve the
    * resources needed by this controller.
    *
@@ -172,14 +172,14 @@ public:
 private:
   void getControllerNames(std::vector<std::string> &v);
 
-  void manageSwitch(const ros::Time& time);
-  void stopControllers(const ros::Time& time);
-  void startControllers(const ros::Time& time);
-  void startControllersAsap(const ros::Time& time);
+  void manageSwitch(const rclcpp::Time& time);
+  void stopControllers(const rclcpp::Time& time);
+  void startControllers(const rclcpp::Time& time);
+  void startControllersAsap(const rclcpp::Time& time);
 
   hardware_interface::RobotHW* robot_hw_;
 
-  ros::NodeHandle root_nh_, cm_node_;
+  rclcpp::Node root_nh_, cm_node_;
 
   std::list<ControllerLoaderInterfaceSharedPtr> controller_loaders_;
 
@@ -192,7 +192,7 @@ private:
   {
     bool do_switch      = {false};
     bool started        = {false};
-    ros::Time init_time = {ros::TIME_MAX};
+    rclcpp::Time init_time = {ros::TIME_MAX};
 
     // Switch options
     int strictness  = {0};
@@ -221,18 +221,18 @@ private:
 
   /** \name ROS Service API
    *\{*/
-  bool listControllerTypesSrv(controller_manager_msgs::ListControllerTypes::Request &req,
-                              controller_manager_msgs::ListControllerTypes::Response &resp);
-  bool listControllersSrv(controller_manager_msgs::ListControllers::Request &req,
-                          controller_manager_msgs::ListControllers::Response &resp);
-  bool switchControllerSrv(controller_manager_msgs::SwitchController::Request &req,
-                           controller_manager_msgs::SwitchController::Response &resp);
-  bool loadControllerSrv(controller_manager_msgs::LoadController::Request &req,
-                          controller_manager_msgs::LoadController::Response &resp);
-  bool unloadControllerSrv(controller_manager_msgs::UnloadController::Request &req,
-                         controller_manager_msgs::UnloadController::Response &resp);
-  bool reloadControllerLibrariesSrv(controller_manager_msgs::ReloadControllerLibraries::Request &req,
-                                    controller_manager_msgs::ReloadControllerLibraries::Response &resp);
+  bool listControllerTypesSrv(controller_manager_msgs::srv::ListControllerTypes::Request &req,
+                              controller_manager_msgs::srv::ListControllerTypes::Response &resp);
+  bool listControllersSrv(controller_manager_msgs::srv::ListControllers::Request &req,
+                          controller_manager_msgs::srv::ListControllers::Response &resp);
+  bool switchControllerSrv(controller_manager_msgs::srv::SwitchController::Request &req,
+                           controller_manager_msgs::srv::SwitchController::Response &resp);
+  bool loadControllerSrv(controller_manager_msgs::srv::LoadController::Request &req,
+                          controller_manager_msgs::srv::LoadController::Response &resp);
+  bool unloadControllerSrv(controller_manager_msgs::srv::UnloadController::Request &req,
+                         controller_manager_msgs::srv::UnloadController::Response &resp);
+  bool reloadControllerLibrariesSrv(controller_manager_msgs::srv::ReloadControllerLibraries::Request &req,
+                                    controller_manager_msgs::srv::ReloadControllerLibraries::Response &resp);
   std::mutex services_lock_;
   ros::ServiceServer srv_list_controllers_, srv_list_controller_types_, srv_load_controller_;
   ros::ServiceServer srv_unload_controller_, srv_switch_controller_, srv_reload_libraries_;

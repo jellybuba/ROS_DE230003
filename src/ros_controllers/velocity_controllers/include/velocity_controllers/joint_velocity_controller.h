@@ -53,7 +53,7 @@ namespace velocity_controllers
  * \param joint Name of the joint to control.
  *
  * Subscribes to:
- * - \b command (std_msgs::Float64) : The joint velocity to apply
+ * - \b command (std_msgs::msg::Float64) : The joint velocity to apply
  */
 typedef forward_command_controller::ForwardCommandController<hardware_interface::VelocityJointInterface>
         JointVelocityController;

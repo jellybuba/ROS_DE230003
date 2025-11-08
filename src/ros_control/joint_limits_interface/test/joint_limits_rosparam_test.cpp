@@ -38,7 +38,7 @@ TEST(JointLimitsRosParamTest, GetJointLimits)
 {
   using namespace joint_limits_interface;
 
-  ros::NodeHandle nh("test");
+  rclcpp::Node nh("test");
 
   // Invalid specification
   {
@@ -158,7 +158,7 @@ TEST(JointLimitsRosParamTest, GetSoftJointLimits)
 {
   using namespace joint_limits_interface;
 
-  ros::NodeHandle nh("test");
+  rclcpp::Node nh("test");
 
   // Invalid specification
   {
@@ -202,6 +202,7 @@ TEST(JointLimitsRosParamTest, GetSoftJointLimits)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "JointLimitsRosparamTestNode");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("JointLimitsRosparamTestNode");
   return RUN_ALL_TESTS();
 }

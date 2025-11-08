@@ -46,7 +46,7 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/rolling_mean.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace diff_drive_controller
 {
@@ -61,7 +61,7 @@ namespace diff_drive_controller
   public:
 
     /// Integration function, used to integrate the odometry:
-    typedef boost::function<void(double, double)> IntegrationFunction;
+    typedef std::function<void(double, double)> IntegrationFunction;
 
     /**
      * \brief Constructor
@@ -75,7 +75,7 @@ namespace diff_drive_controller
      * \brief Initialize the odometry
      * \param time Current time
      */
-    void init(const ros::Time &time);
+    void init(const rclcpp::Time &time);
 
     /**
      * \brief Updates the odometry class with latest wheels position
@@ -84,7 +84,7 @@ namespace diff_drive_controller
      * \param time      Current time
      * \return true if the odometry is actually updated
      */
-    bool update(double left_pos, double right_pos, const ros::Time &time);
+    bool update(double left_pos, double right_pos, const rclcpp::Time &time);
 
     /**
      * \brief Updates the odometry class with latest velocity command
@@ -92,7 +92,7 @@ namespace diff_drive_controller
      * \param angular Angular velocity [rad/s]
      * \param time    Current time
      */
-    void updateOpenLoop(double linear, double angular, const ros::Time &time);
+    void updateOpenLoop(double linear, double angular, const rclcpp::Time &time);
 
     /**
      * \brief heading getter
@@ -179,7 +179,7 @@ namespace diff_drive_controller
     void resetAccumulators();
 
     /// Current timestamp:
-    ros::Time timestamp_;
+    rclcpp::Time timestamp_;
 
     /// Current pose:
     double x_;        //   [m]

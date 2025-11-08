@@ -1,26 +1,23 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(controller_manager_tests)
+find_package(ament_cmake REQUIRED)
+find_package(controller_interface REQUIRED)
+find_package(controller_manager REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS
-  controller_interface
-  controller_manager
-  hardware_interface
-  pluginlib
-  roscpp
-)
-
-catkin_python_setup()
 
 # Declare a catkin package
-catkin_package()
 
+ament_package()
 
 #############
 ## Testing ##
 #############
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
   find_package(rostest REQUIRED)
 
   # Specify header include paths
@@ -45,15 +42,14 @@ if(CATKIN_ENABLE_TESTING)
   add_dependencies(cm_test ${catkin_EXPORTED_TARGETS})
   target_link_libraries(cm_test ${catkin_LIBRARIES} ${GTEST_LIBRARIES})
 
-  catkin_add_nosetests(test)
-
   add_rostest(test/cm_test.test DEPENDENCIES dummy_app cm_test)
 
   add_rostest(test/cm_msgs_utils_rostest.test)
 
   add_rostest(test/controller_manager_scripts.test DEPENDENCIES dummy_app)
-endif()
 
+  catkin_add_nosetests(test)
+endif()
 
 #############
 ## Install ##
@@ -62,7 +58,7 @@ endif()
 # NOTE: Libraries and plugins required for tests are installed since CI
 # runs tests out of the install space rather than the devel space
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
 
   # Install targets
   install(TARGETS ${PROJECT_NAME} 

@@ -39,7 +39,7 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/rolling_mean.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 namespace four_wheel_steering_controller
 {
@@ -54,7 +54,7 @@ namespace four_wheel_steering_controller
   public:
 
     /// Integration function, used to integrate the odometry:
-    typedef boost::function<void(double, double)> IntegrationFunction;
+    typedef std::function<void(double, double)> IntegrationFunction;
 
     /**
      * \brief Constructor
@@ -68,7 +68,7 @@ namespace four_wheel_steering_controller
      * \brief Initialize the odometry
      * \param time Current time
      */
-    void init(const ros::Time &time);
+    void init(const rclcpp::Time &time);
 
     /**
      * \brief Updates the odometry class with latest wheels and steerings position
@@ -82,7 +82,7 @@ namespace four_wheel_steering_controller
      * \return true if the odometry is actually updated
      */
     bool update(const double& fl_speed, const double& fr_speed, const double& rl_speed, const double& rr_speed,
-                double front_steering, double rear_steering, const ros::Time &time);
+                double front_steering, double rear_steering, const rclcpp::Time &time);
 
     /**
      * \brief heading getter
@@ -233,7 +233,7 @@ namespace four_wheel_steering_controller
     void resetAccumulators();
 
     /// Current timestamp:
-    ros::Time last_update_timestamp_;
+    rclcpp::Time last_update_timestamp_;
 
     /// Current pose:
     double x_;        //   [m]

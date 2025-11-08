@@ -38,9 +38,9 @@
 #include <thread>
 
 // ROS
-#include <ros/ros.h>
-#include <rosgraph_msgs/Clock.h>
-#include <std_msgs/Float64.h>
+#include "rclcpp/rclcpp.hpp"
+#include <rosgraph_msgs/msg/clock.hpp>
+#include <std_msgs/msg/float64.hpp>
 
 // ros_control
 #include <controller_manager/controller_manager.h>
@@ -81,7 +81,7 @@ public:
     // store current command
     eff_ = cmd_;
     if(std::fabs(eff_) > max_eff_) {
-      ROS_WARN("Large effort command received: %f; cutting down to % f", eff_, max_eff_);
+      RCLCPP_WARN(rclcpp::get_logger("EffortControllers"), "Large effort command received: %f; cutting down to % f", eff_, max_eff_);
       eff_ = eff_ > 0.0 ? max_eff_ : -max_eff_;
     }
   }
@@ -96,31 +96,31 @@ private:
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "simple_bot_hw");
-  ros::NodeHandle nh;
+  rclcpp::init(argc, argv);
+  auto nh = rclcpp::Node::make_shared("simple_bot_hw");
   SimpleBot bot;
-  ros::Publisher clock_publisher = nh.advertise<rosgraph_msgs::Clock>("/clock", 1);
+  auto clock_publisher = nh.advertise<rosgraph_msgs::msg::Clock>("/clock", 1);
   nh.setParam("/use_sim_time", true);
   controller_manager::ControllerManager cm(&bot, nh);
   ros::AsyncSpinner spinner(2);
   spinner.start();
 
-  ros::Rate rate(1.0/bot.period);
-  ros::Duration period(bot.period);
+  rclcpp::Rate rate(1.0/bot.period);
+  rclcpp::Duration period(bot.period);
   double sim_time = 0.0;
 
   // main "simulation"
-  while(ros::ok()) {
+  while(rclcpp::ok()) {
     auto begin = std::chrono::system_clock::now();
     bot.read();
-    cm.update(ros::Time(sim_time), period);
+    cm.update(rclcpp::Time(sim_time), period);
     bot.write();
     auto end = std::chrono::system_clock::now();
     double elapsed = std::chrono::duration_cast<std::chrono::duration<double> >((end - begin)).count();
     if(bot.period > elapsed)
       std::this_thread::sleep_for(std::chrono::duration<double>(bot.period - elapsed));
-    rosgraph_msgs::Clock clock;
-    clock.clock = ros::Time(sim_time);
+    rosgraph_msgs::msg::Clock clock;
+    clock.clock = rclcpp::Time(sim_time);
     clock_publisher.publish(clock);
     sim_time += bot.period;
   }

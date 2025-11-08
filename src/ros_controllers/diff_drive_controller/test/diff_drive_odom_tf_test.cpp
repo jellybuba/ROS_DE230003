@@ -28,7 +28,8 @@
 /// \author Bence Magyar
 
 #include "test_common.h"
-#include <tf/transform_listener.h>
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 
 // TEST CASES
 TEST_F(DiffDriveControllerTest, testNoOdomFrame)
@@ -36,11 +37,11 @@ TEST_F(DiffDriveControllerTest, testNoOdomFrame)
   // wait for ROS
   while(!isControllerAlive())
   {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
   // set up tf listener
-  tf::TransformListener listener;
-  ros::Duration(2.0).sleep();
+  tf2_ros::TransformListener listener;
+  rclcpp::Duration(2.0).sleep();
   // check the odom frame doesn't exist
   EXPECT_FALSE(listener.frameExists("odom"));
 }
@@ -48,7 +49,8 @@ TEST_F(DiffDriveControllerTest, testNoOdomFrame)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "diff_drive_odom_tf_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("diff_drive_odom_tf_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

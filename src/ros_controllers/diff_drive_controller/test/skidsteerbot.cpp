@@ -31,13 +31,13 @@
 #include <chrono>
 #include <thread>
 #include <controller_manager/controller_manager.h>
-#include <ros/ros.h>
-#include <rosgraph_msgs/Clock.h>
+#include "rclcpp/rclcpp.hpp"
+#include <rosgraph_msgs/msg/clock.hpp>
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "skidsteerbot");
-  ros::NodeHandle nh;
+  rclcpp::init(argc, argv);
+  auto nh = rclcpp::Node::make_shared("skidsteerbot");
 
   // This should be set in launch files as well
   nh.setParam("/use_sim_time", true);
@@ -46,20 +46,20 @@ int main(int argc, char **argv)
   ROS_WARN_STREAM("period: " << robot.getPeriod().toSec());
   controller_manager::ControllerManager cm(&robot, nh);
 
-  ros::Publisher clock_publisher = nh.advertise<rosgraph_msgs::Clock>("/clock", 1);
+  auto clock_publisher = nh.advertise<rosgraph_msgs::msg::Clock>("/clock", 1);
 
-  //ros::Rate rate(1.0 / robot.getPeriod().toSec());
+  //rclcpp::Rate rate(1.0 / robot.getPeriod().toSec());
   ros::AsyncSpinner spinner(1);
   spinner.start();
 
   std::chrono::system_clock::time_point begin = std::chrono::system_clock::now();
   std::chrono::system_clock::time_point end   = std::chrono::system_clock::now();
 
-  ros::Time internal_time(0);
-  const ros::Duration dt = robot.getPeriod();
+  rclcpp::Time internal_time(0);
+  const rclcpp::Duration dt = robot.getPeriod();
   double elapsed_secs = 0;
 
-  while(ros::ok())
+  while(rclcpp::ok())
   {
     begin = std::chrono::system_clock::now();
 
@@ -82,8 +82,8 @@ int main(int argc, char **argv)
       std::this_thread::sleep_for(std::chrono::duration<double>(dt.toSec() - elapsed_secs));
     }
 
-    rosgraph_msgs::Clock clock;
-    clock.clock = ros::Time(internal_time);
+    rosgraph_msgs::msg::Clock clock;
+    clock.clock = rclcpp::Time(internal_time);
     clock_publisher.publish(clock);
     internal_time += dt;
   }

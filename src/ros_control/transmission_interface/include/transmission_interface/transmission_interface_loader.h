@@ -264,8 +264,8 @@ protected:
  * class FooRobot : public hardware_interface::RobotHW
  * {
  * public:
- *   void read(ros::Time time, ros::Duration period);
- *   void write(ros::Time time, ros::Duration period);
+ *   void read(rclcpp::Time time, rclcpp::Duration period);
+ *   void write(rclcpp::Time time, rclcpp::Duration period);
  *
  *   bool init()
  *   {

@@ -29,7 +29,7 @@
 
 #include <actionlib/server/action_server.h>
 
-#include <control_msgs/FollowJointTrajectoryAction.h>
+#include <control_msgs/msg/follow_joint_trajectory_action.hpp>
 
 #include <joint_trajectory_controller/joint_trajectory_segment.h>
 #include <joint_trajectory_controller/trajectory_builder.h>
@@ -43,8 +43,8 @@ namespace trajectory_builder_tests
 using QuinticSplineSegment = trajectory_interface::QuinticSplineSegment<double>;
 using TrajectoryBuilder = joint_trajectory_controller::TrajectoryBuilder<QuinticSplineSegment>;
 
-using GoalHandle = actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction>::GoalHandle;
-using RealTimeServerGoalHandle = realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction>;
+using GoalHandle = actionlib::ActionServer<control_msgs::msg::FollowJointTrajectoryAction>::GoalHandle;
+using RealTimeServerGoalHandle = realtime_tools::RealtimeServerGoalHandle<control_msgs::msg::FollowJointTrajectoryAction>;
 
 class FakeTrajectoryBuilder : public TrajectoryBuilder
 {
@@ -97,7 +97,7 @@ TEST(TrajectoryBuilderTest, testSetGoalHandle)
   EXPECT_FALSE(builder.createGoalHandlePtr()) << "Obtained goal handle despite not set.";
 
   GoalHandle gh;
-  boost::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
+  std::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
   builder.setGoalHandle(rt_goal_handle);
 
   EXPECT_EQ(rt_goal_handle.use_count(), 1) << "Builder should only store a reference on GoalHandlePtr.";
@@ -111,7 +111,7 @@ TEST(TrajectoryBuilderTest, testResetGoalHandle)
   FakeTrajectoryBuilder builder;
 
   GoalHandle gh;
-  boost::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
+  std::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
   builder.setGoalHandle(rt_goal_handle);
 
   builder.reset();

@@ -25,7 +25,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //////////////////////////////////////////////////////////////////////////////
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <controller_manager/controller_manager.h>
 #include <controller_manager_tests/my_robot_hw.h>
 
@@ -33,22 +33,23 @@ using namespace controller_manager_tests;
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "DummyApp");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("DummyApp");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();
 
   MyRobotHW hw;
 
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   controller_manager::ControllerManager cm(&hw, nh);
 
-  ros::Duration period(1.0);
-  while (ros::ok())
+  rclcpp::Duration period(1.0);
+  while (rclcpp::ok())
   {
-    ROS_INFO("loop");
+    RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "loop");
     hw.read();
-    cm.update(ros::Time::now(), period);
+    cm.update(rclcpp::Time::now(), period);
     hw.write();
     period.sleep();
   }

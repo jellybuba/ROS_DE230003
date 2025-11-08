@@ -34,14 +34,14 @@
 
 #include <gtest/gtest.h>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
-#include <geometry_msgs/Twist.h>
-#include <four_wheel_steering_msgs/FourWheelSteering.h>
-#include <nav_msgs/Odometry.h>
+#include <geometry_msgs/msg/twist.hpp>
+#include <four_wheel_steering_msgs/msg/four_wheel_steering.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 #include <tf/tf.h>
 
-#include <std_srvs/Empty.h>
+#include <std_srvs/srv/empty.hpp>
 
 // Floating-point value comparison threshold
 const double EPS = 0.01;
@@ -57,11 +57,11 @@ public:
 
   FourWheelSteeringControllerTest()
   : received_first_odom(false)
-  , cmd_twist_pub(nh.advertise<geometry_msgs::Twist>("cmd_vel", 100))
-  , cmd_4ws_pub(nh.advertise<four_wheel_steering_msgs::FourWheelSteering>("cmd_four_wheel_steering", 100))
+  , cmd_twist_pub(nh.advertise<geometry_msgs::msg::Twist>("cmd_vel", 100))
+  , cmd_4ws_pub(nh.advertise<four_wheel_steering_msgs::msg::FourWheelSteering>("cmd_four_wheel_steering", 100))
   , odom_sub(nh.subscribe("odom", 100, &FourWheelSteeringControllerTest::odomCallback, this))
-  , start_srv(nh.serviceClient<std_srvs::Empty>("start"))
-  , stop_srv(nh.serviceClient<std_srvs::Empty>("stop"))
+  , start_srv(nh.serviceClient<std_srvs::srv::Empty>("start"))
+  , stop_srv(nh.serviceClient<std_srvs::srv::Empty>("stop"))
   {
   }
 
@@ -70,12 +70,12 @@ public:
     odom_sub.shutdown();
   }
 
-  nav_msgs::Odometry getLastOdom(){ return last_odom; }
-  void publish(geometry_msgs::Twist cmd_vel)
+  nav_msgs::msg::Odometry getLastOdom(){ return last_odom; }
+  void publish(geometry_msgs::msg::Twist cmd_vel)
   {
     cmd_twist_pub.publish(cmd_vel);
   }
-  void publish_4ws(four_wheel_steering_msgs::FourWheelSteering cmd_vel)
+  void publish_4ws(four_wheel_steering_msgs::msg::FourWheelSteering cmd_vel)
   {
     cmd_4ws_pub.publish(cmd_vel);
   }
@@ -84,42 +84,42 @@ public:
 
   bool hasReceivedFirstOdom()const{ return received_first_odom; }
 
-  void start(){ std_srvs::Empty srv; start_srv.call(srv); }
-  void stop(){ std_srvs::Empty srv; stop_srv.call(srv); }
+  void start(){ std_srvs::srv::Empty srv; start_srv.call(srv); }
+  void stop(){ std_srvs::srv::Empty srv; stop_srv.call(srv); }
 
   void waitForController() const
   {
-    while(!isControllerAlive() && ros::ok())
+    while(!isControllerAlive() && rclcpp::ok())
     {
       ROS_DEBUG_STREAM_THROTTLE(0.5, "Waiting for controller.");
-      ros::Duration(0.1).sleep();
+      rclcpp::Duration(0.1).sleep();
     }
-    if (!ros::ok())
+    if (!rclcpp::ok())
       FAIL() << "Something went wrong while executing test.";
   }
 
   void waitForOdomMsgs() const
   {
-    while(!hasReceivedFirstOdom() && ros::ok())
+    while(!hasReceivedFirstOdom() && rclcpp::ok())
     {
       ROS_DEBUG_STREAM_THROTTLE(0.5, "Waiting for odom messages to be published.");
-      ros::Duration(0.01).sleep();
+      rclcpp::Duration(0.01).sleep();
     }
-    if (!ros::ok())
+    if (!rclcpp::ok())
       FAIL() << "Something went wrong while executing test.";
   }
 
 private:
   bool received_first_odom;
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
   ros::Publisher cmd_twist_pub, cmd_4ws_pub;
   ros::Subscriber odom_sub;
-  nav_msgs::Odometry last_odom;
+  nav_msgs::msg::Odometry last_odom;
 
   ros::ServiceClient start_srv;
   ros::ServiceClient stop_srv;
 
-  void odomCallback(const nav_msgs::Odometry& odom)
+  void odomCallback(const nav_msgs::msg::Odometry& odom)
   {
     ROS_INFO_STREAM("Callback reveived: pos.x: " << odom.pose.pose.position.x
                      << ", orient.z: " << odom.pose.pose.orientation.z
@@ -130,7 +130,7 @@ private:
   }
 };
 
-inline tf::Quaternion tfQuatFromGeomQuat(const geometry_msgs::Quaternion& quat)
+inline tf::Quaternion tfQuatFromGeomQuat(const geometry_msgs::msg::Quaternion& quat)
 {
   return tf::Quaternion(quat.x, quat.y, quat.z, quat.w);
 }

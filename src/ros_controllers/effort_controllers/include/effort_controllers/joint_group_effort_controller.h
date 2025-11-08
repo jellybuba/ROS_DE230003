@@ -54,7 +54,7 @@ namespace effort_controllers
  * \param joints List of names of the joints to control.
  *
  * Subscribes to:
- * - \b command (std_msgs::Float64MultiArray) : The joint efforts to apply
+ * - \b command (std_msgs::msg::Float64MultiArray) : The joint efforts to apply
  */
 typedef forward_command_controller::ForwardJointGroupCommandController<hardware_interface::EffortJointInterface>
         JointGroupEffortController;

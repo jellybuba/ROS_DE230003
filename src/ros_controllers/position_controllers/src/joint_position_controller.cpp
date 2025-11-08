@@ -38,7 +38,7 @@
 #include <pluginlib/class_list_macros.hpp>
 
 template <class T>
-void forward_command_controller::ForwardCommandController<T>::starting(const ros::Time& time)
+void forward_command_controller::ForwardCommandController<T>::starting(const rclcpp::Time& time)
 {
   // Start controller with current joint position
   command_buffer_.writeFromNonRT(joint_.getPosition());

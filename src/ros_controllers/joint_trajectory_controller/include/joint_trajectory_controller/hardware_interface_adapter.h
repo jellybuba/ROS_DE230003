@@ -56,16 +56,16 @@ template <class HardwareInterface, class State>
 class HardwareInterfaceAdapter
 {
 public:
-  bool init(std::vector<typename HardwareInterface::ResourceHandleType>& /*joint_handles*/, ros::NodeHandle& /*controller_nh*/)
+  bool init(std::vector<typename HardwareInterface::ResourceHandleType>& /*joint_handles*/, rclcpp::Node& /*controller_nh*/)
   {
     return false;
   }
 
-  void starting(const ros::Time& /*time*/) {}
-  void stopping(const ros::Time& /*time*/) {}
+  void starting(const rclcpp::Time& /*time*/) {}
+  void stopping(const rclcpp::Time& /*time*/) {}
 
-  void updateCommand(const ros::Time&     /*time*/,
-                     const ros::Duration& /*period*/,
+  void updateCommand(const rclcpp::Time&     /*time*/,
+                     const rclcpp::Duration& /*period*/,
                      const State&         /*desired_state*/,
                      const State&         /*state_error*/) {}
 };
@@ -96,7 +96,7 @@ class HardwareInterfaceAdapter<hardware_interface::PositionJointInterface, State
 public:
   HardwareInterfaceAdapter() : joint_handles_ptr_(nullptr) {}
 
-  bool init(std::vector<hardware_interface::JointHandle>& joint_handles, ros::NodeHandle& /*controller_nh*/)
+  bool init(std::vector<hardware_interface::JointHandle>& joint_handles, rclcpp::Node& /*controller_nh*/)
   {
     // Store pointer to joint handles
     joint_handles_ptr_ = &joint_handles;
@@ -104,7 +104,7 @@ public:
     return true;
   }
 
-  void starting(const ros::Time& /*time*/)
+  void starting(const rclcpp::Time& /*time*/)
   {
     if (!joint_handles_ptr_) {return;}
 
@@ -115,10 +115,10 @@ public:
     }
   }
 
-  void stopping(const ros::Time& /*time*/) {}
+  void stopping(const rclcpp::Time& /*time*/) {}
 
-  void updateCommand(const ros::Time&     /*time*/,
-                     const ros::Duration& /*period*/,
+  void updateCommand(const rclcpp::Time&     /*time*/,
+                     const rclcpp::Duration& /*period*/,
                      const State&         desired_state,
                      const State&         /*state_error*/)
   {
@@ -146,7 +146,7 @@ class ClosedLoopHardwareInterfaceAdapter
 public:
   ClosedLoopHardwareInterfaceAdapter() : joint_handles_ptr_(nullptr) {}
 
-  bool init(std::vector<hardware_interface::JointHandle>& joint_handles, ros::NodeHandle& controller_nh)
+  bool init(std::vector<hardware_interface::JointHandle>& joint_handles, rclcpp::Node& controller_nh)
   {
     // Store pointer to joint handles
     joint_handles_ptr_ = &joint_handles;
@@ -156,7 +156,7 @@ public:
     for (unsigned int i = 0; i < pids_.size(); ++i)
     {
       // Node handle to PID gains
-      ros::NodeHandle joint_nh(controller_nh, std::string("gains/") + joint_handles[i].getName());
+      rclcpp::Node joint_nh(controller_nh, std::string("gains/") + joint_handles[i].getName());
 
       // Init PID gains from ROS parameter server
       pids_[i].reset(new control_toolbox::Pid());
@@ -177,7 +177,7 @@ public:
     return true;
   }
 
-  void starting(const ros::Time& /*time*/)
+  void starting(const rclcpp::Time& /*time*/)
   {
     if (!joint_handles_ptr_) {return;}
 
@@ -189,10 +189,10 @@ public:
     }
   }
 
-  void stopping(const ros::Time& /*time*/) {}
+  void stopping(const rclcpp::Time& /*time*/) {}
 
-  void updateCommand(const ros::Time&     /*time*/,
-                     const ros::Duration& period,
+  void updateCommand(const rclcpp::Time&     /*time*/,
+                     const rclcpp::Duration& period,
                      const State&         desired_state,
                      const State&         state_error)
   {
@@ -292,7 +292,7 @@ class HardwareInterfaceAdapter<hardware_interface::PosVelJointInterface, State>
 public:
   HardwareInterfaceAdapter() : joint_handles_ptr_(nullptr) {}
 
-  bool init(std::vector<hardware_interface::PosVelJointHandle>& joint_handles, ros::NodeHandle& /*controller_nh*/)
+  bool init(std::vector<hardware_interface::PosVelJointHandle>& joint_handles, rclcpp::Node& /*controller_nh*/)
   {
     // Store pointer to joint handles
     joint_handles_ptr_ = &joint_handles;
@@ -300,11 +300,11 @@ public:
     return true;
   }
 
-  void starting(const ros::Time& /*time*/) {}
-  void stopping(const ros::Time& /*time*/) {}
+  void starting(const rclcpp::Time& /*time*/) {}
+  void stopping(const rclcpp::Time& /*time*/) {}
 
-  void updateCommand(const ros::Time&     /*time*/,
-                     const ros::Duration& /*period*/,
+  void updateCommand(const rclcpp::Time&     /*time*/,
+                     const rclcpp::Duration& /*period*/,
                      const State&         desired_state,
                      const State&         /*state_error*/)
   {
@@ -329,7 +329,7 @@ class HardwareInterfaceAdapter<hardware_interface::PosVelAccJointInterface, Stat
 public:
   HardwareInterfaceAdapter() : joint_handles_ptr_(nullptr) {}
 
-  bool init(std::vector<hardware_interface::PosVelAccJointHandle>& joint_handles, ros::NodeHandle& /*controller_nh*/)
+  bool init(std::vector<hardware_interface::PosVelAccJointHandle>& joint_handles, rclcpp::Node& /*controller_nh*/)
   {
     // Store pointer to joint handles
     joint_handles_ptr_ = &joint_handles;
@@ -337,11 +337,11 @@ public:
     return true;
   }
 
-  void starting(const ros::Time& /*time*/) {}
-  void stopping(const ros::Time& /*time*/) {}
+  void starting(const rclcpp::Time& /*time*/) {}
+  void stopping(const rclcpp::Time& /*time*/) {}
 
-  void updateCommand(const ros::Time&     /*time*/,
-                     const ros::Duration& /*period*/,
+  void updateCommand(const rclcpp::Time&     /*time*/,
+                     const rclcpp::Duration& /*period*/,
                      const State&         desired_state,
                      const State&         /*state_error*/)
   {

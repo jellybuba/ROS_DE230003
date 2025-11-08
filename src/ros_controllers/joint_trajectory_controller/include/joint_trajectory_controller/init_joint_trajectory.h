@@ -38,11 +38,11 @@
 #include <vector>
 
 // Boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // ROS messages
-#include <control_msgs/FollowJointTrajectoryAction.h>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <control_msgs/msg/follow_joint_trajectory_action.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 
 // ros_controls
 #include <realtime_tools/realtime_server_goal_handle.h>
@@ -93,8 +93,8 @@ inline std::vector<unsigned int> mapping(const T& t1, const T& t2)
 template <class Trajectory>
 struct InitJointTrajectoryOptions
 {
-  typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction> RealtimeGoalHandle;
-  typedef boost::shared_ptr<RealtimeGoalHandle>                                               RealtimeGoalHandlePtr;
+  typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::msg::FollowJointTrajectoryAction> RealtimeGoalHandle;
+  typedef std::shared_ptr<RealtimeGoalHandle>                                               RealtimeGoalHandlePtr;
   typedef typename Trajectory::value_type                                                     TrajectoryPerJoint;
   typedef typename TrajectoryPerJoint::value_type                                             Segment;
   typedef typename Segment::Scalar                                                            Scalar;
@@ -115,7 +115,7 @@ struct InitJointTrajectoryOptions
   std::vector<bool>*         angle_wraparound;
   RealtimeGoalHandlePtr      rt_goal_handle;
   SegmentTolerances<Scalar>* default_tolerances;
-  ros::Time*                 other_time_base;
+  rclcpp::Time*                 other_time_base;
   bool                       allow_partial_joints_goal;
   std::string*               error_string;
 
@@ -184,9 +184,9 @@ bool isNotEmpty(typename Trajectory::value_type trajPerJoint)
  * \tparam Trajectory Trajectory type. Should be a \e sequence container \e sorted by segment start time.
  * Additionally, the contained segment type must implement a constructor with the following signature:
  * \code
- * Segment(const ros::Time&                             traj_start_time,
- *         const trajectory_msgs::JointTrajectoryPoint& start_point,
- *         const trajectory_msgs::JointTrajectoryPoint& end_point,
+ * Segment(const rclcpp::Time&                             traj_start_time,
+ *         const trajectory_msgs::msg::JointTrajectoryPoint& start_point,
+ *         const trajectory_msgs::msg::JointTrajectoryPoint& end_point,
  *         const std::vector<Scalar>&                   position_offset)
  * \endcode
  * The following function must also be defined to properly handle continuous joints:
@@ -201,8 +201,8 @@ bool isNotEmpty(typename Trajectory::value_type trajPerJoint)
  */
 // TODO: Return useful bits of current trajectory if input msg is useless?
 template <class Trajectory>
-Trajectory initJointTrajectory(const trajectory_msgs::JointTrajectory&       msg,
-                               const ros::Time&                              time,
+Trajectory initJointTrajectory(const trajectory_msgs::msg::JointTrajectory&       msg,
+                               const rclcpp::Time&                              time,
                                const InitJointTrajectoryOptions<Trajectory>& options =
                                InitJointTrajectoryOptions<Trajectory>())
 {
@@ -213,7 +213,7 @@ Trajectory initJointTrajectory(const trajectory_msgs::JointTrajectory&       msg
 
   const unsigned int n_joints = msg.joint_names.size();
 
-  const ros::Time msg_start_time = internal::startTime(msg, time); // Message start time
+  const rclcpp::Time msg_start_time = internal::startTime(msg, time); // Message start time
 
   ROS_DEBUG_STREAM("Figuring out new trajectory starting at time "
                    << std::fixed << std::setprecision(3) << msg_start_time.toSec());
@@ -248,16 +248,16 @@ Trajectory initJointTrajectory(const trajectory_msgs::JointTrajectory&       msg
 
   if (!has_current_trajectory && has_angle_wraparound)
   {
-    ROS_WARN("Vector specifying whether joints wrap around will not be used because no current trajectory was given.");
+    RCLCPP_WARN(rclcpp::get_logger("JointTrajectoryController"), "Vector specifying whether joints wrap around will not be used because no current trajectory was given.");
   }
 
   // Compute trajectory start time and data extraction time associated to the 'other' time base, if it applies
   // The o_ prefix indicates that time values are represented in this 'other' time base.
-  ros::Time o_time;
-  ros::Time o_msg_start_time;
+  rclcpp::Time o_time;
+  rclcpp::Time o_msg_start_time;
   if (has_other_time_base)
   {
-    ros::Duration msg_start_duration = msg_start_time - time;
+    rclcpp::Duration msg_start_duration = msg_start_time - time;
     o_time = *options.other_time_base;
     o_msg_start_time = o_time + msg_start_duration;
     ROS_DEBUG_STREAM("Using alternate time base. In it, the new trajectory starts at time "
@@ -321,7 +321,7 @@ Trajectory initJointTrajectory(const trajectory_msgs::JointTrajectory&       msg
   // Find first point of new trajectory occurring after current time
   // This point is used later on in this function, but is computed here, in advance because if the trajectory message
   // contains a trajectory in the past, we can quickly return without spending additional computational resources
-  std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator
+  std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator
   msg_it = findPoint(msg, time); // Points to last point occurring before current time (NOTE: Using time, not o_time)
   if (msg_it == msg.points.end())
   {
@@ -332,7 +332,7 @@ Trajectory initJointTrajectory(const trajectory_msgs::JointTrajectory&       msg
     ++msg_it;                     // Points to first point after current time OR sequence end
     if (msg_it == msg.points.end())
     {
-      ros::Duration last_point_dur = time - (msg_start_time + (--msg_it)->time_from_start);
+      rclcpp::Duration last_point_dur = time - (msg_start_time + (--msg_it)->time_from_start);
       error_string = "Dropping all " + std::to_string(msg.points.size());
       error_string += " trajectory point(s), as they occur before the current time.\n";
       error_string += "Last point is " + std::to_string(last_point_dur.toSec());
@@ -353,7 +353,7 @@ Trajectory initJointTrajectory(const trajectory_msgs::JointTrajectory&       msg
     }
     else
     {
-      ros::Duration next_point_dur = msg_start_time + msg_it->time_from_start - time;
+      rclcpp::Duration next_point_dur = msg_start_time + msg_it->time_from_start - time;
       ROS_WARN_STREAM("Dropping first " << std::distance(msg.points.begin(), msg_it) <<
                       " trajectory point(s) out of " << msg.points.size() <<
                       ", as they occur before the current time.\n" <<
@@ -392,7 +392,7 @@ Trajectory initJointTrajectory(const trajectory_msgs::JointTrajectory&       msg
   //for (unsigned int joint_id=0; joint_id < joint_names.size();joint_id++)
   for (unsigned int msg_joint_it=0; msg_joint_it < mapping_vector.size();msg_joint_it++)
   {
-    std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator it = msg_it;
+    std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator it = msg_it;
     if (!isValid(*it, it->positions.size()))
       throw(std::invalid_argument("Size mismatch in trajectory point position, velocity or acceleration data."));
 
@@ -419,7 +419,7 @@ Trajectory initJointTrajectory(const trajectory_msgs::JointTrajectory&       msg
       sample(curr_joint_traj, last_curr_time, last_curr_state);
 
       // Get the first time and state that will be executed from the new trajectory
-      trajectory_msgs::JointTrajectoryPoint point_per_joint;
+      trajectory_msgs::msg::JointTrajectoryPoint point_per_joint;
       if (!it->positions.empty())     {point_per_joint.positions.resize(1, it->positions[msg_joint_it]);}
       if (!it->velocities.empty())    {point_per_joint.velocities.resize(1, it->velocities[msg_joint_it]);}
       if (!it->accelerations.empty()) {point_per_joint.accelerations.resize(1, it->accelerations[msg_joint_it]);}
@@ -470,9 +470,9 @@ Trajectory initJointTrajectory(const trajectory_msgs::JointTrajectory&       msg
     // - As long as there remain two trajectory points we can construct the next trajectory segment
     while (std::distance(it, msg.points.end()) >= 2)
     {
-      std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator next_it = it; ++next_it;
+      std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator next_it = it; ++next_it;
 
-      trajectory_msgs::JointTrajectoryPoint it_point_per_joint, next_it_point_per_joint;
+      trajectory_msgs::msg::JointTrajectoryPoint it_point_per_joint, next_it_point_per_joint;
 
       if (!isValid(*it, it->positions.size()))
             throw(std::invalid_argument("Size mismatch in trajectory point position, velocity or acceleration data."));

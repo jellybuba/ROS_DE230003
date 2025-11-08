@@ -40,9 +40,9 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <pluginlib/class_list_macros.hpp>
 
-#include <nav_msgs/Odometry.h>
-#include <four_wheel_steering_msgs/FourWheelSteeringStamped.h>
-#include <tf/tfMessage.h>
+#include <nav_msgs/msg/odometry.hpp>
+#include <four_wheel_steering_msgs/msg/four_wheel_steering_stamped.hpp>
+#include <tf/msg/tf_message.hpp>
 
 #include <realtime_tools/realtime_buffer.h>
 #include <realtime_tools/realtime_publisher.h>
@@ -75,34 +75,34 @@ namespace four_wheel_steering_controller{
      * \param controller_nh Node handle inside the controller namespace
      */
     bool init(hardware_interface::RobotHW* robot_hw,
-               ros::NodeHandle& root_nh,
-               ros::NodeHandle &controller_nh);
+               rclcpp::Node& root_nh,
+               rclcpp::Node &controller_nh);
 
     /**
      * \brief Updates controller, i.e. computes the odometry and sets the new velocity commands
      * \param time   Current time
      * \param period Time since the last called to update
      */
-    void update(const ros::Time& time, const ros::Duration& period);
+    void update(const rclcpp::Time& time, const rclcpp::Duration& period);
 
     /**
      * \brief Starts controller
      * \param time Current time
      */
-    void starting(const ros::Time& time);
+    void starting(const rclcpp::Time& time);
 
     /**
      * \brief Stops controller
      * \param time Current time
      */
-    void stopping(const ros::Time& /*time*/);
+    void stopping(const rclcpp::Time& /*time*/);
 
   private:
     std::string name_;
 
     /// Odometry related:
-    ros::Duration publish_period_;
-    ros::Time last_state_publish_time_;
+    rclcpp::Duration publish_period_;
+    rclcpp::Time last_state_publish_time_;
     bool open_loop_;
 
     /// Hardware handles:
@@ -114,7 +114,7 @@ namespace four_wheel_steering_controller{
     /// Velocity command related:
     struct Command
     {
-      ros::Time stamp;
+      rclcpp::Time stamp;
 
       Command() : stamp(0.0) {}
     };
@@ -144,9 +144,9 @@ namespace four_wheel_steering_controller{
     ros::Subscriber sub_command_four_wheel_steering_;
 
     /// Odometry related:
-    std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::Odometry> > odom_pub_;
-    std::shared_ptr<realtime_tools::RealtimePublisher<four_wheel_steering_msgs::FourWheelSteeringStamped> > odom_4ws_pub_;
-    std::shared_ptr<realtime_tools::RealtimePublisher<tf::tfMessage> > tf_odom_pub_;
+    std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry> > odom_pub_;
+    std::shared_ptr<realtime_tools::RealtimePublisher<four_wheel_steering_msgs::msg::FourWheelSteeringStamped> > odom_4ws_pub_;
+    std::shared_ptr<realtime_tools::RealtimePublisher<tf::msg::tfMessage> > tf_odom_pub_;
     Odometry odometry_;
 
     /// Wheel separation (or track), distance between left and right wheels (from the midpoint of the wheel width):
@@ -185,13 +185,13 @@ namespace four_wheel_steering_controller{
      * \brief Update and publish odometry
      * \param time   Current time
      */
-    void updateOdometry(const ros::Time &time);
+    void updateOdometry(const rclcpp::Time &time);
     /**
      * \brief Compute and publish command
      * \param time   Current time
      * \param period Time since the last called to update
      */
-    void updateCommand(const ros::Time& time, const ros::Duration& period);
+    void updateCommand(const rclcpp::Time& time, const rclcpp::Duration& period);
 
     /**
      * \brief Brakes the wheels, i.e. sets the velocity to 0
@@ -202,13 +202,13 @@ namespace four_wheel_steering_controller{
      * \brief Velocity command callback
      * \param command Velocity command message (twist)
      */
-    void cmdVelCallback(const geometry_msgs::Twist& command);
+    void cmdVelCallback(const geometry_msgs::msg::Twist& command);
 
     /**
      * \brief Velocity and steering command callback
      * \param command Velocity and steering command message (4ws)
      */
-    void cmdFourWheelSteeringCallback(const four_wheel_steering_msgs::FourWheelSteering &command);
+    void cmdFourWheelSteeringCallback(const four_wheel_steering_msgs::msg::FourWheelSteering &command);
 
     /**
      * \brief Get the wheel names from a wheel param
@@ -218,7 +218,7 @@ namespace four_wheel_steering_controller{
      * \return true if the wheel_param is available and the wheel_names are
      *        retrieved successfully from the param server; false otherwise
      */
-    bool getWheelNames(ros::NodeHandle& controller_nh,
+    bool getWheelNames(rclcpp::Node& controller_nh,
                        const std::string& wheel_param,
                        std::vector<std::string>& wheel_names);
 
@@ -227,7 +227,7 @@ namespace four_wheel_steering_controller{
      * \param root_nh Root node handle
      * \param controller_nh Node handle inside the controller namespace
      */
-    void setOdomPubFields(ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
+    void setOdomPubFields(rclcpp::Node& root_nh, rclcpp::Node& controller_nh);
 
   };
 

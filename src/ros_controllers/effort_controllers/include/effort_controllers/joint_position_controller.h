@@ -50,17 +50,17 @@
 
    Subscribes to:
 
-   - @b command (std_msgs::Float64) : The joint position to achieve.
+   - @b command (std_msgs::msg::Float64) : The joint position to achieve.
 
    Publishes:
 
-   - @b state (control_msgs::JointControllerState) :
+   - @b state (control_msgs::msg::JointControllerState) :
      Current state of the controller, including pid error and gains.
 
 */
 
-#include <control_msgs/JointControllerState.h>
-#include <control_msgs/JointControllerState.h>
+#include <control_msgs/msg/joint_controller_state.hpp>
+#include <control_msgs/msg/joint_controller_state.hpp>
 #include <control_toolbox/pid.h>
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -68,7 +68,7 @@
 #include <realtime_tools/realtime_buffer.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <ros/node_handle.h>
-#include <std_msgs/Float64.h>
+#include <std_msgs/msg/float64.hpp>
 #include <urdf/model.h>
 
 namespace effort_controllers
@@ -104,7 +104,7 @@ public:
    * \returns True if initialization was successful and the controller
    * is ready to be started.
    */
-  bool init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n);
+  bool init(hardware_interface::EffortJointInterface *robot, rclcpp::Node &n);
 
   /*!
    * \brief Give set position of the joint for next update: revolute (angle) and prismatic (position)
@@ -127,12 +127,12 @@ public:
    *
    * \param time The current time
    */
-  void starting(const ros::Time& time);
+  void starting(const rclcpp::Time& time);
 
   /*!
    * \brief Issues commands to the joint. Should be called at regular intervals
    */
-  void update(const ros::Time& time, const ros::Duration& period);
+  void update(const rclcpp::Time& time, const rclcpp::Duration& period);
 
   /**
    * \brief Get the PID parameters
@@ -176,14 +176,14 @@ private:
 
   std::unique_ptr<
     realtime_tools::RealtimePublisher<
-      control_msgs::JointControllerState> > controller_state_publisher_ ;
+      control_msgs::msg::JointControllerState> > controller_state_publisher_ ;
 
   ros::Subscriber sub_command_;
 
   /**
    * \brief Callback from /command subscriber for setpoint
    */
-  void setCommandCB(const std_msgs::Float64ConstPtr& msg);
+  void setCommandCB(const std_msgs::msg::Float64::ConstSharedPtr& msg);
 
   /**
    * \brief Check that the command is within the hard limits of the joint. Checks for joint

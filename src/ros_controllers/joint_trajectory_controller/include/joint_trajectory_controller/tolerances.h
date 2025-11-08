@@ -40,7 +40,7 @@
 #include <ros/node_handle.h>
 
 // ROS messages
-#include <control_msgs/FollowJointTrajectoryAction.h>
+#include <control_msgs/msg/follow_joint_trajectory_action.hpp>
 
 namespace joint_trajectory_controller
 {
@@ -209,7 +209,7 @@ inline bool checkStateTolerancePerJoint(const State&                            
  *
  **/
 template<class Scalar>
-void updateStateTolerances(const control_msgs::JointTolerance& tol_msg, StateTolerances<Scalar>& tols)
+void updateStateTolerances(const control_msgs::msg::JointTolerance& tol_msg, StateTolerances<Scalar>& tols)
 {
   if      (tol_msg.position     > 0.0) {tols.position     = static_cast<Scalar>(tol_msg.position);}
   else if (tol_msg.position     < 0.0) {tols.position     = static_cast<Scalar>(0.0);}
@@ -229,7 +229,7 @@ void updateStateTolerances(const control_msgs::JointTolerance& tol_msg, StateTol
  * \param[out] tols Tolerances values to update.
  */
 template<class Scalar>
-void updateSegmentTolerances(const control_msgs::FollowJointTrajectoryGoal& goal,
+void updateSegmentTolerances(const control_msgs::msg::FollowJointTrajectoryGoal& goal,
                              const std::vector<std::string>&                joint_names,
                              SegmentTolerances<Scalar>&                     tols
 )
@@ -239,21 +239,21 @@ void updateSegmentTolerances(const control_msgs::FollowJointTrajectoryGoal& goal
   assert(joint_names.size() == tols.goal_state_tolerance.size());
 
   typedef typename std::vector<std::string>::const_iterator                  StringConstIterator;
-  typedef typename std::vector<control_msgs::JointTolerance>::const_iterator TolMsgConstIterator;
+  typedef typename std::vector<control_msgs::msg::JointTolerance>::const_iterator TolMsgConstIterator;
 
   for (StringConstIterator names_it = joint_names.begin(); names_it != joint_names.end(); ++names_it)
   {
     const typename std::vector<std::string>::size_type id = std::distance(joint_names.begin(), names_it);
 
     // Update path tolerances
-    const std::vector<control_msgs::JointTolerance>& state_tol = goal.path_tolerance;
+    const std::vector<control_msgs::msg::JointTolerance>& state_tol = goal.path_tolerance;
     for(TolMsgConstIterator state_tol_it = state_tol.begin(); state_tol_it != state_tol.end(); ++state_tol_it)
     {
       if (*names_it == state_tol_it->name) {updateStateTolerances(*state_tol_it, tols.state_tolerance[id]);}
     }
 
     // Update goal state tolerances
-    const std::vector<control_msgs::JointTolerance>& g_state_tol = goal.goal_tolerance;
+    const std::vector<control_msgs::msg::JointTolerance>& g_state_tol = goal.goal_tolerance;
     for(TolMsgConstIterator g_state_tol_it = g_state_tol.begin(); g_state_tol_it != g_state_tol.end(); ++g_state_tol_it)
     {
       if (*names_it == g_state_tol_it->name) {updateStateTolerances(*g_state_tol_it, tols.goal_state_tolerance[id]);}
@@ -261,9 +261,9 @@ void updateSegmentTolerances(const control_msgs::FollowJointTrajectoryGoal& goal
   }
 
   // Update goal time tolerance
-  const ros::Duration& goal_time_tolerance = goal.goal_time_tolerance;
-  if      (goal_time_tolerance < ros::Duration(0.0)) {tols.goal_time_tolerance = 0.0;}
-  else if (goal_time_tolerance > ros::Duration(0.0)) {tols.goal_time_tolerance = goal_time_tolerance.toSec();}
+  const rclcpp::Duration& goal_time_tolerance = goal.goal_time_tolerance;
+  if      (goal_time_tolerance < rclcpp::Duration(0.0)) {tols.goal_time_tolerance = 0.0;}
+  else if (goal_time_tolerance > rclcpp::Duration(0.0)) {tols.goal_time_tolerance = goal_time_tolerance.toSec();}
 }
 
 /**
@@ -288,7 +288,7 @@ void updateSegmentTolerances(const control_msgs::FollowJointTrajectoryGoal& goal
  * \return Trajectory segment tolerances.
  */
 template<class Scalar>
-SegmentTolerances<Scalar> getSegmentTolerances(const ros::NodeHandle& nh,
+SegmentTolerances<Scalar> getSegmentTolerances(const rclcpp::Node& nh,
                                                const std::vector<std::string>& joint_names)
 {
   const unsigned int n_joints = joint_names.size();

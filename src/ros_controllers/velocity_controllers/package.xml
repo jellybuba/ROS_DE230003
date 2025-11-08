@@ -15,7 +15,7 @@
 
   <author>Vijay Pradeep</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>angles</depend>
   <depend>control_msgs</depend>
@@ -28,5 +28,6 @@
 
   <export>
     <controller_interface plugin="${prefix}/velocity_controllers_plugins.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

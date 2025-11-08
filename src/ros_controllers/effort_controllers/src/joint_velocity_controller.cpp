@@ -59,12 +59,12 @@ bool JointVelocityController::init(hardware_interface::EffortJointInterface *rob
   return true;
 }
 
-bool JointVelocityController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &n)
+bool JointVelocityController::init(hardware_interface::EffortJointInterface *robot, rclcpp::Node &n)
 {
   // Get joint name from parameter server
   std::string joint_name;
   if (!n.getParam("joint", joint_name)) {
-    ROS_ERROR("No joint given (namespace: %s)", n.getNamespace().c_str());
+    RCLCPP_ERROR(rclcpp::get_logger("EffortControllers"), "No joint given (namespace: %s)", n.getNamespace().c_str());
     return false;
   }
 
@@ -72,16 +72,16 @@ bool JointVelocityController::init(hardware_interface::EffortJointInterface *rob
   joint_ = robot->getHandle(joint_name);
 
   // Load PID Controller using gains set on parameter server
-  if (!pid_controller_.init(ros::NodeHandle(n, "pid")))
+  if (!pid_controller_.init(rclcpp::Node(n, "pid")))
     return false;
 
   // Start realtime state publisher
   controller_state_publisher_.reset(
-    new realtime_tools::RealtimePublisher<control_msgs::JointControllerState>
+    new realtime_tools::RealtimePublisher<control_msgs::msg::JointControllerState>
     (n, "state", 1));
 
   // Start command subscriber
-  sub_command_ = n.subscribe<std_msgs::Float64>("command", 1, &JointVelocityController::setCommandCB, this);
+  sub_command_ = n.subscribe<std_msgs::msg::Float64>("command", 1, &JointVelocityController::setCommandCB, this);
 
   return true;
 }
@@ -124,13 +124,13 @@ void JointVelocityController::getCommand(double& cmd)
   cmd = command_;
 }
 
-void JointVelocityController::starting(const ros::Time& time)
+void JointVelocityController::starting(const rclcpp::Time& time)
 {
   command_ = 0.0;
   pid_controller_.reset();
 }
 
-void JointVelocityController::update(const ros::Time& time, const ros::Duration& period)
+void JointVelocityController::update(const rclcpp::Time& time, const rclcpp::Duration& period)
 {
   double error = command_ - joint_.getVelocity();
 
@@ -167,7 +167,7 @@ void JointVelocityController::update(const ros::Time& time, const ros::Duration&
   loop_count_++;
 }
 
-void JointVelocityController::setCommandCB(const std_msgs::Float64ConstPtr& msg)
+void JointVelocityController::setCommandCB(const std_msgs::msg::Float64::ConstSharedPtr& msg)
 {
   command_ = msg->data;
 }

@@ -37,7 +37,7 @@ TEST_F(AckermannSteeringControllerTest, testWrongJointName)
   int secs = 0;
   while(!isControllerAlive() && secs < 5)
   {
-    ros::Duration(1.0).sleep();
+    rclcpp::Duration(1.0).sleep();
     secs++;
   }
   // give up and assume controller load failure after 5 seconds
@@ -47,7 +47,8 @@ TEST_F(AckermannSteeringControllerTest, testWrongJointName)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "ackermann_steering_controller_fail_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("ackermann_steering_controller_fail_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

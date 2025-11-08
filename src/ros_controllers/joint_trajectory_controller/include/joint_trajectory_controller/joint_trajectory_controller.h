@@ -38,7 +38,7 @@
 #include <memory>
 
 // Boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/dynamic_bitset.hpp>
 
 // ROS
@@ -48,10 +48,10 @@
 #include <urdf/model.h>
 
 // ROS messages
-#include <control_msgs/FollowJointTrajectoryAction.h>
-#include <control_msgs/JointTrajectoryControllerState.h>
-#include <control_msgs/QueryTrajectoryState.h>
-#include <trajectory_msgs/JointTrajectory.h>
+#include <control_msgs/msg/follow_joint_trajectory_action.hpp>
+#include <control_msgs/msg/joint_trajectory_controller_state.hpp>
+#include <control_msgs/srv/query_trajectory_state.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 // actionlib
 #include <actionlib/server/action_server.h>
@@ -133,18 +133,18 @@ public:
 
   /** \name Non Real-Time Safe Functions
    *\{*/
-  bool init(HardwareInterface* hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
+  bool init(HardwareInterface* hw, rclcpp::Node& root_nh, rclcpp::Node& controller_nh);
   /*\}*/
 
   /** \name Real-Time Safe Functions
    *\{*/
   /** \brief Holds the current position. */
-  void starting(const ros::Time& time);
+  void starting(const rclcpp::Time& time);
 
   /** \brief Cancels the active action goal, if any. */
-  void stopping(const ros::Time& /*time*/);
+  void stopping(const rclcpp::Time& /*time*/);
 
-  void update(const ros::Time& time, const ros::Duration& period);
+  void update(const rclcpp::Time& time, const rclcpp::Duration& period);
   /*\}*/
 
 protected:
@@ -153,18 +153,18 @@ protected:
   {
     TimeData() : time(0.0), period(0.0), uptime(0.0) {}
 
-    ros::Time     time;   ///< Time of last update cycle
-    ros::Duration period; ///< Period of last update cycle
-    ros::Time     uptime; ///< Controller uptime. Set to zero at every restart.
+    rclcpp::Time     time;   ///< Time of last update cycle
+    rclcpp::Duration period; ///< Period of last update cycle
+    rclcpp::Time     uptime; ///< Controller uptime. Set to zero at every restart.
   };
 
-  typedef actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction>                  ActionServer;
+  typedef actionlib::ActionServer<control_msgs::msg::FollowJointTrajectoryAction>                  ActionServer;
   typedef std::shared_ptr<ActionServer>                                                       ActionServerPtr;
   typedef ActionServer::GoalHandle                                                            GoalHandle;
-  typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction> RealtimeGoalHandle;
-  typedef boost::shared_ptr<RealtimeGoalHandle>                                               RealtimeGoalHandlePtr;
-  typedef trajectory_msgs::JointTrajectory::ConstPtr                                          JointTrajectoryConstPtr;
-  typedef realtime_tools::RealtimePublisher<control_msgs::JointTrajectoryControllerState>     StatePublisher;
+  typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::msg::FollowJointTrajectoryAction> RealtimeGoalHandle;
+  typedef std::shared_ptr<RealtimeGoalHandle>                                               RealtimeGoalHandlePtr;
+  typedef trajectory_msgs::msg::JointTrajectory::ConstSharedPtr                                          JointTrajectory::ConstSharedPtr;
+  typedef realtime_tools::RealtimePublisher<control_msgs::msg::JointTrajectoryControllerState>     StatePublisher;
   typedef std::unique_ptr<StatePublisher>                                                     StatePublisherPtr;
 
   typedef JointTrajectorySegment<SegmentImpl> Segment;
@@ -210,37 +210,37 @@ protected:
   realtime_tools::RealtimeBuffer<TimeData> time_data_;
   TimeData old_time_data_;
 
-  ros::Duration state_publisher_period_;
-  ros::Duration action_monitor_period_;
+  rclcpp::Duration state_publisher_period_;
+  rclcpp::Duration action_monitor_period_;
 
   typename Segment::Time stop_trajectory_duration_;  ///< Duration for stop ramp. If zero, the controller stops at the actual position.
   boost::dynamic_bitset<> successful_joint_traj_;
   bool allow_partial_joints_goal_;
 
   // ROS API
-  ros::NodeHandle    controller_nh_;
+  rclcpp::Node    controller_nh_;
   ros::Subscriber    trajectory_command_sub_;
   ActionServerPtr    action_server_;
   ros::ServiceServer query_state_service_;
   StatePublisherPtr  state_publisher_;
 
-  ros::Timer         goal_handle_timer_;
-  ros::Time          last_state_publish_time_;
+  rclcpp::Timer         goal_handle_timer_;
+  rclcpp::Time          last_state_publish_time_;
 
-  virtual bool updateTrajectoryCommand(const JointTrajectoryConstPtr& msg, RealtimeGoalHandlePtr gh, std::string* error_string = nullptr);
-  virtual void trajectoryCommandCB(const JointTrajectoryConstPtr& msg);
+  virtual bool updateTrajectoryCommand(const JointTrajectory::ConstSharedPtr& msg, RealtimeGoalHandlePtr gh, std::string* error_string = nullptr);
+  virtual void trajectoryCommandCB(const JointTrajectory::ConstSharedPtr& msg);
   virtual void goalCB(GoalHandle gh);
   virtual void cancelCB(GoalHandle gh);
   virtual void preemptActiveGoal();
-  virtual bool queryStateService(control_msgs::QueryTrajectoryState::Request&  req,
-                                 control_msgs::QueryTrajectoryState::Response& resp);
+  virtual bool queryStateService(control_msgs::srv::QueryTrajectoryState::Request&  req,
+                                 control_msgs::srv::QueryTrajectoryState::Response& resp);
 
   /**
    * \brief Publish current controller state at a throttled frequency.
    * \note This method is realtime-safe and is meant to be called from \ref update, as it shares data with it without
    * any locking.
    */
-  void publishState(const ros::Time& time);
+  void publishState(const rclcpp::Time& time);
 
   /**
    * \brief Hold the current position.
@@ -250,7 +250,7 @@ protected:
    * \see parameter stop_trajectory_duration
    * \note This method is realtime-safe.
    */
-  void setHoldPosition(const ros::Time& time, RealtimeGoalHandlePtr gh=RealtimeGoalHandlePtr());
+  void setHoldPosition(const rclcpp::Time& time, RealtimeGoalHandlePtr gh=RealtimeGoalHandlePtr());
 
 protected:
   /**
@@ -271,7 +271,7 @@ protected:
    * @note This function is NOT thread safe but intended to be used in the
    * update-function.
    */
-  void updateStates(const ros::Time& sample_time, const Trajectory* const traj);
+  void updateStates(const rclcpp::Time& sample_time, const Trajectory* const traj);
 
 protected:
   /**

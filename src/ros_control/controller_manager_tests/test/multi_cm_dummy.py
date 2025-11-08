@@ -32,7 +32,8 @@ from controller_manager_msgs.msg import HardwareInterfaceResources
 from controller_manager_msgs.srv import ListControllersResponse, LoadController
 
 if __name__ == '__main__':
-    rospy.init_node('multi_cm_dummy')
+    rclpy.init()
+    node = rclpy.create_node('multi_cm_dummy')
 
     # Valid controller managers in different namespaces
     cm_root = ControllerManagerDummy('/')

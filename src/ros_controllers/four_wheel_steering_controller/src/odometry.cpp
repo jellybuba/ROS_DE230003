@@ -62,7 +62,7 @@ namespace four_wheel_steering_controller
   {
   }
 
-  void Odometry::init(const ros::Time& time)
+  void Odometry::init(const rclcpp::Time& time)
   {
     // Reset accumulators and timestamp:
     resetAccumulators();
@@ -71,7 +71,7 @@ namespace four_wheel_steering_controller
 
   bool Odometry::update(const double &fl_speed, const double &fr_speed,
                         const double &rl_speed, const double &rr_speed,
-                        double front_steering, double rear_steering, const ros::Time &time)
+                        double front_steering, double rear_steering, const rclcpp::Time &time)
   {
     const double front_tmp = cos(front_steering)*(tan(front_steering)-tan(rear_steering))/wheel_base_;
     const double front_left_tmp = front_tmp/sqrt(1-steering_track_*front_tmp*cos(front_steering)

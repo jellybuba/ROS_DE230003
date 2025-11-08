@@ -65,14 +65,14 @@ namespace ackermann_steering_controller
   {
   }
 
-  void Odometry::init(const ros::Time& time)
+  void Odometry::init(const rclcpp::Time& time)
   {
     // Reset accumulators and timestamp:
     resetAccumulators();
     timestamp_ = time;
   }
 
-  bool Odometry::update(double rear_wheel_pos, double front_steer_pos, const ros::Time &time)
+  bool Odometry::update(double rear_wheel_pos, double front_steer_pos, const rclcpp::Time &time)
   {
     /// Get current wheel joint positions:
     const double rear_wheel_cur_pos = rear_wheel_pos * wheel_radius_;
@@ -111,7 +111,7 @@ namespace ackermann_steering_controller
     return true;
   }
 
-  void Odometry::updateOpenLoop(double linear, double angular, const ros::Time &time)
+  void Odometry::updateOpenLoop(double linear, double angular, const rclcpp::Time &time)
   {
     /// Save last linear and angular velocity:
     linear_ = linear;

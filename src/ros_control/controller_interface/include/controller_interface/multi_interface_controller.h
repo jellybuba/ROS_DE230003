@@ -35,7 +35,7 @@
 #include <hardware_interface/internal/demangle_symbol.h>
 #include <hardware_interface/robot_hw.h>
 #include <hardware_interface/hardware_interface.h>
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace controller_interface
 {
@@ -76,7 +76,7 @@ namespace controller_interface
  * public:
  *   VelEffController() {}
  *
- *   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle &n)
+ *   bool init(hardware_interface::RobotHW* robot_hw, rclcpp::Node &n)
  *   {
  *     // robot_hw pointer only contains the two interfaces requested by the
  *     // controller. It is a subset of the entire robot, which may have more
@@ -91,9 +91,9 @@ namespace controller_interface
  *
  *     return true;
  *   }
- *   void starting(const ros::Time& time);
- *   void update(const ros::Time& time, const ros::Duration& period);
- *   void stopping(const ros::Time& time);
+ *   void starting(const rclcpp::Time& time);
+ *   void update(const rclcpp::Time& time, const rclcpp::Duration& period);
+ *   void stopping(const rclcpp::Time& time);
  * };
  * \endcode
  *
@@ -115,7 +115,7 @@ namespace controller_interface
  *                                                     EffortJointInterface> (true)
  *   {}
  *
- *   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle &n)
+ *   bool init(hardware_interface::RobotHW* robot_hw, rclcpp::Node &n)
  *   {
  *     // robot_hw pointer contains at most the two interfaces requested by the
  *     // controller. It may have none, only one or both, depending on whether the
@@ -185,7 +185,7 @@ public:
    * is ready to be started.
    */
   virtual bool init(hardware_interface::RobotHW* /*robot_hw*/,
-                    ros::NodeHandle&             /*controller_nh*/)
+                    rclcpp::Node&             /*controller_nh*/)
   {return true;}
 
   /**
@@ -215,8 +215,8 @@ public:
    * is ready to be started.
    */
   virtual bool init(hardware_interface::RobotHW* /*robot_hw*/,
-                    ros::NodeHandle&             /*root_nh*/,
-                    ros::NodeHandle&             /*controller_nh*/)
+                    rclcpp::Node&             /*root_nh*/,
+                    rclcpp::Node&             /*controller_nh*/)
   {return true;}
 
 protected:
@@ -243,13 +243,13 @@ protected:
    * is ready to be started.
    */
   bool initRequest(hardware_interface::RobotHW* robot_hw,
-                   ros::NodeHandle&             root_nh,
-                   ros::NodeHandle&             controller_nh,
+                   rclcpp::Node&             root_nh,
+                   rclcpp::Node&             controller_nh,
                    ClaimedResources&            claimed_resources) override
   {
     // check if construction finished cleanly
     if (state_ != ControllerState::CONSTRUCTED){
-      ROS_ERROR("Cannot initialize this controller because it failed to be constructed");
+      RCLCPP_ERROR(rclcpp::get_logger("ControllerInterface"), "Cannot initialize this controller because it failed to be constructed");
       return false;
     }
 
@@ -264,7 +264,7 @@ protected:
     clearClaims(robot_hw_ctrl_p); // claims will be populated on controller init
     if (!init(robot_hw_ctrl_p, controller_nh) || !init(robot_hw_ctrl_p, root_nh, controller_nh))
     {
-      ROS_ERROR("Failed to initialize the controller");
+      RCLCPP_ERROR(rclcpp::get_logger("ControllerInterface"), "Failed to initialize the controller");
       return false;
     }
 

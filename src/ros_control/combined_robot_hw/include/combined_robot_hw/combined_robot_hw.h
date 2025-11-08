@@ -63,7 +63,7 @@ public:
    *
    * \returns True if initialization was successful
    */
-  bool init(ros::NodeHandle& root_nh, ros::NodeHandle &robot_hw_nh) override;
+  bool init(rclcpp::Node& root_nh, rclcpp::Node &robot_hw_nh) override;
 
 
   /**
@@ -87,7 +87,7 @@ public:
    * \param time The current time
    * \param period The time passed since the last call to \ref read
    */
-  void read(const ros::Time& time, const ros::Duration& period) override;
+  void read(const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
   /**
    * Writes data to the robot HW
@@ -95,11 +95,11 @@ public:
    * \param time The current time
    * \param period The time passed since the last call to \ref write
    */
-  void write(const ros::Time& time, const ros::Duration& period) override;
+  void write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
 protected:
-  ros::NodeHandle root_nh_;
-  ros::NodeHandle robot_hw_nh_;
+  rclcpp::Node root_nh_;
+  rclcpp::Node robot_hw_nh_;
   pluginlib::ClassLoader<hardware_interface::RobotHW> robot_hw_loader_ = {"hardware_interface", "hardware_interface::RobotHW"};
   std::vector<hardware_interface::RobotHWSharedPtr> robot_hw_list_;
 

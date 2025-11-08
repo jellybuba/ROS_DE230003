@@ -30,7 +30,7 @@
 #include <hardware_interface/robot_hw.h>
 #include <controller_interface/controller_base.h>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 #include <gmock/gmock.h>
 
@@ -49,13 +49,13 @@ public:
     state_ = ControllerState::INITIALIZED;
   }
 
-  MOCK_METHOD1(starting, void(const ros::Time&));
-  MOCK_METHOD2(update, void(const ros::Time&, const ros::Duration&));
-  MOCK_METHOD1(stopping, void(const ros::Time&));
-  MOCK_METHOD1(waiting, void(const ros::Time&));
-  MOCK_METHOD1(aborting, void(const ros::Time&));
-  MOCK_METHOD4(initRequest, bool(hardware_interface::RobotHW*, ros::NodeHandle&,
-                                 ros::NodeHandle&, ClaimedResources&));
+  MOCK_METHOD1(starting, void(const rclcpp::Time&));
+  MOCK_METHOD2(update, void(const rclcpp::Time&, const rclcpp::Duration&));
+  MOCK_METHOD1(stopping, void(const rclcpp::Time&));
+  MOCK_METHOD1(waiting, void(const rclcpp::Time&));
+  MOCK_METHOD1(aborting, void(const rclcpp::Time&));
+  MOCK_METHOD4(initRequest, bool(hardware_interface::RobotHW*, rclcpp::Node&,
+                                 rclcpp::Node&, ClaimedResources&));
 };
 
 TEST(ControllerBaseAPI, DefaultStateTest)
@@ -74,9 +74,9 @@ TEST(ControllerBaseAPI, IsInitializedTest)
   StrictMock<ControllerMock> controller;
 
   hardware_interface::RobotHW* robot_hw = nullptr;
-  ros::NodeHandle* node_handle = nullptr;
+  rclcpp::Node* node_handle = nullptr;
   ControllerMock::ClaimedResources resources;
-  const ros::Time time;
+  const rclcpp::Time time;
 
   EXPECT_CALL(controller, initRequest(_, _, _, _))
       .Times(1)
@@ -95,9 +95,9 @@ TEST(ControllerBaseAPI, IsRunningTest)
   StrictMock<ControllerMock> controller;
 
   hardware_interface::RobotHW* robot_hw = nullptr;
-  ros::NodeHandle* node_handle = nullptr;
+  rclcpp::Node* node_handle = nullptr;
   ControllerMock::ClaimedResources resources;
-  const ros::Time time;
+  const rclcpp::Time time;
 
   EXPECT_CALL(controller, starting(_)).Times(1);
   EXPECT_CALL(controller, stopping(_)).Times(1);
@@ -122,9 +122,9 @@ TEST(ControllerBaseAPI, IsStoppedTest)
   StrictMock<ControllerMock> controller;
 
   hardware_interface::RobotHW* robot_hw = nullptr;
-  ros::NodeHandle* node_handle = nullptr;
+  rclcpp::Node* node_handle = nullptr;
   ControllerMock::ClaimedResources resources;
-  const ros::Time time;
+  const rclcpp::Time time;
 
   EXPECT_CALL(controller, starting(_)).Times(1);
   EXPECT_CALL(controller, stopping(_)).Times(1);
@@ -149,9 +149,9 @@ TEST(ControllerBaseAPI, IsWaitingTest)
   StrictMock<ControllerMock> controller;
 
   hardware_interface::RobotHW* robot_hw = nullptr;
-  ros::NodeHandle* node_handle = nullptr;
+  rclcpp::Node* node_handle = nullptr;
   ControllerMock::ClaimedResources resources;
-  const ros::Time time;
+  const rclcpp::Time time;
 
   EXPECT_CALL(controller, starting(_)).Times(1);
   EXPECT_CALL(controller, waiting(_)).Times(1);
@@ -176,9 +176,9 @@ TEST(ControllerBaseAPI, StartRequestTest)
   StrictMock<ControllerMock> controller;
 
   hardware_interface::RobotHW* robot_hw = nullptr;
-  ros::NodeHandle* node_handle = nullptr;
+  rclcpp::Node* node_handle = nullptr;
   ControllerMock::ClaimedResources resources;
-  const ros::Time time;
+  const rclcpp::Time time;
 
   EXPECT_CALL(controller, starting(_)).Times(2);
   EXPECT_CALL(controller, initRequest(_, _, _, _))
@@ -201,9 +201,9 @@ TEST(ControllerBaseAPI, StopRequestTest)
   StrictMock<ControllerMock> controller;
 
   hardware_interface::RobotHW* robot_hw = nullptr;
-  ros::NodeHandle* node_handle = nullptr;
+  rclcpp::Node* node_handle = nullptr;
   ControllerMock::ClaimedResources resources;
-  const ros::Time time;
+  const rclcpp::Time time;
 
   EXPECT_CALL(controller, stopping(_)).Times(2);
   EXPECT_CALL(controller, initRequest(_, _, _, _))
@@ -226,9 +226,9 @@ TEST(ControllerBaseAPI, WaitRequestTest)
   StrictMock<ControllerMock> controller;
 
   hardware_interface::RobotHW* robot_hw = nullptr;
-  ros::NodeHandle* node_handle = nullptr;
+  rclcpp::Node* node_handle = nullptr;
   ControllerMock::ClaimedResources resources;
-  const ros::Time time;
+  const rclcpp::Time time;
 
   EXPECT_CALL(controller, waiting(_)).Times(2);
   EXPECT_CALL(controller, initRequest(_, _, _, _))
@@ -251,9 +251,9 @@ TEST(ControllerBaseAPI, AbortRequestTest)
   StrictMock<ControllerMock> controller;
 
   hardware_interface::RobotHW* robot_hw = nullptr;
-  ros::NodeHandle* node_handle = nullptr;
+  rclcpp::Node* node_handle = nullptr;
   ControllerMock::ClaimedResources resources;
-  const ros::Time time;
+  const rclcpp::Time time;
 
   EXPECT_CALL(controller, aborting(_)).Times(2);
   EXPECT_CALL(controller, initRequest(_, _, _, _))
@@ -276,10 +276,10 @@ TEST(ControllerBaseAPI, UpdateRequestTest)
   StrictMock<ControllerMock> controller;
 
   hardware_interface::RobotHW* robot_hw = nullptr;
-  ros::NodeHandle* node_handle = nullptr;
+  rclcpp::Node* node_handle = nullptr;
   ControllerMock::ClaimedResources resources;
-  const ros::Time time;
-  const ros::Duration period;
+  const rclcpp::Time time;
+  const rclcpp::Duration period;
 
   EXPECT_CALL(controller, starting(_)).Times(1);
   EXPECT_CALL(controller, update(_, _)).Times(1);

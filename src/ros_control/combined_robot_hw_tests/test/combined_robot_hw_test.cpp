@@ -25,7 +25,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //////////////////////////////////////////////////////////////////////////////
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <gtest/gtest.h>
 
 #include <combined_robot_hw/combined_robot_hw.h>
@@ -37,7 +37,7 @@ using combined_robot_hw::CombinedRobotHW;
 
 TEST(CombinedRobotHWTests, combinationOk)
 {
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
 
   CombinedRobotHW robot_hw;
   bool init_success = robot_hw.init(nh, nh);
@@ -83,22 +83,22 @@ TEST(CombinedRobotHWTests, combinationOk)
   ASSERT_ANY_THROW(ej_interface->getHandle("non_existent_joint"));
 
   // Test read and write functions
-  ros::Duration period(1.0);
-  robot_hw.read(ros::Time::now(), period);
+  rclcpp::Duration period(1.0);
+  robot_hw.read(rclcpp::Time::now(), period);
   js_handle = js_interface->getHandle("test_joint1");
   ASSERT_FLOAT_EQ(2.7, js_handle.getPosition());
   ASSERT_FLOAT_EQ(1.2, ft_handle.getForce()[2]);
 
   ej_handle = ej_interface->getHandle("test_joint1");
   ej_handle.setCommand(3.5);
-  robot_hw.write(ros::Time::now(), period);
+  robot_hw.write(rclcpp::Time::now(), period);
   ej_handle = ej_interface->getHandle("test_joint2");
   ASSERT_FLOAT_EQ(3.5, ej_handle.getCommand());
 }
 
 TEST(CombinedRobotHWTests, switchOk)
 {
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
 
   CombinedRobotHW robot_hw;
   bool init_success = robot_hw.init(nh, nh);
@@ -234,7 +234,8 @@ TEST(CombinedRobotHWTests, switchOk)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "CombinedRobotHWTestNode");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("CombinedRobotHWTestNode");
 
   int ret = RUN_ALL_TESTS();
 

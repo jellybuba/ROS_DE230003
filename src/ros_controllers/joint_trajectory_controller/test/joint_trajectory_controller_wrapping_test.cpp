@@ -34,13 +34,13 @@
 
 #include <gtest/gtest.h>
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <actionlib/client/simple_action_client.h>
 
-#include <std_msgs/Float64.h>
-#include <control_msgs/FollowJointTrajectoryAction.h>
-#include <control_msgs/JointTrajectoryControllerState.h>
-#include <control_msgs/QueryTrajectoryState.h>
+#include <std_msgs/msg/float64.hpp>
+#include <control_msgs/msg/follow_joint_trajectory_action.hpp>
+#include <control_msgs/msg/joint_trajectory_controller_state.hpp>
+#include <control_msgs/srv/query_trajectory_state.hpp>
 
 // Floating-point value comparison threshold
 const double EPS = 0.01;
@@ -64,7 +64,7 @@ public:
     max_pos_err[0] = 0.0;
     max_pos_err[1] = 0.0;
 
-    trajectory_msgs::JointTrajectoryPoint point;
+    trajectory_msgs::msg::JointTrajectoryPoint point;
     point.positions.resize(n_joints, 0.0);
     point.velocities.resize(n_joints, 0.0);
     point.accelerations.resize(n_joints, 0.0);
@@ -76,21 +76,21 @@ public:
     // Go home trajectory
     traj_home.joint_names = joint_names;
     traj_home.points.resize(1, point);
-    traj_home.points[0].time_from_start = ros::Duration(1.0);
+    traj_home.points[0].time_from_start = rclcpp::Duration(1.0);
 
     // Trajectory to command joints outside of wrap range
     points.resize(3, point);
     points[0].positions[0] =  M_PI + 0.01;  // Just outside wrap
     points[0].positions[1] =  -M_PI - 0.01;    // Just outside wrap
-    points[0].time_from_start = ros::Duration(1.0);
+    points[0].time_from_start = rclcpp::Duration(1.0);
 
     points[1].positions[0] =  M_PI + 0.06;
     points[1].positions[1] = -M_PI - 0.06;
-    points[1].time_from_start = ros::Duration(2.0);
+    points[1].time_from_start = rclcpp::Duration(2.0);
 
     points[2].positions[0] = M_PI + 0.1;
     points[2].positions[1] =  -M_PI - 0.01;
-    points[2].time_from_start = ros::Duration(4.0);
+    points[2].time_from_start = rclcpp::Duration(4.0);
 
     traj.joint_names = joint_names;
     traj.points = points;
@@ -100,19 +100,19 @@ public:
     traj_goal.trajectory      = traj;
 
     // Smoothing publisher (determines how well the robot follows a trajectory)
-    smoothing_pub = ros::NodeHandle().advertise<std_msgs::Float64>("smoothing", 1);
+    smoothing_pub = rclcpp::Node().advertise<std_msgs::msg::Float64>("smoothing", 1);
 
     // Trajectory publisher
-    traj_pub = nh.advertise<trajectory_msgs::JointTrajectory>("command", 1);
+    traj_pub = nh.advertise<trajectory_msgs::msg::JointTrajectory>("command", 1);
 
     // State subscriber
-    state_sub = nh.subscribe<control_msgs::JointTrajectoryControllerState>("state",
+    state_sub = nh.subscribe<control_msgs::msg::JointTrajectoryControllerState>("state",
                                                                            1,
                                                                            &JointTrajectoryControllerTest::stateCB,
                                                                            this);
 
     // Query state service client
-    query_state_service = nh.serviceClient<control_msgs::QueryTrajectoryState>("query_state");
+    query_state_service = nh.serviceClient<control_msgs::srv::QueryTrajectoryState>("query_state");
 
     // Action client
     const std::string action_server_name = nh.getNamespace() + "/follow_joint_trajectory";
@@ -126,25 +126,25 @@ public:
   }
 
 protected:
-  typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> ActionClient;
+  typedef actionlib::SimpleActionClient<control_msgs::msg::FollowJointTrajectoryAction> ActionClient;
   typedef std::shared_ptr<ActionClient> ActionClientPtr;
-  typedef control_msgs::FollowJointTrajectoryGoal ActionGoal;
-  typedef control_msgs::JointTrajectoryControllerStateConstPtr StateConstPtr;
+  typedef control_msgs::msg::FollowJointTrajectoryGoal ActionGoal;
+  typedef control_msgs::msg::JointTrajectoryControllerState::ConstSharedPtr StateConstPtr;
 
   std::mutex mutex;
-  ros::NodeHandle nh;
+  rclcpp::Node nh;
 
   unsigned int n_joints;
   std::vector<std::string> joint_names;
-  std::vector<trajectory_msgs::JointTrajectoryPoint> points;
+  std::vector<trajectory_msgs::msg::JointTrajectoryPoint> points;
 
-  trajectory_msgs::JointTrajectory traj_home;
-  trajectory_msgs::JointTrajectory traj;
+  trajectory_msgs::msg::JointTrajectory traj_home;
+  trajectory_msgs::msg::JointTrajectory traj;
   ActionGoal                       traj_home_goal;
   ActionGoal                       traj_goal;
 
-  ros::Duration short_timeout;
-  ros::Duration long_timeout;
+  rclcpp::Duration short_timeout;
+  rclcpp::Duration long_timeout;
 
   ros::Publisher     smoothing_pub;
   ros::Publisher     traj_pub;
@@ -183,33 +183,33 @@ protected:
       return max_pos_err[idx];
   }
 
-  bool initState(const ros::Duration& timeout = ros::Duration(5.0))
+  bool initState(const rclcpp::Duration& timeout = rclcpp::Duration(5.0))
   {
     bool init_ok = false;
-    ros::Time start_time = ros::Time::now();
-    while (!init_ok && (ros::Time::now() - start_time) < timeout)
+    rclcpp::Time start_time = rclcpp::Time::now();
+    while (!init_ok && (rclcpp::Time::now() - start_time) < timeout)
     {
       {
         std::lock_guard<std::mutex> lock(mutex);
         init_ok = controller_state && !controller_state->joint_names.empty();
       }
-      ros::Duration(0.1).sleep();
+      rclcpp::Duration(0.1).sleep();
     }
     return init_ok;
   }
 
   static bool waitForState(const ActionClientPtr& action_client,
                            const actionlib::SimpleClientGoalState& state,
-                           const ros::Duration& timeout)
+                           const rclcpp::Duration& timeout)
   {
-    using ros::Time;
-    using ros::Duration;
+    using rclcpp::Time;
+    using rclcpp::Duration;
 
     Time start_time = Time::now();
-    while (action_client->getState() != state && ros::ok())
+    while (action_client->getState() != state && rclcpp::ok())
     {
       if (timeout >= Duration(0.0) && (Time::now() - start_time) > timeout) { return false; } // Timed-out
-      ros::Duration(0.01).sleep();
+      rclcpp::Duration(0.01).sleep();
     }
     return true;
   }
@@ -221,16 +221,16 @@ TEST_F(JointTrajectoryControllerTest, jointWrapping)
   ASSERT_TRUE(action_client->waitForServer(long_timeout));
 
   // Go to home configuration, we need known initial conditions
-  traj_home_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  traj_home_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client->sendGoal(traj_home_goal);
   ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::SUCCEEDED, long_timeout));
 
   // Make robot respond with a delay
   {
-    std_msgs::Float64 smoothing;
+    std_msgs::msg::Float64 smoothing;
     smoothing.data = 0.75;
     smoothing_pub.publish(smoothing);
-    ros::Duration(0.5).sleep();
+    rclcpp::Duration(0.5).sleep();
   }
 
   // Disable path constraints
@@ -243,7 +243,7 @@ TEST_F(JointTrajectoryControllerTest, jointWrapping)
   traj_goal.path_tolerance[1].velocity = -1.0;
 
   // Send trajectory (command joints outside of wrap range)
-  traj_goal.trajectory.header.stamp = ros::Time(0); // Start immediately
+  traj_goal.trajectory.header.stamp = rclcpp::Time(0); // Start immediately
   action_client->sendGoal(traj_goal);
   EXPECT_TRUE(waitForState(action_client, SimpleClientGoalState::ACTIVE, short_timeout));
 
@@ -257,17 +257,18 @@ TEST_F(JointTrajectoryControllerTest, jointWrapping)
 
   // Restore perfect control
   {
-    std_msgs::Float64 smoothing;
+    std_msgs::msg::Float64 smoothing;
     smoothing.data = 0.0;
     smoothing_pub.publish(smoothing);
-    ros::Duration(0.5).sleep();
+    rclcpp::Duration(0.5).sleep();
   }
 }
 
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "joint_trajectory_controller_wrapping_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("joint_trajectory_controller_wrapping_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

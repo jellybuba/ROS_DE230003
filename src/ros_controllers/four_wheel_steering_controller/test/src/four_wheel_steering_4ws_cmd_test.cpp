@@ -1,5 +1,6 @@
 #include "test_common.h"
-#include <tf/transform_listener.h>
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 
 // TEST CASES
 TEST_F(FourWheelSteeringControllerTest, testForward)
@@ -8,22 +9,22 @@ TEST_F(FourWheelSteeringControllerTest, testForward)
   waitForController();
 
   // zero everything before test
-  four_wheel_steering_msgs::FourWheelSteering cmd_vel;
+  four_wheel_steering_msgs::msg::FourWheelSteering cmd_vel;
   cmd_vel.speed = 0.0;
   cmd_vel.front_steering_angle = 0.0;
   cmd_vel.rear_steering_angle = 0.0;
   publish_4ws(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
   // get initial odom
-  nav_msgs::Odometry old_odom = getLastOdom();
+  nav_msgs::msg::Odometry old_odom = getLastOdom();
   // send a velocity command of 0.1 m/s
   cmd_vel.speed = 0.1;
   publish_4ws(cmd_vel);
   // wait for Xs
   double travel_time = 5.0;
-  ros::Duration(travel_time).sleep();
+  rclcpp::Duration(travel_time).sleep();
 
-  nav_msgs::Odometry new_odom = getLastOdom();
+  nav_msgs::msg::Odometry new_odom = getLastOdom();
 
   const double actual_travel_time = (new_odom.header.stamp - old_odom.header.stamp).toSec();
   const double expected_distance = cmd_vel.speed * actual_travel_time;
@@ -58,14 +59,14 @@ TEST_F(FourWheelSteeringControllerTest, testCrab)
   waitForController();
 
   // zero everything before test
-  four_wheel_steering_msgs::FourWheelSteering cmd_vel;
+  four_wheel_steering_msgs::msg::FourWheelSteering cmd_vel;
   cmd_vel.speed = 0.0;
   cmd_vel.front_steering_angle = 0.0;
   cmd_vel.rear_steering_angle = 0.0;
   publish_4ws(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
   // get initial odom
-  nav_msgs::Odometry old_odom = getLastOdom();
+  nav_msgs::msg::Odometry old_odom = getLastOdom();
   // send a velocityand steering command
   cmd_vel.speed = 0.2;
   cmd_vel.front_steering_angle = M_PI/8.0;
@@ -73,9 +74,9 @@ TEST_F(FourWheelSteeringControllerTest, testCrab)
   publish_4ws(cmd_vel);
   // wait for Xs
   double travel_time = 5.0;
-  ros::Duration(travel_time).sleep();
+  rclcpp::Duration(travel_time).sleep();
 
-  nav_msgs::Odometry new_odom = getLastOdom();
+  nav_msgs::msg::Odometry new_odom = getLastOdom();
 
   double actual_travel_time = (new_odom.header.stamp - old_odom.header.stamp).toSec();
 
@@ -111,14 +112,14 @@ TEST_F(FourWheelSteeringControllerTest, testSymmetricTurn)
   waitForController();
 
   // zero everything before test
-  four_wheel_steering_msgs::FourWheelSteering cmd_vel;
+  four_wheel_steering_msgs::msg::FourWheelSteering cmd_vel;
   cmd_vel.speed = 0.0;
   cmd_vel.front_steering_angle = 0.0;
   cmd_vel.rear_steering_angle = 0.0;
   publish_4ws(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
   // get initial odom
-  nav_msgs::Odometry old_odom = getLastOdom();
+  nav_msgs::msg::Odometry old_odom = getLastOdom();
   // send a velocity command
   cmd_vel.speed = M_PI/2.0;
   // send steering for angular speed of M_PI/10.0
@@ -128,9 +129,9 @@ TEST_F(FourWheelSteeringControllerTest, testSymmetricTurn)
   cmd_vel.rear_steering_angle = -0.18776;
   publish_4ws(cmd_vel);
   // wait for 10s to make a half turn
-  ros::Duration(10.0).sleep();
+  rclcpp::Duration(10.0).sleep();
 
-  nav_msgs::Odometry new_odom = getLastOdom();
+  nav_msgs::msg::Odometry new_odom = getLastOdom();
 
   // check if the robot traveled 20 meter in XY plane, changes in z should be ~~0
   const double dx = new_odom.pose.pose.position.x - old_odom.pose.pose.position.x;
@@ -163,14 +164,14 @@ TEST_F(FourWheelSteeringControllerTest, testNonSymmetricTurn)
   waitForController();
 
   // zero everything before test
-  four_wheel_steering_msgs::FourWheelSteering cmd_vel;
+  four_wheel_steering_msgs::msg::FourWheelSteering cmd_vel;
   cmd_vel.speed = 0.0;
   cmd_vel.front_steering_angle = 0.0;
   cmd_vel.rear_steering_angle = 0.0;
   publish_4ws(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
   // get initial odom
-  nav_msgs::Odometry old_odom = getLastOdom();
+  nav_msgs::msg::Odometry old_odom = getLastOdom();
   // send a velocity command
   cmd_vel.speed = M_PI/2.0;
   // send steering for angular speed
@@ -181,9 +182,9 @@ TEST_F(FourWheelSteeringControllerTest, testNonSymmetricTurn)
   cmd_vel.rear_steering_angle = 0.15866;
   publish_4ws(cmd_vel);
   // wait for 10s to make a half turn
-  ros::Duration(10.0).sleep();
+  rclcpp::Duration(10.0).sleep();
 
-  nav_msgs::Odometry new_odom = getLastOdom();
+  nav_msgs::msg::Odometry new_odom = getLastOdom();
 
   // check if the robot traveled 20 meter in XY plane, changes in z should be ~~0
   const double dx = new_odom.pose.pose.position.x - old_odom.pose.pose.position.x;
@@ -216,8 +217,8 @@ TEST_F(FourWheelSteeringControllerTest, testOdomFrame)
   waitForController();
 
   // set up tf listener
-  tf::TransformListener listener;
-  ros::Duration(2.0).sleep();
+  tf2_ros::TransformListener listener;
+  rclcpp::Duration(2.0).sleep();
   // check the odom frame exist
   EXPECT_TRUE(listener.frameExists("odom"));
 }
@@ -225,11 +226,12 @@ TEST_F(FourWheelSteeringControllerTest, testOdomFrame)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "four_wheel_steering_4ws_cmd_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("four_wheel_steering_4ws_cmd_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();
-  //ros::Duration(0.5).sleep();
+  //rclcpp::Duration(0.5).sleep();
   int ret = RUN_ALL_TESTS();
   spinner.stop();
   ros::shutdown();

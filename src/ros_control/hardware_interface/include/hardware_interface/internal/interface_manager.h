@@ -95,7 +95,7 @@ struct CheckIsResourceManager {
   template <typename C>
   static T* newCI(std::vector<ResourceManagerBase*> &/*guards*/, ...) {
     // it is not a ResourceManager
-    ROS_ERROR("You cannot register multiple interfaces of the same type which are "
+    RCLCPP_ERROR(rclcpp::get_logger("HardwareInterface"), "You cannot register multiple interfaces of the same type which are "
               "not of type ResourceManager. There is no established protocol "
               "for combining them.");
     return nullptr;
@@ -201,7 +201,7 @@ public:
         num_ifaces_registered_[type_name] = iface_list.size();
       } else {
         // it is not a ResourceManager
-        ROS_ERROR("You cannot register multiple interfaces of the same type which are "
+        RCLCPP_ERROR(rclcpp::get_logger("HardwareInterface"), "You cannot register multiple interfaces of the same type which are "
                   "not of type ResourceManager. There is no established protocol "
                   "for combining them.");
         iface_combo = nullptr;

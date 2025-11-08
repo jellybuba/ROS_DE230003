@@ -31,7 +31,7 @@
 
 #include <actionlib/server/action_server.h>
 
-#include <control_msgs/FollowJointTrajectoryAction.h>
+#include <control_msgs/msg/follow_joint_trajectory_action.hpp>
 
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/posvel_command_interface.h>
@@ -71,8 +71,8 @@ using Segment = joint_trajectory_controller::JointTrajectorySegment<QuinticSplin
 using TrajectoryPerJoint = std::vector<Segment>;
 using Trajectory = std::vector<TrajectoryPerJoint>;
 
-using GoalHandle = actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction>::GoalHandle;
-using RealTimeServerGoalHandle = realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction>;
+using GoalHandle = actionlib::ActionServer<control_msgs::msg::FollowJointTrajectoryAction>::GoalHandle;
+using RealTimeServerGoalHandle = realtime_tools::RealtimeServerGoalHandle<control_msgs::msg::FollowJointTrajectoryAction>;
 
 /**
  * @brief Provides all known hardware interfaces.
@@ -284,7 +284,7 @@ TYPED_TEST(HoldTrajectoryBuilderTest, testSetGoalHandle)
   const auto number_of_joints = joints.size();
   const double start_time{0.0};
   GoalHandle gh;
-  boost::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
+  std::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
 
   Builder builder(joints);
 	builder.setStartTime(start_time);
@@ -313,7 +313,7 @@ TYPED_TEST(HoldTrajectoryBuilderTest, testResetGoalHandle)
   const auto number_of_joints = joints.size();
   const double start_time{0.0};
   GoalHandle gh;
-  boost::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
+  std::shared_ptr<RealTimeServerGoalHandle> rt_goal_handle = boost::make_shared<RealTimeServerGoalHandle>(gh);
 
   Builder builder(joints);
   builder.setGoalHandle(rt_goal_handle);

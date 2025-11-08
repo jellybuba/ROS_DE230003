@@ -88,7 +88,7 @@ public:
    *
    * \param period Control period.
    */
-  void enforceLimits(const ros::Duration& period)
+  void enforceLimits(const rclcpp::Duration& period)
   {
     if (std::isnan(prev_cmd_))
       prev_cmd_ = jh_.getPosition();
@@ -185,7 +185,7 @@ public:
    * If the joint has no position limits (eg. a continuous joint), only velocity limits will be enforced.
    * \param period Control period.
    */
-  void enforceLimits(const ros::Duration& period)
+  void enforceLimits(const rclcpp::Duration& period)
   {
     assert(period.toSec() > 0.0);
 
@@ -282,7 +282,7 @@ public:
   /**
    * \brief Enforce position, velocity, and effort limits for a joint that is not subject to soft limits.
    */
-  void enforceLimits(const ros::Duration& /* period */)
+  void enforceLimits(const rclcpp::Duration& /* period */)
   {
     double min_eff = -limits_.max_effort;
     double max_eff = limits_.max_effort;
@@ -345,7 +345,7 @@ public:
    *
    * If the joint has no position limits (eg. a continuous joint), only velocity and effort limits will be enforced.
    */
-  void enforceLimits(const ros::Duration& /*period*/)
+  void enforceLimits(const rclcpp::Duration& /*period*/)
   {
     using internal::saturate;
 
@@ -422,7 +422,7 @@ public:
    * \brief Enforce joint velocity and acceleration limits.
    * \param period Control period.
    */
-  void enforceLimits(const ros::Duration& period)
+  void enforceLimits(const rclcpp::Duration& period)
   {
     using internal::saturate;
 
@@ -485,7 +485,7 @@ public:
    *
    * \param period Control period.
    */
-  void enforceLimits(const ros::Duration& period)
+  void enforceLimits(const rclcpp::Duration& period)
   {
     using internal::saturate;
 
@@ -552,7 +552,7 @@ public:
   /** \name Real-Time Safe Functions
    *\{*/
   /** \brief Enforce limits for all managed handles. */
-  void enforceLimits(const ros::Duration& period)
+  void enforceLimits(const rclcpp::Duration& period)
   {
     for (auto&& resource_name_and_handle : this->resource_map_)
     {

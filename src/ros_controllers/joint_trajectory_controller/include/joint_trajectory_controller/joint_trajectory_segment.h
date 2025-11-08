@@ -40,8 +40,8 @@
 #include <angles/angles.h>
 
 // ROS messages
-#include <control_msgs/FollowJointTrajectoryAction.h>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <control_msgs/msg/follow_joint_trajectory_action.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 
 // ros_controls
 #include <realtime_tools/realtime_server_goal_handle.h>
@@ -73,8 +73,8 @@ public:
   typedef typename Segment::Scalar Scalar;
   typedef typename Segment::Time   Time;
 
-  typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction> RealtimeGoalHandle;
-  typedef boost::shared_ptr<RealtimeGoalHandle>                                               RealtimeGoalHandlePtr;
+  typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::msg::FollowJointTrajectoryAction> RealtimeGoalHandle;
+  typedef std::shared_ptr<RealtimeGoalHandle>                                               RealtimeGoalHandlePtr;
 
   struct State : public Segment::State
   {
@@ -90,13 +90,13 @@ public:
      * If unspecified (empty), zero offsets are applied; if specified, its size must coincide with that of \p point.
      *
      */
-    State(const trajectory_msgs::JointTrajectoryPoint& point,
+    State(const trajectory_msgs::msg::JointTrajectoryPoint& point,
           const std::vector<Scalar>&                   position_offset = std::vector<Scalar>())
     {
       init(point, position_offset);
     }
 
-    void init(const trajectory_msgs::JointTrajectoryPoint& point,
+    void init(const trajectory_msgs::msg::JointTrajectoryPoint& point,
               const std::vector<Scalar>&                   position_offset = std::vector<Scalar>())
     {
       using std::invalid_argument;
@@ -160,9 +160,9 @@ public:
    *
    * \throw std::invalid_argument If input parameters are inconsistent and a valid segment can't be constructed.
    */
-  JointTrajectorySegment(const ros::Time&                             traj_start_time,
-                         const trajectory_msgs::JointTrajectoryPoint& start_point,
-                         const trajectory_msgs::JointTrajectoryPoint& end_point,
+  JointTrajectorySegment(const rclcpp::Time&                             traj_start_time,
+                         const trajectory_msgs::msg::JointTrajectoryPoint& start_point,
+                         const trajectory_msgs::msg::JointTrajectoryPoint& end_point,
                          const std::vector<Scalar>&                   position_offset = std::vector<Scalar>())
     : rt_goal_handle_(),
       tolerances_()

@@ -36,24 +36,24 @@
 TEST_F(DiffDriveControllerTest, testNaN) {
   // wait for ROS
   while (!isControllerAlive()) {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
   // zero everything before test
-  geometry_msgs::Twist cmd_vel;
+  geometry_msgs::msg::Twist cmd_vel;
   cmd_vel.linear.x = 0.0;
   cmd_vel.angular.z = 0.0;
   publish(cmd_vel);
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
 
   // send a command
   cmd_vel.linear.x = 0.1;
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
 
   // stop robot (will generate NaN)
   stop();
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
 
-  nav_msgs::Odometry odom = getLastOdom();
+  nav_msgs::msg::Odometry odom = getLastOdom();
 
   EXPECT_FALSE(std::isnan(odom.twist.twist.linear.x));
   EXPECT_FALSE(std::isnan(odom.twist.twist.angular.z));
@@ -64,7 +64,7 @@ TEST_F(DiffDriveControllerTest, testNaN) {
 
   // start robot
   start();
-  ros::Duration(2.0).sleep();
+  rclcpp::Duration(2.0).sleep();
 
   odom = getLastOdom();
 
@@ -79,39 +79,40 @@ TEST_F(DiffDriveControllerTest, testNaN) {
 TEST_F(DiffDriveControllerTest, testNaNCmd) {
   // wait for ROS
   while (!isControllerAlive()) {
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
   // zero everything before test
-  geometry_msgs::Twist cmd_vel;
+  geometry_msgs::msg::Twist cmd_vel;
   cmd_vel.linear.x = 0.0;
   cmd_vel.angular.z = 0.0;
   publish(cmd_vel);
-  ros::Duration(0.1).sleep();
+  rclcpp::Duration(0.1).sleep();
 
   // send NaN
   for (int i = 0; i < 10; ++i) {
-    geometry_msgs::Twist cmd_vel;
+    geometry_msgs::msg::Twist cmd_vel;
     cmd_vel.linear.x = NAN;
     cmd_vel.angular.z = NAN;
     publish(cmd_vel);
-    geometry_msgs::TwistStamped odom_msg = getLastCmdVelOut();
+    geometry_msgs::msg::TwistStamped odom_msg = getLastCmdVelOut();
     EXPECT_FALSE(std::isnan(odom_msg.twist.linear.x));
     EXPECT_FALSE(std::isnan(odom_msg.twist.angular.z));
-    ros::Duration(0.1).sleep();
+    rclcpp::Duration(0.1).sleep();
   }
 
-  nav_msgs::Odometry odom = getLastOdom();
+  nav_msgs::msg::Odometry odom = getLastOdom();
   EXPECT_DOUBLE_EQ(odom.twist.twist.linear.x, 0.0);
   EXPECT_DOUBLE_EQ(odom.pose.pose.position.x, 0.0);
   EXPECT_DOUBLE_EQ(odom.pose.pose.position.y, 0.0);
 
-  geometry_msgs::TwistStamped odom_msg = getLastCmdVelOut();
+  geometry_msgs::msg::TwistStamped odom_msg = getLastCmdVelOut();
   EXPECT_DOUBLE_EQ(odom_msg.twist.linear.x, 0.0);
 }
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "diff_drive_nan_test");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("diff_drive_nan_test");
 
   ros::AsyncSpinner spinner(1);
   spinner.start();

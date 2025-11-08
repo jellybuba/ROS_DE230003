@@ -38,14 +38,14 @@ namespace internal
 {
 
 template <class Enclosure, class Member>
-inline boost::shared_ptr<Member> share_member(boost::shared_ptr<Enclosure> enclosure, Member &member)
+inline std::shared_ptr<Member> share_member(std::shared_ptr<Enclosure> enclosure, Member &member)
 {
   actionlib::EnclosureDeleter<Enclosure> d(enclosure);
-  boost::shared_ptr<Member> p(&member, d);
+  std::shared_ptr<Member> p(&member, d);
   return p;
 }
 
-std::vector<std::string> getStrings(const ros::NodeHandle& nh, const std::string& param_name)
+std::vector<std::string> getStrings(const rclcpp::Node& nh, const std::string& param_name)
 {
   using namespace XmlRpc;
   XmlRpcValue xml_array;
@@ -76,7 +76,7 @@ std::vector<std::string> getStrings(const ros::NodeHandle& nh, const std::string
   return out;
 }
 
-urdf::ModelSharedPtr getUrdf(const ros::NodeHandle& nh, const std::string& param_name)
+urdf::ModelSharedPtr getUrdf(const rclcpp::Node& nh, const std::string& param_name)
 {
   urdf::ModelSharedPtr urdf(new urdf::Model);
 
@@ -119,7 +119,7 @@ std::vector<urdf::JointConstSharedPtr> getUrdfJoints(const urdf::Model& urdf, co
   return out;
 }
 
-std::string getLeafNamespace(const ros::NodeHandle& nh)
+std::string getLeafNamespace(const rclcpp::Node& nh)
 {
   const std::string complete_ns = nh.getNamespace();
   std::size_t id   = complete_ns.find_last_of("/");
@@ -130,12 +130,12 @@ std::string getLeafNamespace(const ros::NodeHandle& nh)
 
 template <class SegmentImpl, class HardwareInterface>
 inline void JointTrajectoryController<SegmentImpl, HardwareInterface>::
-starting(const ros::Time& time)
+starting(const rclcpp::Time& time)
 {
   // Update time data
   TimeData time_data;
   time_data.time   = time;
-  time_data.uptime = ros::Time(0.0);
+  time_data.uptime = rclcpp::Time(0.0);
   time_data_.initRT(time_data);
 
   // Initialize the desired_state with the current state on startup
@@ -157,14 +157,14 @@ starting(const ros::Time& time)
 
 template <class SegmentImpl, class HardwareInterface>
 inline void JointTrajectoryController<SegmentImpl, HardwareInterface>::
-stopping(const ros::Time& /*time*/)
+stopping(const rclcpp::Time& /*time*/)
 {
   preemptActiveGoal();
 }
 
 template <class SegmentImpl, class HardwareInterface>
 inline void JointTrajectoryController<SegmentImpl, HardwareInterface>::
-trajectoryCommandCB(const JointTrajectoryConstPtr& msg)
+trajectoryCommandCB(const JointTrajectory::ConstSharedPtr& msg)
 {
   const bool update_ok = updateTrajectoryCommand(msg, RealtimeGoalHandlePtr());
   if (update_ok) {preemptActiveGoal();}
@@ -203,8 +203,8 @@ JointTrajectoryController()
 
 template <class SegmentImpl, class HardwareInterface>
 bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInterface* hw,
-                                                                     ros::NodeHandle&   root_nh,
-                                                                     ros::NodeHandle&   controller_nh)
+                                                                     rclcpp::Node&   root_nh,
+                                                                     rclcpp::Node&   controller_nh)
 {
   using namespace internal;
 
@@ -218,12 +218,12 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
   double state_publish_rate = 50.0;
   controller_nh_.getParam("state_publish_rate", state_publish_rate);
   ROS_DEBUG_STREAM_NAMED(name_, "Controller state will be published at " << state_publish_rate << "Hz.");
-  state_publisher_period_ = ros::Duration(1.0 / state_publish_rate);
+  state_publisher_period_ = rclcpp::Duration(1.0 / state_publish_rate);
 
   // Action status checking update rate
   double action_monitor_rate = 20.0;
   controller_nh_.getParam("action_monitor_rate", action_monitor_rate);
-  action_monitor_period_ = ros::Duration(1.0 / action_monitor_rate);
+  action_monitor_period_ = rclcpp::Duration(1.0 / action_monitor_rate);
   ROS_DEBUG_STREAM_NAMED(name_, "Action status changes will be monitored at " << action_monitor_rate << "Hz.");
 
   // Stop trajectory duration
@@ -235,7 +235,7 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
   controller_nh_.param<bool>("allow_partial_joints_goal", allow_partial_joints_goal_, false);
   if (allow_partial_joints_goal_)
   {
-    ROS_DEBUG_NAMED(name_, "Goals with partial set of joints are allowed");
+    RCLCPP_DEBUG(rclcpp::get_logger(name_), "Goals with partial set of joints are allowed");
   }
 
   // List of controlled joints
@@ -280,7 +280,7 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
                          "\n- Trajectory segment type: '" << hardware_interface::internal::demangledTypeName<SegmentImpl>() << "'");
 
   // Default tolerances
-  ros::NodeHandle tol_nh(controller_nh_, "constraints");
+  rclcpp::Node tol_nh(controller_nh_, "constraints");
   default_tolerances_ = getSegmentTolerances<Scalar>(tol_nh, joint_names_);
 
   // Hardware interface adapter
@@ -344,7 +344,7 @@ bool JointTrajectoryController<SegmentImpl, HardwareInterface>::init(HardwareInt
 
 template <class SegmentImpl, class HardwareInterface>
 void JointTrajectoryController<SegmentImpl, HardwareInterface>::
-update(const ros::Time& time, const ros::Duration& period)
+update(const rclcpp::Time& time, const rclcpp::Duration& period)
 {
   // Get currently followed trajectory
   TrajectoryPtr curr_traj_ptr;
@@ -377,7 +377,7 @@ update(const ros::Time& time, const ros::Duration& period)
     if (curr_traj[i].end() == segment_it)
     {
       // Non-realtime safe, but should never happen under normal operation
-      ROS_ERROR_NAMED(name_,
+      RCLCPP_ERROR(rclcpp::get_logger(name_),
                       "Unexpected error: No trajectory defined at current time. Please contact the package maintainer.");
       return;
     }
@@ -399,7 +399,7 @@ update(const ros::Time& time, const ros::Duration& period)
             checkStateTolerancePerJoint(state_joint_error_, joint_tolerances.state_tolerance, true);
           }
           rt_segment_goal->preallocated_result_->error_code =
-          control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
+          control_msgs::msg::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
           rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
           rt_active_goal_.reset();
           successful_joint_traj_.reset();
@@ -411,7 +411,7 @@ update(const ros::Time& time, const ros::Duration& period)
           ROS_DEBUG_STREAM_THROTTLE_NAMED(1,name_,"Finished executing last segment, checking goal tolerances");
 
         // Controller uptime
-        const ros::Time uptime = time_data_.readFromRT()->uptime;
+        const rclcpp::Time uptime = time_data_.readFromRT()->uptime;
 
         // Checks that we have ended inside the goal tolerances
         const SegmentTolerancesPerJoint<Scalar>& tolerances = segment_it->getTolerances();
@@ -434,7 +434,7 @@ update(const ros::Time& time, const ros::Duration& period)
             checkStateTolerancePerJoint(state_joint_error_, tolerances.goal_state_tolerance, true);
           }
 
-          rt_segment_goal->preallocated_result_->error_code = control_msgs::FollowJointTrajectoryResult::GOAL_TOLERANCE_VIOLATED;
+          rt_segment_goal->preallocated_result_->error_code = control_msgs::msg::FollowJointTrajectoryResult::GOAL_TOLERANCE_VIOLATED;
           rt_segment_goal->setAborted(rt_segment_goal->preallocated_result_);
           rt_active_goal_.reset();
           successful_joint_traj_.reset();
@@ -447,7 +447,7 @@ update(const ros::Time& time, const ros::Duration& period)
   RealtimeGoalHandlePtr current_active_goal(rt_active_goal_);
   if (current_active_goal && successful_joint_traj_.count() == getNumberOfJoints())
   {
-    current_active_goal->preallocated_result_->error_code = control_msgs::FollowJointTrajectoryResult::SUCCESSFUL;
+    current_active_goal->preallocated_result_->error_code = control_msgs::msg::FollowJointTrajectoryResult::SUCCESSFUL;
     current_active_goal->setSucceeded(current_active_goal->preallocated_result_);
     current_active_goal.reset(); // do not publish feedback
     rt_active_goal_.reset();
@@ -467,7 +467,7 @@ update(const ros::Time& time, const ros::Duration& period)
 
 template <class SegmentImpl, class HardwareInterface>
 bool JointTrajectoryController<SegmentImpl, HardwareInterface>::
-updateTrajectoryCommand(const JointTrajectoryConstPtr& msg, RealtimeGoalHandlePtr gh, std::string* error_string)
+updateTrajectoryCommand(const JointTrajectory::ConstSharedPtr& msg, RealtimeGoalHandlePtr gh, std::string* error_string)
 {
   typedef InitJointTrajectoryOptions<Trajectory> Options;
   Options options;
@@ -495,16 +495,16 @@ updateTrajectoryCommand(const JointTrajectoryConstPtr& msg, RealtimeGoalHandlePt
   TimeData* time_data = time_data_.readFromRT(); // TODO: Grrr, we need a lock-free data structure here!
 
   // Time of the next update
-  const ros::Time next_update_time = time_data->time + time_data->period;
+  const rclcpp::Time next_update_time = time_data->time + time_data->period;
 
   // Uptime of the next update
-  ros::Time next_update_uptime = time_data->uptime + time_data->period;
+  rclcpp::Time next_update_uptime = time_data->uptime + time_data->period;
 
   // Hold current position if trajectory is empty
   if (msg->points.empty())
   {
     setHoldPosition(time_data->uptime, gh);
-    ROS_DEBUG_NAMED(name_, "Empty trajectory command, stopping.");
+    RCLCPP_DEBUG(rclcpp::get_logger(name_), "Empty trajectory command, stopping.");
     return true;
   }
 
@@ -560,9 +560,9 @@ goalCB(GoalHandle gh)
   // Precondition: Running controller
   if (!this->isRunning())
   {
-    ROS_ERROR_NAMED(name_, "Can't accept new action goals. Controller is not running.");
-    control_msgs::FollowJointTrajectoryResult result;
-    result.error_code = control_msgs::FollowJointTrajectoryResult::INVALID_GOAL; // TODO: Add better error status to msg?
+    RCLCPP_ERROR(rclcpp::get_logger(name_), "Can't accept new action goals. Controller is not running.");
+    control_msgs::msg::FollowJointTrajectoryResult result;
+    result.error_code = control_msgs::msg::FollowJointTrajectoryResult::INVALID_GOAL; // TODO: Add better error status to msg?
     gh.setRejected(result);
     return;
   }
@@ -572,9 +572,9 @@ goalCB(GoalHandle gh)
   {
     if (gh.getGoal()->trajectory.joint_names.size() != joint_names_.size())
     {
-      ROS_ERROR_NAMED(name_, "Joints on incoming goal don't match the controller joints.");
-      control_msgs::FollowJointTrajectoryResult result;
-      result.error_code = control_msgs::FollowJointTrajectoryResult::INVALID_JOINTS;
+      RCLCPP_ERROR(rclcpp::get_logger(name_), "Joints on incoming goal don't match the controller joints.");
+      control_msgs::msg::FollowJointTrajectoryResult result;
+      result.error_code = control_msgs::msg::FollowJointTrajectoryResult::INVALID_JOINTS;
       gh.setRejected(result);
       return;
     }
@@ -586,9 +586,9 @@ goalCB(GoalHandle gh)
 
   if (mapping_vector.empty())
   {
-    ROS_ERROR_NAMED(name_, "Joints on incoming goal don't match the controller joints.");
-    control_msgs::FollowJointTrajectoryResult result;
-    result.error_code = control_msgs::FollowJointTrajectoryResult::INVALID_JOINTS;
+    RCLCPP_ERROR(rclcpp::get_logger(name_), "Joints on incoming goal don't match the controller joints.");
+    control_msgs::msg::FollowJointTrajectoryResult result;
+    result.error_code = control_msgs::msg::FollowJointTrajectoryResult::INVALID_JOINTS;
     gh.setRejected(result);
     return;
   }
@@ -617,8 +617,8 @@ goalCB(GoalHandle gh)
   else
   {
     // Reject invalid goal
-    control_msgs::FollowJointTrajectoryResult result;
-    result.error_code = control_msgs::FollowJointTrajectoryResult::INVALID_GOAL;
+    control_msgs::msg::FollowJointTrajectoryResult result;
+    result.error_code = control_msgs::msg::FollowJointTrajectoryResult::INVALID_GOAL;
     result.error_string = error_string;
     gh.setRejected(result);
   }
@@ -637,11 +637,11 @@ cancelCB(GoalHandle gh)
     rt_active_goal_.reset();
 
     // Controller uptime
-    const ros::Time uptime = time_data_.readFromRT()->uptime;
+    const rclcpp::Time uptime = time_data_.readFromRT()->uptime;
 
     // Enter hold current position mode
     setHoldPosition(uptime);
-    ROS_DEBUG_NAMED(name_, "Canceling active action goal because cancel callback recieved from actionlib.");
+    RCLCPP_DEBUG(rclcpp::get_logger(name_), "Canceling active action goal because cancel callback recieved from actionlib.");
 
     // Mark the current goal as canceled
     current_active_goal->gh_.setCanceled();
@@ -650,20 +650,20 @@ cancelCB(GoalHandle gh)
 
 template <class SegmentImpl, class HardwareInterface>
 bool JointTrajectoryController<SegmentImpl, HardwareInterface>::
-queryStateService(control_msgs::QueryTrajectoryState::Request&  req,
-                  control_msgs::QueryTrajectoryState::Response& resp)
+queryStateService(control_msgs::srv::QueryTrajectoryState::Request&  req,
+                  control_msgs::srv::QueryTrajectoryState::Response& resp)
 {
   // Preconditions
   if (!this->isRunning())
   {
-    ROS_ERROR_NAMED(name_, "Can't sample trajectory. Controller is not running.");
+    RCLCPP_ERROR(rclcpp::get_logger(name_), "Can't sample trajectory. Controller is not running.");
     return false;
   }
 
   // Convert request time to internal monotonic representation
   TimeData* time_data = time_data_.readFromRT();
-  const ros::Duration time_offset = req.time - time_data->time;
-  const ros::Time sample_time = time_data->uptime + time_offset;
+  const rclcpp::Duration time_offset = req.time - time_data->time;
+  const rclcpp::Time sample_time = time_data->uptime + time_offset;
 
   // Sample trajectory at requested time
   TrajectoryPtr curr_traj_ptr;
@@ -698,7 +698,7 @@ queryStateService(control_msgs::QueryTrajectoryState::Request&  req,
 
 template <class SegmentImpl, class HardwareInterface>
 void JointTrajectoryController<SegmentImpl, HardwareInterface>::
-publishState(const ros::Time& time)
+publishState(const rclcpp::Time& time)
 {
   // Check if it's time to publish
   if (!state_publisher_period_.isZero() && last_state_publish_time_ + state_publisher_period_ < time)
@@ -723,7 +723,7 @@ publishState(const ros::Time& time)
 
 template <class SegmentImpl, class HardwareInterface>
 inline void JointTrajectoryController<SegmentImpl, HardwareInterface>::
-setHoldPosition(const ros::Time& time, RealtimeGoalHandlePtr gh)
+setHoldPosition(const rclcpp::Time& time, RealtimeGoalHandlePtr gh)
 {
   hold_traj_builder_
       ->setStartTime(time.toSec())
@@ -749,7 +749,7 @@ getNumberOfJoints() const
 
 template <class SegmentImpl, class HardwareInterface>
 void JointTrajectoryController<SegmentImpl, HardwareInterface>::
-updateStates(const ros::Time& sample_time, const Trajectory* const traj)
+updateStates(const rclcpp::Time& sample_time, const Trajectory* const traj)
 {
   old_desired_state_ = desired_state_;
 

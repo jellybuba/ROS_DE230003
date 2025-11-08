@@ -30,7 +30,7 @@
 
 namespace combined_robot_hw
 {
-  bool CombinedRobotHW::init(ros::NodeHandle& root_nh, ros::NodeHandle &robot_hw_nh)
+  bool CombinedRobotHW::init(rclcpp::Node& root_nh, rclcpp::Node &robot_hw_nh)
   {
     root_nh_ = root_nh;
     robot_hw_nh_ = robot_hw_nh;
@@ -91,22 +91,22 @@ namespace combined_robot_hw
 
   bool CombinedRobotHW::loadRobotHW(const std::string& name)
   {
-    ROS_DEBUG("Will load robot HW '%s'", name.c_str());
+    RCLCPP_DEBUG(rclcpp::get_logger("CombinedRobotHw"), "Will load robot HW '%s'", name.c_str());
 
-    ros::NodeHandle c_nh;
+    rclcpp::Node c_nh;
     // Constructs the robot HW
     try
     {
-      c_nh = ros::NodeHandle(robot_hw_nh_, name);
+      c_nh = rclcpp::Node(robot_hw_nh_, name);
     }
     catch(std::exception &e)
     {
-      ROS_ERROR("Exception thrown while constructing nodehandle for robot HW with name '%s':\n%s", name.c_str(), e.what());
+      RCLCPP_ERROR(rclcpp::get_logger("CombinedRobotHw"), "Exception thrown while constructing nodehandle for robot HW with name '%s':\n%s", name.c_str(), e.what());
       return false;
     }
     catch(...)
     {
-      ROS_ERROR("Exception thrown while constructing nodehandle for robot HW with name '%s'", name.c_str());
+      RCLCPP_ERROR(rclcpp::get_logger("CombinedRobotHw"), "Exception thrown while constructing nodehandle for robot HW with name '%s'", name.c_str());
       return false;
     }
 
@@ -114,7 +114,7 @@ namespace combined_robot_hw
     std::string type;
     if (c_nh.getParam("type", type))
     {
-      ROS_DEBUG("Constructing robot HW '%s' of type '%s'", name.c_str(), type.c_str());
+      RCLCPP_DEBUG(rclcpp::get_logger("CombinedRobotHw"), "Constructing robot HW '%s' of type '%s'", name.c_str(), type.c_str());
       try
       {
         for (const auto& cur_type : robot_hw_loader_.getDeclaredClasses())
@@ -127,24 +127,24 @@ namespace combined_robot_hw
       }
       catch (const std::runtime_error &ex)
       {
-        ROS_ERROR("Could not load class %s: %s", type.c_str(), ex.what());
+        RCLCPP_ERROR(rclcpp::get_logger("CombinedRobotHw"), "Could not load class %s: %s", type.c_str(), ex.what());
       }
     }
     else
     {
-      ROS_ERROR("Could not load robot HW '%s' because the type was not specified. Did you load the robot HW configuration on the parameter server (namespace: '%s')?", name.c_str(), c_nh.getNamespace().c_str());
+      RCLCPP_ERROR(rclcpp::get_logger("CombinedRobotHw"), "Could not load robot HW '%s' because the type was not specified. Did you load the robot HW configuration on the parameter server (namespace: '%s')?", name.c_str(), c_nh.getNamespace().c_str());
       return false;
     }
 
     // checks if robot HW was constructed
     if (!robot_hw)
     {
-      ROS_ERROR("Could not load robot HW '%s' because robot HW type '%s' does not exist.",  name.c_str(), type.c_str());
+      RCLCPP_ERROR(rclcpp::get_logger("CombinedRobotHw"), "Could not load robot HW '%s' because robot HW type '%s' does not exist.",  name.c_str(), type.c_str());
       return false;
     }
 
     // Initializes the robot HW
-    ROS_DEBUG("Initializing robot HW '%s'", name.c_str());
+    RCLCPP_DEBUG(rclcpp::get_logger("CombinedRobotHw"), "Initializing robot HW '%s'", name.c_str());
     bool initialized;
     try
     {
@@ -152,31 +152,31 @@ namespace combined_robot_hw
     }
     catch(std::exception &e)
     {
-      ROS_ERROR("Exception thrown while initializing robot HW %s.\n%s", name.c_str(), e.what());
+      RCLCPP_ERROR(rclcpp::get_logger("CombinedRobotHw"), "Exception thrown while initializing robot HW %s.\n%s", name.c_str(), e.what());
       initialized = false;
     }
     catch(...)
     {
-      ROS_ERROR("Exception thrown while initializing robot HW %s", name.c_str());
+      RCLCPP_ERROR(rclcpp::get_logger("CombinedRobotHw"), "Exception thrown while initializing robot HW %s", name.c_str());
       initialized = false;
     }
 
     if (!initialized)
     {
-      ROS_ERROR("Initializing robot HW '%s' failed", name.c_str());
+      RCLCPP_ERROR(rclcpp::get_logger("CombinedRobotHw"), "Initializing robot HW '%s' failed", name.c_str());
       return false;
     }
-    ROS_DEBUG("Initialized robot HW '%s' successful", name.c_str());
+    RCLCPP_DEBUG(rclcpp::get_logger("CombinedRobotHw"), "Initialized robot HW '%s' successful", name.c_str());
 
     robot_hw_list_.push_back(robot_hw);
 
     this->registerInterfaceManager(robot_hw.get());
 
-    ROS_DEBUG("Successfully load robot HW '%s'", name.c_str());
+    RCLCPP_DEBUG(rclcpp::get_logger("CombinedRobotHw"), "Successfully load robot HW '%s'", name.c_str());
     return true;
   }
 
-  void CombinedRobotHW::read(const ros::Time& time, const ros::Duration& period)
+  void CombinedRobotHW::read(const rclcpp::Time& time, const rclcpp::Duration& period)
   {
     // Call the read method of the single RobotHW objects.
     for (const auto& robot_hw : robot_hw_list_)
@@ -186,7 +186,7 @@ namespace combined_robot_hw
   }
 
 
-  void CombinedRobotHW::write(const ros::Time& time, const ros::Duration& period)
+  void CombinedRobotHW::write(const rclcpp::Time& time, const rclcpp::Duration& period)
   {
     // Call the write method of the single RobotHW objects.
     for (const auto& robot_hw : robot_hw_list_)

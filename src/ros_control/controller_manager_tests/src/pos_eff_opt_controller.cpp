@@ -29,7 +29,7 @@
 
 using namespace controller_manager_tests;
 
-bool PosEffOptController::init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle &n)
+bool PosEffOptController::init(hardware_interface::RobotHW* robot_hw, rclcpp::Node &n)
 {
   std::vector<std::string> pos_joints;
   if (!n.getParam("position_joints", pos_joints)) {return false;}
@@ -56,7 +56,7 @@ bool PosEffOptController::init(hardware_interface::RobotHW* robot_hw, ros::NodeH
   }
   else
   {
-    ROS_WARN("Optional interface not found: 'hardware_interface::PositionJointInterface'");
+    RCLCPP_WARN(rclcpp::get_logger("ControllerManagerTests"), "Optional interface not found: 'hardware_interface::PositionJointInterface'");
   }
 
   if (eff_iface)
@@ -68,24 +68,24 @@ bool PosEffOptController::init(hardware_interface::RobotHW* robot_hw, ros::NodeH
   }
   else
   {
-    ROS_ERROR("Required interface not found: 'hardware_interface::EffortJointInterface'");
+    RCLCPP_ERROR(rclcpp::get_logger("ControllerManagerTests"), "Required interface not found: 'hardware_interface::EffortJointInterface'");
     return false;
   }
 
   return true;
 }
 
-void PosEffOptController::starting(const ros::Time& /*time*/)
+void PosEffOptController::starting(const rclcpp::Time& /*time*/)
 {
-  ROS_INFO("Starting PosEffOptController");
+  RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "Starting PosEffOptController");
 }
 
-void PosEffOptController::update(const ros::Time& /*time*/, const ros::Duration& /*period*/)
+void PosEffOptController::update(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
 {}
 
-void PosEffOptController::stopping(const ros::Time& /*time*/)
+void PosEffOptController::stopping(const rclcpp::Time& /*time*/)
 {
-  ROS_INFO("Stopping PosEffOptController");
+  RCLCPP_INFO(rclcpp::get_logger("ControllerManagerTests"), "Stopping PosEffOptController");
 }
 
 PLUGINLIB_EXPORT_CLASS(controller_manager_tests::PosEffOptController, controller_interface::ControllerBase)

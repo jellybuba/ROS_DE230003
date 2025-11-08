@@ -11,22 +11,23 @@
   <url type="bugtracker">https://github.com/ros-controls/ros_controllers/issues</url>
   <url type="repository">https://github.com/ros-controls/ros_controllers</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>controller_interface</depend>
   <depend>nav_msgs</depend>
   <depend>four_wheel_steering_msgs</depend>
   <depend>realtime_tools</depend>
-  <depend>tf</depend>
   <depend>urdf_geometry_parser</depend>
   <depend>pluginlib</depend>
+  <depend>tf2_ros</depend>
 
   <test_depend>rosgraph_msgs</test_depend>
-  <test_depend>rostest</test_depend>
   <test_depend>std_srvs</test_depend>
   <test_depend>controller_manager</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
   <export>
     <controller_interface plugin="${prefix}/four_wheel_steering_controller_plugins.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

@@ -90,7 +90,7 @@ public:
 protected:
   double pos = {0.0}, vel = {0.0}, eff = {0.0}, cmd = {0.0};
   string name = {"joint_name"};
-  ros::Duration period = ros::Duration{0.1};
+  rclcpp::Duration period = rclcpp::Duration{0.1};
   JointHandle cmd_handle = {JointStateHandle(name, &pos, &vel, &eff), &cmd};
   JointLimits limits;
   SoftJointLimits soft_limits;
@@ -107,10 +107,10 @@ TEST_F(JointLimitsHandleTest, AssertionTriggering)
   EXPECT_DEATH(VelocityJointSaturationHandle().enforceLimits(period), ".*");
 
   // Negative period should trigger an assertion
-  EXPECT_DEATH(PositionJointSoftLimitsHandle(cmd_handle, limits, soft_limits).enforceLimits(ros::Duration(-0.1)), ".*");
+  EXPECT_DEATH(PositionJointSoftLimitsHandle(cmd_handle, limits, soft_limits).enforceLimits(rclcpp::Duration(-0.1)), ".*");
 
   limits.has_acceleration_limits = true;
-  EXPECT_DEATH(VelocityJointSaturationHandle(cmd_handle, limits).enforceLimits(ros::Duration(-0.1)), ".*");
+  EXPECT_DEATH(VelocityJointSaturationHandle(cmd_handle, limits).enforceLimits(rclcpp::Duration(-0.1)), ".*");
 }
 #endif // NDEBUG
 
@@ -372,7 +372,7 @@ TEST_F(VelocityJointSaturationHandleTest, EnforceAccelerationBounds)
 
   pos = 0.0;
   double cmd;
-  const ros::Duration long_enough(1000.0); // An arbitrarily long time, sufficient to suppress acceleration limits
+  const rclcpp::Duration long_enough(1000.0); // An arbitrarily long time, sufficient to suppress acceleration limits
 
   // Positive velocity
   cmd_handle.setCommand(limits.max_velocity / 2.0); // register last command

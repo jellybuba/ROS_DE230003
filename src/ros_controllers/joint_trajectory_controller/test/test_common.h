@@ -30,15 +30,15 @@
 #pragma once
 
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 #include <gtest/gtest.h>
 
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/simple_client_goal_state.h>
 
-#include <trajectory_msgs/JointTrajectory.h>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
+#include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 
 #include <joint_trajectory_controller/joint_trajectory_segment.h>
 #include <trajectory_interface/quintic_spline_segment.h>
@@ -69,20 +69,20 @@ inline bool vectorsAlmostEqual(const std::vector<double>& vec1,
 
 testing::AssertionResult waitForEvent(const std::function<bool()>& check_event,
                                       const std::string& event_description,
-                                      const ros::Duration& timeout,
+                                      const rclcpp::Duration& timeout,
                                       unsigned int repeat = 1);
 
 //////////////////////////
 // trajectory functions //
 //////////////////////////
 
-inline ros::Duration getTrajectoryDuration(const trajectory_msgs::JointTrajectory &traj)
+inline rclcpp::Duration getTrajectoryDuration(const trajectory_msgs::msg::JointTrajectory &traj)
 {
   return traj.points.back().time_from_start;
 }
 
-inline bool trajectoryPointsAlmostEqual(const trajectory_msgs::JointTrajectoryPoint& p1,
-                                        const trajectory_msgs::JointTrajectoryPoint& p2,
+inline bool trajectoryPointsAlmostEqual(const trajectory_msgs::msg::JointTrajectoryPoint& p1,
+                                        const trajectory_msgs::msg::JointTrajectoryPoint& p2,
                                         const double& tolerance = JOINT_STATES_COMPARISON_EPS)
 {
   return vectorsAlmostEqual(p1.positions, p2.positions, tolerance) &&
@@ -122,7 +122,7 @@ inline bool checkActionResultErrorCode(const std::shared_ptr<SimpleActionClient<
 
 template <class T>
 AssertionResult waitForActionServer(const std::shared_ptr<SimpleActionClient<T>>& action_client,
-                                    const ros::Duration& timeout = ros::Duration(TIMEOUT_CONNECTIONS_S))
+                                    const rclcpp::Duration& timeout = rclcpp::Duration(TIMEOUT_CONNECTIONS_S))
 {
   if (!action_client->waitForServer(timeout))
   {
@@ -134,7 +134,7 @@ AssertionResult waitForActionServer(const std::shared_ptr<SimpleActionClient<T>>
 
 template <class T>
 AssertionResult waitForActionResult(const std::shared_ptr<SimpleActionClient<T>>& action_client,
-                                    const ros::Duration& timeout = ros::Duration(TIMEOUT_ACTION_RESULT_S))
+                                    const rclcpp::Duration& timeout = rclcpp::Duration(TIMEOUT_ACTION_RESULT_S))
 {
   if (!action_client->waitForResult(timeout))
   {
@@ -146,7 +146,7 @@ AssertionResult waitForActionResult(const std::shared_ptr<SimpleActionClient<T>>
 template <class T>
 AssertionResult waitForActionGoalState(const std::shared_ptr<SimpleActionClient<T>>& action_client,
                                        const SimpleClientGoalState& state,
-                                       const ros::Duration& timeout = ros::Duration(TIMEOUT_ACTION_RESULT_S))
+                                       const rclcpp::Duration& timeout = rclcpp::Duration(TIMEOUT_ACTION_RESULT_S))
 {
   return waitForEvent(std::bind(checkActionGoalState<T>, action_client, state),
                       "action goal state " + state.getText(),

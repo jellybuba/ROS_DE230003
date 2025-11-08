@@ -46,8 +46,8 @@ private:
   using TrajectoryPerJoint    = std::vector<Segment>;
   using Trajectory            = std::vector<TrajectoryPerJoint>;
 
-  using RealtimeGoalHandle    = realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction>;
-  using RealtimeGoalHandlePtr = boost::shared_ptr<RealtimeGoalHandle>;
+  using RealtimeGoalHandle    = realtime_tools::RealtimeServerGoalHandle<control_msgs::msg::FollowJointTrajectoryAction>;
+  using RealtimeGoalHandlePtr = std::shared_ptr<RealtimeGoalHandle>;
 
 public:
   /**

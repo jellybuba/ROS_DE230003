@@ -44,11 +44,11 @@ const double EPS = 1e-9;
 
 TEST(StartTimeTest, StartTime)
 {
-  const ros::Time now(1.0);
+  const rclcpp::Time now(1.0);
   // Zero start time
   {
     JointTrajectory msg;
-    msg.header.stamp = ros::Time(0.0);
+    msg.header.stamp = rclcpp::Time(0.0);
     EXPECT_NE(msg.header.stamp, internal::startTime(msg, now));
     EXPECT_EQ(now, internal::startTime(msg, now));
   }
@@ -56,7 +56,7 @@ TEST(StartTimeTest, StartTime)
   // Nonzero start time
   {
     JointTrajectory msg;
-    msg.header.stamp = ros::Time(2.0);
+    msg.header.stamp = rclcpp::Time(2.0);
     EXPECT_EQ(msg.header.stamp, internal::startTime(msg, now));
     EXPECT_NE(now, internal::startTime(msg, now));
   }
@@ -71,26 +71,26 @@ public:
     points[0].positions.resize(1, 2.0);
     points[0].velocities.resize(1, 0.0);
     points[0].accelerations.resize(1, 0.0);
-    points[0].time_from_start = ros::Duration(1.0);
+    points[0].time_from_start = rclcpp::Duration(1.0);
 
     points[1].positions.resize(1, 4.0);
     points[1].velocities.resize(1, 0.0);
     points[1].accelerations.resize(1, 0.0);
-    points[1].time_from_start = ros::Duration(2.0);
+    points[1].time_from_start = rclcpp::Duration(2.0);
 
     points[2].positions.resize(1, 3.0);
     points[2].velocities.resize(1, 0.0);
     points[2].accelerations.resize(1, 0.0);
-    points[2].time_from_start = ros::Duration(4.0);
+    points[2].time_from_start = rclcpp::Duration(4.0);
 
-    trajectory_msg.header.stamp = ros::Time(0.5);
+    trajectory_msg.header.stamp = rclcpp::Time(0.5);
     trajectory_msg.joint_names.resize(1, "foo_joint");
     trajectory_msg.points = points;
   }
 
 protected:
   vector<JointTrajectoryPoint> points;
-  trajectory_msgs::JointTrajectory trajectory_msg;
+  trajectory_msgs::msg::JointTrajectory trajectory_msg;
 };
 
 TEST_F(TrajectoryInterfaceRosTest, IsValid)
@@ -183,50 +183,50 @@ TEST_F(TrajectoryInterfaceRosTest, IsTimeStrictlyIncreasing)
 
 TEST_F(TrajectoryInterfaceRosTest, FindPoint)
 {
-  const ros::Time msg_start_time = trajectory_msg.header.stamp;
+  const rclcpp::Time msg_start_time = trajectory_msg.header.stamp;
   const vector<JointTrajectoryPoint>& msg_points = trajectory_msg.points;
 
   // Before first point: No points found
   {
-    const ros::Time time = msg_start_time;
+    const rclcpp::Time time = msg_start_time;
     EXPECT_EQ(msg_points.end(), findPoint(trajectory_msg, time));
   }
 
   // First point
   {
-    const ros::Time time = msg_start_time + msg_points.begin()->time_from_start;
+    const rclcpp::Time time = msg_start_time + msg_points.begin()->time_from_start;
     EXPECT_EQ(msg_points.begin(), findPoint(trajectory_msg, time));
   }
 
   // Between the first and second points
   {
-    const ros::Time time = msg_start_time +
-    ros::Duration((msg_points.begin()->time_from_start + (++msg_points.begin())->time_from_start).toSec() / 2.0);
+    const rclcpp::Time time = msg_start_time +
+    rclcpp::Duration((msg_points.begin()->time_from_start + (++msg_points.begin())->time_from_start).toSec() / 2.0);
     EXPECT_EQ(msg_points.begin(), findPoint(trajectory_msg, time));
   }
 
   // Second point
   {
-    const ros::Time time = msg_start_time + (++msg_points.begin())->time_from_start;
+    const rclcpp::Time time = msg_start_time + (++msg_points.begin())->time_from_start;
     EXPECT_EQ(++msg_points.begin(), findPoint(trajectory_msg, time));
   }
 
   // Between the second and third points
   {
-    const ros::Time time = msg_start_time +
-    ros::Duration(((++msg_points.begin())->time_from_start + (--msg_points.end())->time_from_start).toSec() / 2.0);
+    const rclcpp::Time time = msg_start_time +
+    rclcpp::Duration(((++msg_points.begin())->time_from_start + (--msg_points.end())->time_from_start).toSec() / 2.0);
     EXPECT_EQ(++msg_points.begin(), findPoint(trajectory_msg, time));
   }
 
   // Last point
   {
-    const ros::Time time = msg_start_time + (--msg_points.end())->time_from_start;
+    const rclcpp::Time time = msg_start_time + (--msg_points.end())->time_from_start;
     EXPECT_EQ(--msg_points.end(), findPoint(trajectory_msg, time));
   }
 
   // After the last point
   {
-    const ros::Time time = msg_start_time + (--msg_points.end())->time_from_start + ros::Duration(1.0);
+    const rclcpp::Time time = msg_start_time + (--msg_points.end())->time_from_start + rclcpp::Duration(1.0);
     EXPECT_EQ(--msg_points.end(), findPoint(trajectory_msg, time));
   }
 }
