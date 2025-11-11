@@ -2,3 +2,5 @@
 /.vscode
 /build
 /devel
+/log
+/install
