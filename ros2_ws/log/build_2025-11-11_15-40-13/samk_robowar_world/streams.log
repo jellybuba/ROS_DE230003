@@ -1,0 +1,62 @@
+[0.019s] Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /home/jellybuba/repos/ROS_DE230003/ros2_ws/src/samk_robowar_world -DCMAKE_INSTALL_PREFIX=/home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world
+[0.340s] -- The C compiler identification is GNU 13.3.0
+[1.124s] -- The CXX compiler identification is GNU 13.3.0
+[1.787s] -- Detecting C compiler ABI info
+[2.054s] -- Detecting C compiler ABI info - done
+[2.060s] -- Check for working C compiler: /usr/bin/cc - skipped
+[2.061s] -- Detecting C compile features
+[2.062s] -- Detecting C compile features - done
+[2.147s] -- Detecting CXX compiler ABI info
+[2.410s] -- Detecting CXX compiler ABI info - done
+[2.417s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[2.418s] -- Detecting CXX compile features
+[2.418s] -- Detecting CXX compile features - done
+[2.440s] -- Found ament_cmake: 2.5.4 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[2.581s] -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+[4.081s] [33mCMake Warning at CMakeLists.txt:6 (find_package):
+[4.081s]   By not providing "Findroslaunch.cmake" in CMAKE_MODULE_PATH this project
+[4.081s]   has asked CMake to find a package configuration file provided by
+[4.081s]   "roslaunch", but CMake did not find one.
+[4.081s] 
+[4.081s]   Could not find a package configuration file provided by "roslaunch" with
+[4.081s]   any of the following names:
+[4.081s] 
+[4.081s]     roslaunchConfig.cmake
+[4.081s]     roslaunch-config.cmake
+[4.081s] 
+[4.081s]   Add the installation prefix of "roslaunch" to CMAKE_PREFIX_PATH or set
+[4.082s]   "roslaunch_DIR" to a directory containing one of the above files.  If
+[4.082s]   "roslaunch" provides a separate development package or SDK, be sure it has
+[4.082s]   been installed.
+[4.082s] 
+[4.082s] [0m
+[4.159s] -- Configuring done (4.1s)
+[4.166s] -- Generating done (0.0s)
+[4.169s] -- Build files have been written to: /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world
+[4.175s] Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /home/jellybuba/repos/ROS_DE230003/ros2_ws/src/samk_robowar_world -DCMAKE_INSTALL_PREFIX=/home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world
+[4.176s] Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world -- -j16 -l16
+[4.222s] Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world -- -j16 -l16
+[4.223s] Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world
+[4.233s] -- Install configuration: ""
+[4.235s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/ament_index/resource_index/package_run_dependencies/samk_robowar_world
+[4.235s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/ament_index/resource_index/parent_prefix_path/samk_robowar_world
+[4.236s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/environment/ament_prefix_path.sh
+[4.237s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/environment/ament_prefix_path.dsv
+[4.237s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/environment/path.sh
+[4.237s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/environment/path.dsv
+[4.237s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/local_setup.bash
+[4.237s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/local_setup.sh
+[4.238s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/local_setup.zsh
+[4.238s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/local_setup.dsv
+[4.238s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/package.dsv
+[4.239s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/ament_index/resource_index/packages/samk_robowar_world
+[4.239s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/cmake/samk_robowar_worldConfig.cmake
+[4.239s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/cmake/samk_robowar_worldConfig-version.cmake
+[4.240s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/samk_robowar_world/share/samk_robowar_world/package.xml
+[4.240s] [31mCMake Error at cmake_install.cmake:113 (file):
+[4.240s]   file INSTALL cannot find
+[4.240s]   "/home/jellybuba/repos/ROS_DE230003/ros2_ws/src/samk_robowar_world/config":
+[4.240s]   No such file or directory.
+[4.240s] 
+[4.240s] [0m
+[4.242s] Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world' returned '1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/samk_robowar_world

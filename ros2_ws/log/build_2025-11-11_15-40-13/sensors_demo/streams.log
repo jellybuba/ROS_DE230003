@@ -1,0 +1,46 @@
+[0.018s] Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /home/jellybuba/repos/ROS_DE230003/ros2_ws/src/sensors_demo -DCMAKE_INSTALL_PREFIX=/home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo
+[0.329s] -- The C compiler identification is GNU 13.3.0
+[1.113s] -- The CXX compiler identification is GNU 13.3.0
+[1.776s] -- Detecting C compiler ABI info
+[2.042s] -- Detecting C compiler ABI info - done
+[2.049s] -- Check for working C compiler: /usr/bin/cc - skipped
+[2.050s] -- Detecting C compile features
+[2.051s] -- Detecting C compile features - done
+[2.135s] -- Detecting CXX compiler ABI info
+[2.399s] -- Detecting CXX compiler ABI info - done
+[2.406s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[2.406s] -- Detecting CXX compile features
+[2.407s] -- Detecting CXX compile features - done
+[2.428s] -- Found ament_cmake: 2.5.4 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[2.570s] -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+[2.793s] -- Configuring done (2.7s)
+[2.800s] -- Generating done (0.0s)
+[2.804s] -- Build files have been written to: /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo
+[2.811s] Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /home/jellybuba/repos/ROS_DE230003/ros2_ws/src/sensors_demo -DCMAKE_INSTALL_PREFIX=/home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo
+[2.813s] Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo -- -j16 -l16
+[2.860s] Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo -- -j16 -l16
+[2.872s] Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo
+[2.880s] -- Install configuration: ""
+[2.880s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/launch
+[2.883s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/launch/demo.launch
+[2.883s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf
+[2.884s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/materials.xacro
+[2.884s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/lidar.gazebo
+[2.885s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/base.xacro
+[2.885s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/sonar.gazebo
+[2.887s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/ament_index/resource_index/package_run_dependencies/sensors_demo
+[2.887s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/ament_index/resource_index/parent_prefix_path/sensors_demo
+[2.888s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/ament_prefix_path.sh
+[2.888s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/ament_prefix_path.dsv
+[2.888s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/path.sh
+[2.889s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/path.dsv
+[2.889s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.bash
+[2.889s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.sh
+[2.889s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.zsh
+[2.889s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.dsv
+[2.890s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/package.dsv
+[2.890s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/ament_index/resource_index/packages/sensors_demo
+[2.891s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/cmake/sensors_demoConfig.cmake
+[2.891s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/cmake/sensors_demoConfig-version.cmake
+[2.891s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/package.xml
+[2.894s] Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo

@@ -1,0 +1,8 @@
+source;share/samk_robowar_world/hook/cmake_prefix_path.ps1
+source;share/samk_robowar_world/hook/cmake_prefix_path.dsv
+source;share/samk_robowar_world/hook/cmake_prefix_path.sh
+source;share/samk_robowar_world/local_setup.bash
+source;share/samk_robowar_world/local_setup.dsv
+source;share/samk_robowar_world/local_setup.ps1
+source;share/samk_robowar_world/local_setup.sh
+source;share/samk_robowar_world/local_setup.zsh

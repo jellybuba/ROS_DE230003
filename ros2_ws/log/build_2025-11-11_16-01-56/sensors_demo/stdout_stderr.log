@@ -1,0 +1,27 @@
+-- Found ament_cmake: 2.5.4 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo
+-- Install configuration: ""
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/launch
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/launch/demo.launch
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/materials.xacro
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/lidar.gazebo
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/base.xacro
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/sonar.gazebo
+-- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/ament_index/resource_index/package_run_dependencies/sensors_demo
+-- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/ament_index/resource_index/parent_prefix_path/sensors_demo
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/ament_prefix_path.sh
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/path.sh
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/path.dsv
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.bash
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.sh
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.zsh
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.dsv
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/package.dsv
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/ament_index/resource_index/packages/sensors_demo
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/cmake/sensors_demoConfig.cmake
+-- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/cmake/sensors_demoConfig-version.cmake
+-- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/package.xml

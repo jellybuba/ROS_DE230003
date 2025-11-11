@@ -1,0 +1,31 @@
+[0.011s] Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo -- -j16 -l16
+[0.044s] -- Found ament_cmake: 2.5.4 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.336s] -- Configuring done (0.3s)
+[0.343s] -- Generating done (0.0s)
+[0.345s] -- Build files have been written to: /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo
+[0.371s] Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo -- -j16 -l16
+[0.382s] Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo
+[0.390s] -- Install configuration: ""
+[0.391s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/launch
+[0.391s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/launch/demo.launch
+[0.391s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf
+[0.391s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/materials.xacro
+[0.391s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/lidar.gazebo
+[0.392s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/base.xacro
+[0.392s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/urdf/sonar.gazebo
+[0.392s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/ament_index/resource_index/package_run_dependencies/sensors_demo
+[0.392s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/ament_index/resource_index/parent_prefix_path/sensors_demo
+[0.392s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/ament_prefix_path.sh
+[0.392s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/ament_prefix_path.dsv
+[0.392s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/path.sh
+[0.392s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/environment/path.dsv
+[0.393s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.bash
+[0.393s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.sh
+[0.393s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.zsh
+[0.393s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/local_setup.dsv
+[0.393s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/package.dsv
+[0.393s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/ament_index/resource_index/packages/sensors_demo
+[0.393s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/cmake/sensors_demoConfig.cmake
+[0.393s] -- Up-to-date: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/cmake/sensors_demoConfig-version.cmake
+[0.393s] -- Installing: /home/jellybuba/repos/ROS_DE230003/ros2_ws/install/sensors_demo/share/sensors_demo/package.xml
+[0.394s] Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo

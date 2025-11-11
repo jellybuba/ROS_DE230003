@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypelayout="1.0"?>
+<package format="3">
+  <name>samk_robowar_world</name>
+  <version>0.0.0</version>
+  <description>The samk_robowar_world package</description>
+
+  <maintainer email="jellybuba@todo.todo">jellybuba</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Basic ROS2 dependencies that should work in Jazzy -->
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>urdf</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>joint_state_publisher</depend>
+  <depend>rviz2</depend>
+
+  <!-- Gazebo and controller dependencies commented out for now -->
+  <!-- These will need to be added when available in Jazzy -->
+  <!-- <depend>gazebo_ros</depend> -->
+  <!-- <depend>controller_manager</depend> -->
+  <!-- <depend>joint_state_controller</depend> -->
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
