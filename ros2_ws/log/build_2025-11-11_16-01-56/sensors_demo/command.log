@@ -1,4 +1,0 @@
-Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo -- -j16 -l16
-Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --build /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo -- -j16 -l16
-Invoking command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo
-Invoked command in '/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake --install /home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo

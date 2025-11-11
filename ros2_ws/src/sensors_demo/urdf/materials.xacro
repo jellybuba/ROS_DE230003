@@ -21,8 +21,8 @@
     <color rgba="${255/255} ${108/255} ${10/255} 1.0"/>
   </material>
 
-  <material name="pink">
-    <color rgba="${255/255} ${0/255} ${255/255} 1.0"/>
+  <material name="pink_i_guess">
+    <color rgba="${255/255} ${0/255} ${128/255} 1.0"/>
   </material>
 
   <material name="brown">

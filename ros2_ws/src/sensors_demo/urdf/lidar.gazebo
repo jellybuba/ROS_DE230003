@@ -2,8 +2,8 @@
 <robot>
     <gazebo reference="sensor_link">
         <material>Gazebo/Blue</material>
-        <sensor type="ray" name="sonar_sesor">
-            <pose> 0 0 0 0 0 0</pose>
+        <sensor type="ray" name="lidar_sensor">
+            <pose>0 0 0 0 0 0</pose>
             <visualize>true</visualize>
             <update_rate>60</update_rate>
             <ray>
@@ -24,7 +24,7 @@
             <plugin name="lidar_controller" filename="libgazebo_ros_laser.so">
                 <gaussianNoise>0.005</gaussianNoise>
                 <alwaysOn>true</alwaysOn>
-                <update_rate>60</update_rate>
+                <updateRate>60</updateRate>
                 <topicName>/lidar</topicName>
                 <frameName>sensor_link</frameName>
             </plugin>

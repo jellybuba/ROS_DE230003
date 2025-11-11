@@ -1,9 +1,0 @@
-/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo/CMakeFiles/uninstall.dir
-/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo/CMakeFiles/sensors_demo_uninstall.dir
-/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo/CMakeFiles/test.dir
-/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo/CMakeFiles/edit_cache.dir
-/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo/CMakeFiles/rebuild_cache.dir
-/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo/CMakeFiles/list_install_components.dir
-/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo/CMakeFiles/install.dir
-/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo/CMakeFiles/install/local.dir
-/home/jellybuba/repos/ROS_DE230003/ros2_ws/build/sensors_demo/CMakeFiles/install/strip.dir
