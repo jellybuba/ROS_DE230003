@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<robot name="geom_demo" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="dens_alu" value="2712"/>
+    <xacro:property name="dens_au" value="19320"/>
+
+    <xacro:property name="cuboid_x" value="1.0"/>
+    <xacro:property name="cuboid_y" value="1.0"/>
+    <xacro:property name="cuboid_z" value="1.0"/>
+
+    <xacro:property name="cuboid_m" value="${dens_alu * cuboid_x * cuboid_y * cuboid_z}" />
+
+    <xacro:property name="cuboid_Ix" value="${(1/12) * cuboid_m * (pow(cuboid_y, 2) + pow(cuboid_z, 2))}"/>
+    <xacro:property name="cuboid_Iy" value="${(1/12) * cuboid_m * (pow(cuboid_x, 2) + pow(cuboid_z, 2))}"/>
+    <xacro:property name="cuboid_Iz" value="${(1/12) * cuboid_m * (pow(cuboid_x, 2) + pow(cuboid_y, 2))}"/>
+
+    <material name="white">
+        <color rgba="0 1 0 1"/>
+    </material>
+
+<link name="cuboid">
+    <visual>
+        <origin xyz="0 0 ${cuboid_z/2}" rpy="0 0 0" />
+        <geometry>
+            <box size="${cuboid_x} ${cuboid_y} ${cuboid_z}" />
+        </geometry>
+        <material name="green" />
+    </visual>
+    <inertial>
+        <origin xyz="0 0 ${cuboid_z/2}" rpy="0 0 0" />
+        <mass value="${cuboid_m}" />
+        <inertia ixx="${cuboid_Ix}" ixy="0.0" ixz="0.0" 
+                 iyy="${cuboid_Iy}" iyz="0.0" 
+                 izz="${cuboid_Iz}" />
+    </inertial>
+</link>
+
+<xacro:property name="cylinder_r" value="1.0"/>
+<xacro:property name="cylinder_z" value="1.0"/>
+<xacro:property name="cylinder_m" value="${dens_alu * pi * pow(cylinder_r,2) * cylinder_z}"/>
+
+<xacro:property name="cylinder_Ix" value="${(1/12) * cylinder_m * (3 * pow(cylinder_r, 2) + pow(cylinder_z, 2))}"/>
+<xacro:property name="cylinder_Iy" value="${cylinder_Ix}"/>
+<xacro:property name="cylinder_Iz" value="${(1/2) * cylinder_m * pow(cylinder_r,2)}"/>
+
+<link name="cylinder">
+    <visual>
+        <origin xyz="0 0 ${cylinder_z/2}" rpy="0 0 0" />
+        <geometry>
+            <cylinder radius="${cylinder_r}" length="${cylinder_z}" />
+        </geometry>
+        <material name="green" />
+    </visual>
+    <inertial>
+        <origin xyz="0 0 ${cylinder_z/2}" rpy="0 0 0" />
+        <mass value="${cylinder_m}" />
+        <inertia ixx="${cylinder_Ix}" ixy="0.0" ixz="0.0" 
+                 iyy="${cylinder_Iy}" iyz="0.0" 
+                 izz="${cylinder_Iz}" />
+    </inertial>
+</link>
+
+</robot>
