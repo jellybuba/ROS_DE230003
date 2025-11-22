@@ -6,12 +6,14 @@
   <xacro:property name="width" value="0.6"/>
   <xacro:property name="r" value="0.15"/>
   <xacro:property name="w" value="0.1"/>
-  
-  <xacro:property name="density" value="19816"/>
 
-  <xacro:property name="chassis_m" value="${len * width * height * density}"/>
-  <xacro:property name="wheel_m" value="${pi * r * r * w * density}"/>
-  <xacro:property name="caster_m" value="${(4.0/3.0) * pi * r * r * r * density}"/>
+  <!--do not ask why plutonium, it was just fun-->
+
+  <xacro:property name="density_plutonium" value="19816"/>
+
+  <xacro:property name="chassis_m" value="${len * width * height * density_plutonium}"/>
+  <xacro:property name="wheel_m" value="${pi * r * r * w * density_plutonium}"/>
+  <xacro:property name="caster_m" value="${(4.0/3.0) * pi * r * r * r * density_plutonium}"/>
 
   <xacro:property name="s1" value="${height/2 + r/2}"/> 
   <xacro:property name="s2" value="${2 * r}"/>
