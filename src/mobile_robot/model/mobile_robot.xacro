@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <robot name="P.E.K.K.A" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    xacro:<xacro:include filename="$(find mobile_robot)/model/something.gazebo"/>
-
     <!-- Body dimensions -->
     <xacro:property name="cuboid_x" value="1.0" />
     <xacro:property name="cuboid_y" value="0.6" />
@@ -21,6 +19,7 @@
     <!-- Material density -->
     <xacro:property name="dens_al" value="2712.0" />
 
+    <xacro:include filename="$(find mobile_robot)/model/something.gazebo"/>
     <!-- Robot body mass, wheel mass, caster mass -->
     <!-- Body -->
     <xacro:property name="cuboid_m" value="${dens_al * cuboid_x * cuboid_y * cuboid_z}" />
@@ -40,6 +39,8 @@
 
     <!-- Moments of inertia of the caster sphere -->
     <xacro:property name="I_caster" value="${(2.0/5.0) * caster_m * pow(r,2)}" />
+
+    <xacro:include filename="$(find mobile_robot)/model/something.gazebo"/>
 
     <!-- Macro to define the inertial section -->
     <xacro:macro name="inertiaMacro" params="mass:=0 Ix:=1 Iy:=1 Iz:=1">
@@ -153,4 +154,66 @@
         </collision>
         <xacro:inertiaMacro mass="${caster_m}" Ix="${I_caster}" Iy="${I_caster}" Iz="${I_caster}"/>
     </link>
+
+    <xacro:property name="cylinder_r" value="0.03"/>
+    <xacro:property name="cylinder_z" value="0.04"/>
+    <xacro:property name="cylinder_m" value="${dens_al * pi * pow(cylinder_r,2) * cylinder_z}"/>
+
+    <xacro:property name="cylinder_Ix" value="${(1.0/12.0) * cylinder_m * (3 * pow(cylinder_r, 2) + pow(cylinder_z, 2))}"/>
+    <xacro:property name="cylinder_Iy" value="${cylinder_Ix}"/>
+    <xacro:property name="cylinder_Iz" value="${(1.0/2.0) * cylinder_m * pow(cylinder_r,2)}"/>
+
+    <link name="lidar">
+        <visual>
+            <geometry>
+                <cylinder radius="${cylinder_r}" length="${cylinder_z}"/>
+            </geometry>
+            <material name="green">
+                <color rgba="0 1 0 1"/>
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="${cylinder_r}" length="${cylinder_z}"/>
+            </geometry>
+        </collision>
+        <inertial> <mass value="0.1"/> 
+             <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+        </inertial>
+    </link>
+
+    <joint name="lidar_joint" type="fixed">
+        <parent link="body_link"/>
+        <child link="lidar"/>
+        <origin xyz="0 0 ${s1 + cuboid_z/2 + cylinder_z/2}" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="lidar">
+        <sensor name="lidar" type="gpu_lidar">
+            <pose>0 0 0 0 0 0</pose>
+            <always_on>true</always_on>
+            <visualize>true</visualize>
+            <update_rate>10</update_rate>
+            <topic>scan</topic> 
+            <ray>
+                <scan>
+                    <horizontal>
+                        <samples>360</samples>
+                        <resolution>1</resolution>
+                        <min_angle>-3.14159</min_angle>
+                        <max_angle>3.14159</max_angle>
+                    </horizontal>
+                </scan>
+                <range>
+                    <min>0.10</min>
+                    <max>10.0</max>
+                    <resolution>0.01</resolution>
+                </range>
+            </ray>
+            <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+                <render_engine>ogre2</render_engine>
+            </plugin>
+        </sensor>
+    </gazebo>
+
 </robot>
