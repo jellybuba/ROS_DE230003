@@ -1,0 +1,4 @@
+import sys
+if sys.prefix == '/usr':
+    sys.real_prefix = sys.prefix
+    sys.prefix = sys.exec_prefix = '/home/jellybuba/repos/ros2_ws/src/mobile_robot/install/mobile_robot'
